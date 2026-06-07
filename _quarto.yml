@@ -1,0 +1,19 @@
+project:
+  type: default
+
+format:
+  html:
+    theme: cosmo
+    toc: true
+    toc-title: "Sumário"
+    toc-depth: 2
+    code-fold: true
+    code-summary: "Ver código"
+    embed-resources: true
+    fig-align: center
+
+execute:
+  freeze: auto
+  echo: true
+  warning: false
+  message: false

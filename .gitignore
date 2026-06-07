@@ -1,0 +1,28 @@
+# R
+.Rhistory
+.RData
+.Rproj.user/
+*.Rproj
+
+# Quarto / knitr cache
+_freeze/
+.quarto/
+*_cache/
+*_files/
+
+# Gráficos gerados (recriados em cada render)
+output/
+
+# Dados brutos baixados localmente (não versionados)
+data/
+
+# HTML renderizado localmente (Posit Connect renderiza a partir do .qmd)
+*.html
+*_files/
+
+# VS Code
+.vscode/
+
+# Sistema operacional
+.DS_Store
+Thumbs.db
