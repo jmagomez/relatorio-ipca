@@ -9,16 +9,13 @@ _freeze/
 .quarto/
 *_cache/
 *_files/
+!relatorio_ipca_files/
 
 # Gráficos gerados (recriados em cada render)
 output/
 
 # Dados brutos baixados localmente (não versionados)
 data/
-
-# HTML renderizado localmente (Posit Connect renderiza a partir do .qmd)
-*.html
-*_files/
 
 # VS Code
 .vscode/
