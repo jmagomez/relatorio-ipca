@@ -31,18 +31,22 @@ Write-Host "Gerando manifest.json..." -ForegroundColor Cyan
 $rscript  = "C:\Program Files\R\R-4.6.0\bin\Rscript.exe"
 $rVersion = & $rscript --no-save -e "cat(as.character(getRversion()))" 2>$null
 
-$files = git ls-files | Where-Object { $_ -ne "manifest.json" }
+# Apenas os arquivos necessarios para servir o HTML estatico
+$deployFiles = @("relatorio_ipca.html") + @(
+    Get-ChildItem -Recurse -File "relatorio_ipca_files" |
+    ForEach-Object { $_.FullName.Replace("$PSScriptRoot\", "").Replace("\", "/") }
+)
 
-$filesLines = $files | ForEach-Object {
-    $path = $_
-    $hash = (Get-FileHash $path -Algorithm MD5).Hash.ToLower()
+$filesLines = $deployFiles | Where-Object { Test-Path $_ } | ForEach-Object {
+    $hash = (Get-FileHash $_ -Algorithm MD5).Hash.ToLower()
+    $path = $_.Replace("\", "/")
     "    `"$path`": { `"checksum`": `"$hash`" }"
 }
 $filesJson = $filesLines -join ",`n"
 
 $manifest = "{`n" +
     "  `"version`": 1,`n" +
-    "  `"locale`": `"pt_BR.UTF-8`",`n" +
+    "  `"locale`": `"en_US`",`n" +
     "  `"platform`": `"$rVersion`",`n" +
     "  `"metadata`": {`n" +
     "    `"appmode`": `"static`",`n" +
@@ -57,13 +61,15 @@ $manifest = "{`n" +
     "  `"users`": null`n" +
     "}"
 
+# UTF-8 sem BOM (Posit Connect rejeita BOM no JSON)
+$utf8NoBom = New-Object System.Text.UTF8Encoding $false
 [System.IO.File]::WriteAllText(
     (Join-Path $PSScriptRoot "manifest.json"),
     $manifest,
-    [System.Text.Encoding]::UTF8
+    $utf8NoBom
 )
 
-Write-Host "$($files.Count) arquivos indexados no manifest" -ForegroundColor Green
+Write-Host "$($filesLines.Count) arquivos no manifest (HTML + assets)" -ForegroundColor Green
 
 # ── 3. Stage ───────────────────────────────────────────────────────────────────
 Write-Host "Adicionando arquivos ao stage..." -ForegroundColor Cyan

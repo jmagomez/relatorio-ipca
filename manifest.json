@@ -1,6 +1,6 @@
-﻿{
+{
   "version": 1,
-  "locale": "pt_BR.UTF-8",
+  "locale": "en_US",
   "platform": "4.6.0",
   "metadata": {
     "appmode": "static",
@@ -10,15 +10,7 @@
   },
   "packages": null,
   "files": {
-    ".gitignore": { "checksum": "16fa583103e44eab74db00890a94648a" },
-    "CLAUDE.MD": { "checksum": "b6019e5d78bc7934cb33fe14da4f81a9" },
-    "R/coleta.R": { "checksum": "75917e225bd02342a97f3a020ff67ff0" },
-    "R/graficos.R": { "checksum": "5f534a1a80c1db2a6e60e966503d2a6a" },
-    "R/tratamento.R": { "checksum": "d61dc901feda232990b333026cc09b5f" },
-    "README.md": { "checksum": "b390075e1bd2de3423c2401421b3ca46" },
-    "_quarto.yml": { "checksum": "364309af249a6ca4ebe472d8113da68b" },
     "relatorio_ipca.html": { "checksum": "21ea4764db886e88d7e52a903e3cb99f" },
-    "relatorio_ipca.qmd": { "checksum": "1b1952b07d0124c4fbcfda84532e5d11" },
     "relatorio_ipca_files/libs/bootstrap/bootstrap-efbb37e9afcc02144ebbc7afd12a776f.min.css": { "checksum": "efbb37e9afcc02144ebbc7afd12a776f" },
     "relatorio_ipca_files/libs/bootstrap/bootstrap-icons.css": { "checksum": "886da841d7421705f715f600c5ff11bb" },
     "relatorio_ipca_files/libs/bootstrap/bootstrap-icons.woff": { "checksum": "efe54401ef52214fd3b701e23ff88c5f" },
@@ -28,9 +20,9 @@
     "relatorio_ipca_files/libs/quarto-html/popper.min.js": { "checksum": "3a4a291ccf3f1ea0f82b641542fd3827" },
     "relatorio_ipca_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css": { "checksum": "15634bcf2e68342d4ad2dfa704d543f6" },
     "relatorio_ipca_files/libs/quarto-html/quarto.js": { "checksum": "6f4245742deb3cc92337dbe2701ccfe1" },
-    "relatorio_ipca_files/libs/quarto-html/tabsets/tabsets.js": { "checksum": "e8d6a8862b33ccc461f8fd532e05b365" },
     "relatorio_ipca_files/libs/quarto-html/tippy.css": { "checksum": "ebd6f8ce46a677e1a4f5f8a8317109a9" },
-    "relatorio_ipca_files/libs/quarto-html/tippy.umd.min.js": { "checksum": "d828775275749701b48bd9d958814111" }
+    "relatorio_ipca_files/libs/quarto-html/tippy.umd.min.js": { "checksum": "d828775275749701b48bd9d958814111" },
+    "relatorio_ipca_files/libs/quarto-html/tabsets/tabsets.js": { "checksum": "e8d6a8862b33ccc461f8fd532e05b365" }
   },
   "users": null
 }
