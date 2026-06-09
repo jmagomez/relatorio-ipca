@@ -30,16 +30,36 @@ Write-Host "Gerando manifest.json..." -ForegroundColor Cyan
 
 $rscript  = "C:\Program Files\R\R-4.6.0\bin\Rscript.exe"
 $rVersion = & $rscript --no-save -e "cat(as.character(getRversion()))" 2>$null
+$repoUrl  = "https://packagemanager.posit.co/cran/latest"
 
-# Apenas os arquivos necessarios para servir o HTML estatico
-$deployFiles = @("relatorio_ipca.html") + @(
-    Get-ChildItem -Recurse -File "relatorio_ipca_files" |
-    ForEach-Object { $_.FullName.Replace("$PSScriptRoot\", "").Replace("\", "/") }
+# Pacotes do projeto + dependencias-chave
+$pkgNames = @(
+    "rbcb","sidrar","dplyr","lubridate","slider","forcats",
+    "ggplot2","scales","knitr","rmarkdown",
+    "httr","jsonlite","stringr","rlang","cli","vctrs",
+    "pillar","tibble","generics","lifecycle","fansi","utf8",
+    "glue","magrittr","tidyselect","withr","gtable","isoband",
+    "MASS","mgcv","nlme","Matrix"
 )
 
-$filesLines = $deployFiles | Where-Object { Test-Path $_ } | ForEach-Object {
+$pkgLines = foreach ($p in $pkgNames) {
+    $v = & $rscript --no-save -e "cat(as.character(utils::packageVersion('$p')))" 2>$null
+    if ($v) {
+        "    `"$p`": { `"Source`": `"CRAN`", `"Repository`": `"$repoUrl`", `"description`": { `"Package`": `"$p`", `"Version`": `"$v`", `"Source`": `"CRAN`" } }"
+    }
+}
+$packagesJson = ($pkgLines | Where-Object { $_ }) -join ",`n"
+
+# Arquivos: fontes Quarto + HTML pre-renderizado + assets
+$sourceFiles = @("relatorio_ipca.qmd","_quarto.yml",
+                 "R/coleta.R","R/tratamento.R","R/graficos.R")
+$staticFiles = @("relatorio_ipca.html") + @(
+    Get-ChildItem -Recurse -File "relatorio_ipca_files" |
+    ForEach-Object { $_.FullName.Replace("$PSScriptRoot\","").Replace("\","/") }
+)
+$filesLines = ($sourceFiles + $staticFiles) | Where-Object { Test-Path $_ } | ForEach-Object {
+    $path = $_.Replace("\","/")
     $hash = (Get-FileHash $_ -Algorithm MD5).Hash.ToLower()
-    $path = $_.Replace("\", "/")
     "    `"$path`": { `"checksum`": `"$hash`" }"
 }
 $filesJson = $filesLines -join ",`n"
@@ -49,27 +69,25 @@ $manifest = "{`n" +
     "  `"locale`": `"en_US`",`n" +
     "  `"platform`": `"$rVersion`",`n" +
     "  `"metadata`": {`n" +
-    "    `"appmode`": `"static`",`n" +
+    "    `"appmode`": `"quarto-static`",`n" +
     "    `"primary_rmd`": null,`n" +
     "    `"primary_html`": `"relatorio_ipca.html`",`n" +
     "    `"has_parameters`": false`n" +
     "  },`n" +
-    "  `"packages`": null,`n" +
+    "  `"packages`": {`n" +
+    $packagesJson + "`n" +
+    "  },`n" +
     "  `"files`": {`n" +
     $filesJson + "`n" +
     "  },`n" +
     "  `"users`": null`n" +
     "}"
 
-# UTF-8 sem BOM (Posit Connect rejeita BOM no JSON)
+# UTF-8 sem BOM — Posit Connect rejeita BOM no JSON
 $utf8NoBom = New-Object System.Text.UTF8Encoding $false
-[System.IO.File]::WriteAllText(
-    (Join-Path $PSScriptRoot "manifest.json"),
-    $manifest,
-    $utf8NoBom
-)
+[System.IO.File]::WriteAllText((Join-Path $PSScriptRoot "manifest.json"), $manifest, $utf8NoBom)
 
-Write-Host "$($filesLines.Count) arquivos no manifest (HTML + assets)" -ForegroundColor Green
+Write-Host "$($filesLines.Count) arquivos | $(@($pkgLines | Where-Object {$_}).Count) pacotes" -ForegroundColor Green
 
 # ── 3. Stage ───────────────────────────────────────────────────────────────────
 Write-Host "Adicionando arquivos ao stage..." -ForegroundColor Cyan
