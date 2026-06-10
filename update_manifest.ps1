@@ -32,21 +32,32 @@ $rscript  = "C:\Program Files\R\R-4.6.0\bin\Rscript.exe"
 $rVersion = & $rscript --no-save -e "cat(as.character(getRversion()))" 2>$null
 $repoUrl  = "https://packagemanager.posit.co/cran/latest"
 
-# Pacotes do projeto + dependencias-chave
-$pkgNames = @(
-    "rbcb","sidrar","dplyr","lubridate","slider","forcats",
-    "ggplot2","scales","knitr","rmarkdown",
-    "httr","jsonlite","stringr","rlang","cli","vctrs",
-    "pillar","tibble","generics","lifecycle","fansi","utf8",
-    "glue","magrittr","tidyselect","withr","gtable","isoband",
-    "MASS","mgcv","nlme","Matrix"
-)
+# Calcular arvore recursiva de dependencias (exclui base e recommended do R)
+$depScript = @"
+pkgs <- c('rbcb','sidrar','dplyr','lubridate','slider','forcats',
+          'ggplot2','scales','knitr','rmarkdown','httr','jsonlite','stringr')
+db   <- utils::installed.packages()
+deps <- tools::package_dependencies(pkgs, db=db, recursive=TRUE,
+          which=c('Imports','Depends','LinkingTo'))
+todos    <- unique(c(pkgs, unlist(deps, use.names=FALSE)))
+base_rec <- rownames(db[!is.na(db[,'Priority']) &
+             db[,'Priority'] %in% c('base','recommended'),])
+contrib  <- sort(setdiff(todos, c(base_rec, NA)))
+for (p in contrib) {
+  v <- tryCatch(as.character(packageVersion(p)), error=function(e) NA_character_)
+  if (!is.na(v)) cat(p, '|', v, '\n')
+}
+"@
+$enc = New-Object System.Text.UTF8Encoding $false
+$tmpDep = [System.IO.Path]::GetTempFileName() + ".R"
+[System.IO.File]::WriteAllText($tmpDep, $depScript, $enc)
+$depOutput = & $rscript --no-save $tmpDep 2>$null
+Remove-Item $tmpDep -ErrorAction SilentlyContinue
 
-$pkgLines = foreach ($p in $pkgNames) {
-    $v = & $rscript --no-save -e "cat(as.character(utils::packageVersion('$p')))" 2>$null
-    if ($v) {
-        "    `"$p`": { `"Source`": `"CRAN`", `"Repository`": `"$repoUrl`", `"description`": { `"Package`": `"$p`", `"Version`": `"$v`", `"Source`": `"CRAN`" } }"
-    }
+$pkgLines = foreach ($line in ($depOutput -split "`n" | Where-Object { $_ -match '\|' })) {
+    $parts = $line.Trim() -split '\s*\|\s*', 2
+    $p = $parts[0].Trim(); $v = $parts[1].Trim()
+    "    `"$p`": { `"Source`": `"CRAN`", `"Repository`": `"$repoUrl`", `"description`": { `"Package`": `"$p`", `"Version`": `"$v`", `"Source`": `"CRAN`" } }"
 }
 $packagesJson = ($pkgLines | Where-Object { $_ }) -join ",`n"
 
