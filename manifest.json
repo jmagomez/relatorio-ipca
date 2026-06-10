@@ -75,7 +75,7 @@
     "xml2": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "xml2", "Version": "1.5.2", "Source": "CRAN" } },
     "xts": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "xts", "Version": "0.14.2", "Source": "CRAN" } },
     "yaml": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "yaml", "Version": "2.3.12", "Source": "CRAN" } },
-    "zoo": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "zoo", "Version": "1.8.15", "Source": "CRAN" } }
+    "zoo": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "zoo", "Version": "1.8-15", "Source": "CRAN" } }
   },
   "files": {
     "relatorio_ipca.qmd": { "checksum": "1b1952b07d0124c4fbcfda84532e5d11" },

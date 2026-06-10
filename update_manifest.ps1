@@ -44,7 +44,7 @@ base_rec <- rownames(db[!is.na(db[,'Priority']) &
              db[,'Priority'] %in% c('base','recommended'),])
 contrib  <- sort(setdiff(todos, c(base_rec, NA)))
 for (p in contrib) {
-  v <- tryCatch(as.character(packageVersion(p)), error=function(e) NA_character_)
+  v <- tryCatch(packageDescription(p, fields='Version'), error=function(e) NA_character_)
   if (!is.na(v)) cat(p, '|', v, '\n')
 }
 "@
