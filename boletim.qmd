@@ -24,8 +24,7 @@ fmt <- function(x) {
 # ------------------------------------------------------------------
 # Indicadores — IPCA (SGS 433)
 # ------------------------------------------------------------------
-ipca_nivel   <- 0.67     # var. mensal abr/2026 (%)
-ipca_var_mes <- 0.67     # %
+ipca_var_mes <- 0.67     # % — abr/2026
 ipca_var_ano <- 2.60     # % acumulado no ano
 ipca_var_12m <- 4.39     # % acumulado em 12 meses
 
@@ -35,7 +34,7 @@ ipca_var_12m <- 4.39     # % acumulado em 12 meses
 cambio_nivel   <- 5.1763  # R$ — 10/jun/2026
 cambio_var_mes <- 2.36    # %
 cambio_var_ano <- -5.93   # %
-cambio_var_12m <- -9.33   # %
+cambio_var_12m <- -5.15   # %
 
 # ------------------------------------------------------------------
 # Selic meta (SGS 432)
@@ -47,12 +46,14 @@ selic_var_ano <- NA
 selic_var_12m <- NA
 
 # ------------------------------------------------------------------
-# IBC-Br (SGS 24364 — SA; SGS 24363 — original)
+# IBC-Br
+#   Nível e var_mes: série com ajuste sazonal (SGS 24364)
+#   var_ano e var_12m: série original (SGS 24363)
 # ------------------------------------------------------------------
-ibcbr_nivel    <- 117.62  # índice mar/2026
-ibcbr_var_mes  <- -0.67   # % — série com ajuste sazonal (SGS 24364)
-ibcbr_var_ano  <-  9.62   # % — série original (SGS 24363)
-ibcbr_var_12m  <-  3.07   # % — série original (SGS 24363)
+ibcbr_nivel    <- 117.61851  # índice — série original (SGS 24363), mar/2026
+ibcbr_var_mes  <-  -0.67    # % — série com ajuste sazonal (SGS 24364)
+ibcbr_var_ano  <-   9.62    # % — série original (SGS 24363)
+ibcbr_var_12m  <-   3.07    # % — série original (SGS 24363)
 ```
 
 ## Quadro-resumo
@@ -61,24 +62,24 @@ ibcbr_var_12m  <-  3.07   # % — série original (SGS 24363)
 library(knitr)
 
 quadro <- data.frame(
-  Indicador      = c("IPCA", "Câmbio (R$/US$)", "Selic (meta)", "IBC-Br"),
-  `Último valor` = c(
-    paste0(fmt(ipca_nivel),   "% — abr/2026"),
+  Indicador       = c("IPCA", "Câmbio (R$/US$)", "Selic (meta)", "IBC-Br"),
+  `Último valor`  = c(
+    paste0(fmt(ipca_var_mes), "% — abr/2026"),
     paste0("R$ ", fmt(cambio_nivel), " — 10/jun/2026"),
-    paste0(fmt(selic_nivel),  " p.p. a.a."),
-    paste0(fmt(ibcbr_nivel),  " — mar/2026")
+    paste0(fmt(selic_nivel), " p.p. a.a."),
+    paste0(fmt(ibcbr_nivel), " — mar/2026 (série original, SGS 24363)")
   ),
-  `Var. mês`     = c(
-    paste0(fmt(ipca_var_mes),   "%"),
+  `Var. mês`      = c(
+    paste0(fmt(ipca_var_mes), "%"),
     paste0("+", fmt(cambio_var_mes), "%"),
     fmt(selic_var_mes),
-    paste0(fmt(ibcbr_var_mes),  "% (série SA)")
+    paste0(fmt(ibcbr_var_mes), "% (série SA, SGS 24364)")
   ),
   `Var. 12 meses` = c(
-    paste0(fmt(ipca_var_12m),   "%"),
+    paste0(fmt(ipca_var_12m), "%"),
     paste0(fmt(cambio_var_12m), "%"),
     fmt(selic_var_12m),
-    paste0(fmt(ibcbr_var_12m),  "% (série original)")
+    paste0(fmt(ibcbr_var_12m), "% (série original, SGS 24363)")
   ),
   check.names = FALSE
 )
@@ -91,15 +92,8 @@ kable(quadro, align = c("l", "r", "r", "r"))
 ## Inflação
 
 O Índice Nacional de Preços ao Consumidor Amplo (IPCA) registrou variação de
-`r fmt(ipca_var_mes)`% em abril de 2026, resultado que eleva o acumulado no ano
-para `r fmt(ipca_var_ano)`% e o acumulado em doze meses para
-`r fmt(ipca_var_12m)`%.
-
-O ritmo de alta dos preços ao consumidor permanece acima do centro da meta
-estabelecida pelo Conselho Monetário Nacional para 2026 (3,0%), embora ainda
-dentro do intervalo de tolerância (1,5 p.p. para cima e para baixo). O
-acumulado em doze meses de `r fmt(ipca_var_12m)`% situa o índice 1,39 p.p.
-acima do centro da meta vigente.
+`r fmt(ipca_var_mes)`% em abril de 2026. O acumulado no ano corrente atingiu
+`r fmt(ipca_var_ano)`% e o acumulado em doze meses chegou a `r fmt(ipca_var_12m)`%.
 
 ---
 
@@ -107,47 +101,35 @@ acima do centro da meta vigente.
 
 ### Taxa de Câmbio
 
-Em 10 de junho de 2026, o dólar americano era cotado a R$&nbsp;`r fmt(cambio_nivel)`,
-o que representa uma variação de +`r fmt(cambio_var_mes)`% frente ao fechamento
-do mês anterior. No horizonte de doze meses, a moeda norte-americana acumula
-recuo de `r fmt(cambio_var_12m)`%, refletindo um movimento de apreciação do
-real no período. No acumulado do ano corrente, a variação é de
-`r fmt(cambio_var_ano)`%.
-
-No mês corrente, a cotação registrou alta de +`r fmt(cambio_var_mes)`%, enquanto
-no acumulado de doze meses o recuo foi de `r fmt(cambio_var_12m)`% e no
-acumulado do ano a variação foi de `r fmt(cambio_var_ano)`%.
+Em 10 de junho de 2026, o dólar americano era cotado a R$&nbsp;`r fmt(cambio_nivel)`.
+No mês corrente, a cotação registrou variação de +`r fmt(cambio_var_mes)`% frente ao
+fechamento do mês anterior. No acumulado do ano, a variação é de
+`r fmt(cambio_var_ano)`%. No horizonte de doze meses, a moeda norte-americana
+acumula recuo de `r fmt(abs(cambio_var_12m))`%, configurando apreciação do real
+no período.
 
 ### Taxa Selic
 
-O Comitê de Política Monetária (Copom) mantém a taxa Selic em
-`r fmt(selic_nivel)`&nbsp;p.p. ao ano. Por se tratar de uma taxa-meta fixada
-administrativamente pelo Copom em cada reunião, variações percentuais mensais
-ou anuais não se aplicam a esse indicador.
-
-A taxa de `r fmt(selic_nivel)`&nbsp;p.p. a.a. é a mais elevada registrada desde
-janeiro de 2023, quando a Selic meta também se encontrava nesse patamar.
+A taxa Selic meta encontra-se em `r fmt(selic_nivel)`&nbsp;p.p. ao ano. Por se
+tratar de uma taxa-meta fixada administrativamente pelo Comitê de Política
+Monetária (Copom) em cada reunião, variações percentuais mensais ou anuais não
+se aplicam a esse indicador.
 
 ---
 
 ## Atividade Econômica
 
 O Índice de Atividade Econômica do Banco Central (IBC-Br) registrou índice de
-`r fmt(ibcbr_nivel)` em março de 2026. Na margem, a série com ajuste sazonal
+`r fmt(ibcbr_nivel)` em março de 2026, conforme a série original
+(SGS&nbsp;24363).
+
+Na comparação mensal com ajuste sazonal, a série dessazonalizada
 (SGS&nbsp;24364) apontou variação de `r fmt(ibcbr_var_mes)`% em relação ao mês
-anterior, indicando leve retração da atividade após o expurgo de efeitos
-sazonais.
+anterior.
 
-No horizonte mais longo, a série original (SGS&nbsp;24363) acumula alta de
-`r fmt(ibcbr_var_12m)`% nos últimos doze meses, evidenciando que, apesar do
-arrefecimento recente na margem, o nível de atividade ainda se encontra acima
-do observado um ano antes. O acumulado no ano, também pela série original
-(SGS&nbsp;24363), atinge `r fmt(ibcbr_var_ano)`%.
-
-Na comparação mensal dessazonalizada (SGS&nbsp;24364), o IBC-Br recuou
-`r fmt(ibcbr_var_mes)`% em março de 2026, ao passo que a série original
-(SGS&nbsp;24363) acumula expansão de `r fmt(ibcbr_var_12m)`% nos últimos doze
-meses.
+No horizonte de doze meses, a série original (SGS&nbsp;24363) registra variação
+acumulada de `r fmt(ibcbr_var_12m)`%. O acumulado no ano pela mesma série
+original (SGS&nbsp;24363) é de `r fmt(ibcbr_var_ano)`%.
 
 ---
 
