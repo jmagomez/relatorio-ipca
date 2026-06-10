@@ -383,6 +383,15 @@
         "Source": "CRAN"
       }
     },
+    "cpp11": {
+      "Source": "CRAN",
+      "Repository": "https://cran.rstudio.com/",
+      "description": {
+        "Package": "cpp11",
+        "Version": "0.5.5",
+        "Source": "CRAN"
+      }
+    },
     "timechange": {
       "Source": "CRAN",
       "Repository": "https://cran.rstudio.com/",
