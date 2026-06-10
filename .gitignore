@@ -1,25 +1,12 @@
-# R
+# ── R ─────────────────────────────────────────────────────────────────────────
 .Rhistory
 .RData
 .Rproj.user/
 *.Rproj
 
-# Quarto / knitr cache
-_freeze/
+# ── Quarto ────────────────────────────────────────────────────────────────────
 .quarto/
-*_cache/
 *_files/
-!relatorio_ipca_files/
 
-# Gráficos gerados (recriados em cada render)
+# ── Artefatos gerados ─────────────────────────────────────────────────────────
 output/
-
-# Dados brutos baixados localmente (não versionados)
-data/
-
-# VS Code
-.vscode/
-
-# Sistema operacional
-.DS_Store
-Thumbs.db

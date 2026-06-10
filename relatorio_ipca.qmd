@@ -1,175 +1,159 @@
 ---
-title: "Relatório Mensal do IPCA"
-subtitle: "Inflação ao Consumidor — Análise e Monitoramento"
+title: "Relatório IPCA"
+subtitle: "Inflação ao Consumidor — Análise Conjuntural"
 date: today
 lang: pt
 ---
 
-```{r}
-#| label: setup
-#| include: false
+```{r setup}
+#| echo: false
+#| message: false
+#| warning: false
 
 source("R/coleta.R")
 source("R/tratamento.R")
 source("R/graficos.R")
 
-# Coleta -----------------------------------------------------------------------
+# ── Coleta ────────────────────────────────────────────────────────────────────
 df_ipca_raw <- coletar_ipca_mensal()
 df_meta_raw <- coletar_meta_inflacao()
 df_grupos   <- coletar_ipca_grupos()
 
-# Tratamento -------------------------------------------------------------------
-df_ipca    <- df_ipca_raw |> calcular_acumulado_12m() |> calcular_acumulado_ano()
-df_sazonal <- preparar_sazonal(df_ipca_raw)
-contrib    <- preparar_contribuicoes(df_grupos)
+# ── Tratamento ────────────────────────────────────────────────────────────────
+df_ipca <- df_ipca_raw |>
+  calcular_acumulado_12m() |>
+  calcular_acumulado_ano()
 
-# Gráficos e exportação para output/ ------------------------------------------
-g_mensal        <- grafico_ipca_mensal(df_ipca_raw)
-g_12m           <- grafico_ipca_12m(df_ipca, df_meta_raw)
-g_sazonal       <- grafico_sazonal(df_sazonal)
-g_contribuicoes <- grafico_contribuicoes(contrib$mes_atual)
+df_meta_mensal <- preparar_meta_mensal(df_ipca, df_meta_raw)
+df_sazonal     <- preparar_sazonal(df_ipca)
+lst_contrib    <- preparar_contribuicoes(df_grupos)
 
-salvar_grafico(g_mensal,        "ipca_mensal")
-salvar_grafico(g_12m,           "ipca_12m")
-salvar_grafico(g_sazonal,       "ipca_sazonal")
-salvar_grafico(g_contribuicoes, "ipca_contribuicoes", altura = 5)
+# ── Gráficos → output/ ────────────────────────────────────────────────────────
+p_mensal        <- grafico_ipca_mensal(df_ipca)
+p_12m           <- grafico_ipca_12m(df_ipca, df_meta_mensal)
+p_sazonal       <- grafico_sazonal(df_sazonal)
+p_contribuicoes <- grafico_contribuicoes(lst_contrib$mes_atual)
 
-# Variáveis para inline code --------------------------------------------------
-.meses_ext <- c(
-  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
-  "julho",   "agosto",   "setembro", "outubro", "novembro", "dezembro"
+salvar_graficos(list(
+  ipca_mensal   = p_mensal,
+  ipca_12m      = p_12m,
+  sazonal       = p_sazonal,
+  contribuicoes = p_contribuicoes
+))
+
+# ── Variáveis para inline code ────────────────────────────────────────────────
+meses_pt <- c(
+  "janeiro","fevereiro","março","abril","maio","junho",
+  "julho","agosto","setembro","outubro","novembro","dezembro"
 )
 
-data_ult   <- max(df_ipca_raw$data)
-data_ref   <- paste(.meses_ext[lubridate::month(data_ult)], "de", lubridate::year(data_ult))
+data_ult      <- max(df_ipca_raw$data, na.rm = TRUE)
+data_ref      <- paste(meses_pt[lubridate::month(data_ult)], "de",
+                        lubridate::year(data_ult))
 
-ultimo_ipca    <- dplyr::slice_tail(df_ipca_raw, n = 1)$ipca_mm
-penultimo_ipca <- df_ipca_raw |>
-  dplyr::arrange(data) |>
-  dplyr::slice_tail(n = 2) |>
-  dplyr::slice_head(n = 1) |>
-  dplyr::pull(ipca_mm)
+ipca_ultimo   <- tail(df_ipca_raw$ipca_mm, 1)
+acum_12m_ult  <- tail(na.omit(df_ipca$acum_12m), 1)
+acum_ano_ult  <- tail(na.omit(df_ipca$acum_ano),  1)
+meta_ano      <- tail(na.omit(df_meta_mensal$meta_inflacao), 1)
+desvio_meta   <- round(acum_12m_ult - meta_ano, 2)
 
-acum_ano <- dplyr::slice_tail(df_ipca, n = 1)$acumulado_ano
-acum_12m <- df_ipca |>
-  dplyr::filter(!is.na(acumulado_12m)) |>
-  dplyr::slice_tail(n = 1) |>
-  dplyr::pull(acumulado_12m)
+situacao_meta <- dplyr::case_when(
+  acum_12m_ult > meta_ano + 1.5  ~ "acima do limite superior da banda",
+  acum_12m_ult < meta_ano - 1.5  ~ "abaixo do limite inferior da banda",
+  acum_12m_ult > meta_ano        ~ "acima do centro, dentro da banda",
+  TRUE                            ~ "abaixo do centro, dentro da banda"
+)
 
-meta_atual <- {
-  v <- df_meta_raw |>
-    dplyr::mutate(ano = lubridate::year(data)) |>
-    dplyr::filter(ano == lubridate::year(data_ult)) |>
-    dplyr::pull(meta)
-  if (length(v)) v[[1]] else NA_real_
-}
-meta_sup <- meta_atual + 1.5
-meta_inf <- meta_atual - 1.5
+df_ult_mes    <- lst_contrib$mes_atual
+grupo_lider   <- df_ult_mes$grupo[which.max(df_ult_mes$contribuicao)]
+contrib_lider <- round(max(df_ult_mes$contribuicao, na.rm = TRUE), 2)
+n_pos         <- sum(df_ult_mes$contribuicao > 0, na.rm = TRUE)
+n_neg         <- sum(df_ult_mes$contribuicao < 0, na.rm = TRUE)
 
-contrib_mes   <- contrib$mes_atual
-grupo_lider   <- contrib_mes |> dplyr::slice_max(contribuicao, n = 1) |> dplyr::pull(grupo)
-contrib_lider <- contrib_mes |> dplyr::slice_max(contribuicao, n = 1) |> dplyr::pull(contribuicao)
-grupo_menor   <- contrib_mes |> dplyr::slice_min(contribuicao, n = 1) |> dplyr::pull(grupo)
-contrib_menor <- contrib_mes |> dplyr::slice_min(contribuicao, n = 1) |> dplyr::pull(contribuicao)
+ipca_penult   <- dplyr::nth(df_ipca_raw$ipca_mm, -2)
+mov_mensal    <- if (ipca_ultimo >= ipca_penult) "aceleração" else "desaceleração"
 
-tendencia_mm  <- if (!is.na(ultimo_ipca) && !is.na(penultimo_ipca) &&
-                     ultimo_ipca > penultimo_ipca) "acelerou" else "desacelerou"
-dentro_banda  <- !is.na(acum_12m) && !is.na(meta_inf) &&
-                 acum_12m >= meta_inf && acum_12m <= meta_sup
-posicao_banda <- if (isTRUE(dentro_banda)) "dentro" else "fora"
-
-fmt <- function(x, d = 2) {
-  if (is.na(x)) return("N/D")
-  scales::number(x, accuracy = 10^(-d), decimal.mark = ",", suffix = "%")
-}
-fmt_pp <- function(x, d = 2) {
-  if (is.na(x)) return("N/D")
-  scales::number(x, accuracy = 10^(-d), decimal.mark = ",", suffix = " p.p.")
-}
+fmt <- function(x, d = 2) format(round(x, d), nsmall = d)
 ```
 
 ## Introdução
 
-O Índice Nacional de Preços ao Consumidor Amplo (IPCA), apurado mensalmente pelo Instituto Brasileiro de Geografia e Estatística (IBGE), é o indicador oficial da inflação no Brasil e o parâmetro de referência para o regime de metas estabelecido pelo Conselho Monetário Nacional (CMN). A meta anual é acompanhada com banda de tolerância de ± 1,5 ponto percentual, e o Banco Central do Brasil (BCB) responde por sua convergência por meio da taxa Selic. Este relatório consolida os dados de **`r data_ref`** e os apresenta sob quatro perspectivas complementares: variação mensal, acumulado em 12 meses, comportamento sazonal e decomposição por grupos de despesa.
+O **Índice Nacional de Preços ao Consumidor Amplo (IPCA)** é o indicador oficial de inflação do Brasil, calculado mensalmente pelo IBGE. Sua cobertura abrange famílias com renda entre 1 e 40 salários mínimos residentes nas principais regiões metropolitanas do país, e a composição do índice reflete a estrutura de consumo apurada pela Pesquisa de Orçamentos Familiares (POF). Por ser a referência do sistema de metas de inflação, o IPCA baliza as decisões de política monetária do Banco Central do Brasil (BCB).
 
-Em **`r data_ref`**, o IPCA registrou variação de **`r fmt(ultimo_ipca)`**, ante **`r fmt(penultimo_ipca)`** no mês anterior — o índice `r tendencia_mm` na margem. No acumulado do ano o nível alcança **`r fmt(acum_ano)`**; já a janela de doze meses, referência central para o acompanhamento da meta, totaliza **`r fmt(acum_12m)`**, posicionando-se **`r posicao_banda`** da banda de tolerância (meta de `r fmt(meta_atual)` com limites entre `r fmt(meta_inf)` e `r fmt(meta_sup)`).
+O índice é decomposto em nove grupos de despesa — de Alimentação e Bebidas a Comunicação — cada qual com peso específico na cesta de consumo. Essa estrutura permite identificar não apenas o nível da inflação, mas também seus determinantes, distinguindo choques setoriais de pressões difusas. Os dados deste relatório foram coletados diretamente da API do BCB (série 433 e série 13521 via **rbcb**) e do SIDRA/IBGE (tabela 7060 via **sidrar**).
+
+Os dados mais recentes disponíveis referem-se a **`r data_ref`**. A análise está organizada em quatro dimensões: variação mensal recente, inflação acumulada em doze meses em relação à meta, padrão sazonal histórico e decomposição por grupo de despesa.
 
 ---
 
-## Panorama Mensal {#sec-mensal}
+## Panorama Mensal
 
-A variação mensal do IPCA mede a oscilação de preços de um mês para o outro, captando a pressão inflacionária pontual no período. O gráfico abaixo exibe os últimos 24 meses — janela suficiente para identificar tendências de curto prazo, sazonalidade recorrente e eventuais choques de preços isolados. Barras em azul correspondem a meses de alta; em âmbar, a episódios de deflação.
+Em `r data_ref`, o IPCA registrou variação de **`r fmt(ipca_ultimo)`%**, caracterizando `r mov_mensal` em relação ao mês anterior (`r fmt(ipca_penult)`%). O acumulado no ano corrente soma **`r fmt(acum_ano_ult)`%**, refletindo o ritmo de ajuste de preços até o período de referência. O gráfico abaixo apresenta a evolução da variação mensal nos últimos 24 meses.
 
-```{r}
-#| label: fig-mensal
+A janela de 24 meses permite capturar pelo menos dois ciclos sazonais completos e identificar tendências de médio prazo sem o ruído de séries longas. Barras em azul indicam meses de inflação positiva; barras em âmbar sinalizam deflação — situação menos frequente no histórico brasileiro, mas relevante para identificar episódios de alívio em grupos específicos.
+
+```{r fig-mensal}
 #| echo: false
 #| out-width: "100%"
-#| fig-alt: "Barras da variação mensal do IPCA nos últimos 24 meses"
 knitr::include_graphics("output/ipca_mensal.png")
 ```
 
-A variação de **`r fmt(ultimo_ipca)`** em `r data_ref` representa `r if (ultimo_ipca > penultimo_ipca) "aceleração" else "desaceleração"` frente ao mês anterior (`r fmt(penultimo_ipca)`). O IPCA cobre famílias com renda mensal de 1 a 40 salários mínimos residentes em regiões metropolitanas e municípios selecionados pelo IBGE, abrangendo cerca de 90% da população urbana brasileira.
-
-A sequência de variações mensais nos últimos dois anos revela o ritmo do processo inflacionário em curso. Leituras consecutivas abaixo de 0,50% ao mês geralmente indicam convergência para níveis compatíveis com a meta anual; valores sistematicamente superiores sinalizam pressão estrutural que exige atenção do Comitê de Política Monetária (Copom). O acompanhamento mensal desse indicador é insumo central para as decisões de taxa de juros e para a formação de expectativas de mercado.
+A leitura visual das barras evidencia a intensidade da pressão inflacionária mês a mês. Oscilações abruptas — barras muito mais altas ou mais baixas do que seus vizinhos — costumam refletir choques de oferta pontuais (energia, combustíveis, alimentos in natura) ou efeitos de base estatística, em particular quando o mês correspondente do ano anterior apresentou variação atípica.
 
 ---
 
-## Acumulado em 12 Meses {#sec-12m}
+## IPCA Acumulado em 12 Meses
 
-O IPCA acumulado em 12 meses é o indicador de referência para o regime de metas de inflação, pois elimina oscilações sazonais e ruídos de curto prazo, expondo a tendência estrutural dos preços. O cálculo adota a metodologia de produto acumulado — `(∏(1 + rₜ/100) − 1) × 100` — que é aritmeticamente precisa e evita a soma simples de percentuais mensais. O gráfico contrasta a série histórica do IPCA com a meta do CMN (tracejado verde) e a banda de tolerância de ± 1,5 p.p. (faixa cinza).
+O IPCA acumulado em doze meses encerrou `r data_ref` em **`r fmt(acum_12m_ult)`%**, situando-se `r situacao_meta`. A meta estabelecida pelo Conselho Monetário Nacional (CMN) para o ano vigente é de **`r fmt(meta_ano)`%**, com tolerância de ±1,5 ponto percentual — portanto, a banda aceitável vai de `r fmt(meta_ano - 1.5)`% a `r fmt(meta_ano + 1.5)`%. O desvio em relação ao centro da meta é de **`r fmt(abs(desvio_meta))` p.p.**
 
-```{r}
-#| label: fig-12m
+O horizonte de doze meses é preferível à variação mensal para avaliar a convergência à meta, pois atenua distorções sazonais e choques transitórios. A série acumulada também é o parâmetro que o BCB monitora formalmente: quando ultrapassa o limite superior por dois trimestres consecutivos, o presidente do Banco Central deve enviar carta aberta ao Ministério da Fazenda. O gráfico a seguir exibe a trajetória histórica do acumulado e a banda da meta ao longo do tempo.
+
+```{r fig-12m}
 #| echo: false
 #| out-width: "100%"
-#| fig-alt: "Linha do IPCA acumulado em 12 meses com meta variável e banda de tolerância"
 knitr::include_graphics("output/ipca_12m.png")
 ```
 
-Com **`r fmt(acum_12m)`** no acumulado de doze meses, o IPCA situa-se **`r posicao_banda`** da banda de tolerância do CMN (meta de `r fmt(meta_atual)`, com limite inferior em `r fmt(meta_inf)` e superior em `r fmt(meta_sup)`). `r if (isTRUE(dentro_banda)) "O cumprimento da meta evidencia que a política monetária tem sido eficaz em ancorar as expectativas inflacionárias." else "A posição fora da banda requer atenção do BCB, podendo sinalizar ajustes na taxa Selic nas próximas reuniões do Copom."`
-
-A visualização da meta ao longo do tempo evidencia o processo de calibração do CMN: a meta permaneceu em 4,5% por vários anos, recuou gradualmente para 3,5% e, a partir de 2025, adotou-se o regime de meta contínua avaliada por janela móvel de 12 meses, sem data de referência fixa. Essa mudança reforça a interpretação do gráfico acima como o painel central de monitoramento do BCB e torna a série de meta uma variável dinâmica ao longo do tempo, não mais um escalar fixo.
+A área sombreada em verde representa a banda de tolerância da meta vigente em cada período — variável ao longo do tempo, pois as metas foram revisadas pelo CMN em diferentes anos. A linha tracejada indica o centro da meta. Períodos em que a linha azul transita acima da banda superior correspondem a ciclos de aperto monetário; quando a linha cai abaixo da banda inferior, o Banco Central pode considerar afrouxamento das condições financeiras.
 
 ---
 
-## Sazonalidade {#sec-sazonal}
+## Padrão Sazonal
 
-O gráfico sazonal sobrepõe as variações mensais do IPCA para cada ano disponível desde 2015, revelando padrões recorrentes ao longo do calendário. O ano corrente é destacado em azul escuro com traço mais espesso; os anos históricos aparecem em gradação de cinza — do mais distante (cinza claro) ao mais recente (cinza médio) — permitindo uma leitura hierárquica sem poluição visual.
+A análise sazonal sobrepõe as variações mensais de múltiplos anos para revelar padrões recorrentes ao longo dos doze meses do calendário. No Brasil, a inflação tende a ser mais intensa no primeiro trimestre — período marcado pela renovação de contratos de aluguel, reajuste de mensalidades escolares e pressões sobre a energia elétrica decorrentes do período úmido — e a arrefecer entre junho e agosto, meses de menor demanda por serviços ligados ao clima.
 
-```{r}
-#| label: fig-sazonal
+O conhecimento do padrão sazonal é fundamental para interpretar leituras mensais: uma alta em março pode ser esperada e não sinalizar aceleração estrutural, enquanto um número elevado em agosto — fora do padrão — merece atenção analítica. O gráfico a seguir sobrepõe os anos desde 2015, com o ano corrente destacado em azul escuro e traço mais espesso.
+
+```{r fig-sazonal}
 #| echo: false
 #| out-width: "100%"
-#| fig-alt: "Sazonalidade do IPCA: variação mensal por mês do ano comparada entre anos"
-knitr::include_graphics("output/ipca_sazonal.png")
+knitr::include_graphics("output/sazonal.png")
 ```
 
-A análise histórica revela padrões sazonais consistentes no IPCA brasileiro. O primeiro trimestre concentra reajustes de serviços regulados — mensalidades escolares em fevereiro, energia elétrica, planos de saúde e tarifas de transporte —, pressionando o índice no início do ano. O segundo semestre tende a apresentar alívio, com destaque para os meses de agosto a outubro, quando a safra agrícola de inverno abastece o mercado e modera os preços de Alimentação e Bebidas.
-
-A comparação entre o traço do ano corrente e a nuvem histórica permite avaliar se `r lubridate::year(data_ult)` segue o padrão típico ou apresenta desvios relevantes. Desvios positivos em meses historicamente brandos merecem atenção: podem indicar choques setoriais específicos, pressão cambial ou repasse de custos produtivos ainda não absorvido pela cadeia de preços. Desvios negativos, por sua vez, podem sinalizar alívio de demanda ou impacto de medidas de política econômica.
+O envelope formado pelas linhas históricas define o intervalo de comportamento esperado para cada mês. Quando a linha do ano corrente se afasta desse envelope — tanto para cima quanto para baixo —, isso indica a presença de choques não-sazonais ou mudanças estruturais no processo inflacionário que merecem investigação adicional, como alterações de política fiscal, câmbio ou preços administrados.
 
 ---
 
-## Contribuições dos Grupos {#sec-contrib}
+## Contribuições por Grupo
 
-A decomposição por grupos de despesa revela quais segmentos do consumo puxaram o IPCA em `r data_ref`. A contribuição de cada grupo é calculada como `variação × peso / 100`, resultando em pontos percentuais aditivos cuja soma reproduz, salvo arredondamento, a variação total do índice cheio. O gráfico ordena os nove grupos da maior para a menor contribuição, identificando os vetores dominantes da inflação no período.
+A variação mensal do IPCA pode ser decomposta pela contribuição de cada um dos nove grupos que compõem o índice. A contribuição é calculada como o produto da variação mensal de cada grupo pelo seu peso na cesta de consumo, dividido por 100 — ou seja, quantos pontos percentuais aquele grupo adicionou (ou subtraiu) à inflação cheia do mês. Pela construção do índice, a soma das nove contribuições reproduz o IPCA mensal.
 
-```{r}
-#| label: fig-contribuicoes
+Em `r data_ref`, o grupo **`r grupo_lider`** liderou as pressões inflacionárias, com contribuição de **`r fmt(contrib_lider)` p.p.** De um total de nove grupos, `r n_pos` registraram contribuição positiva e `r n_neg` contribuição negativa para o índice. A composição entre grupos pressores e grupos atenuadores oferece informação qualitativa relevante sobre a natureza da inflação corrente.
+
+```{r fig-contrib}
 #| echo: false
 #| out-width: "100%"
-#| fig-alt: "Barras horizontais das contribuições dos grupos ao IPCA no mês de referência"
-knitr::include_graphics("output/ipca_contribuicoes.png")
+knitr::include_graphics("output/contribuicoes.png")
 ```
 
-Em `r data_ref`, **`r grupo_lider`** foi o principal vetor inflacionário, com contribuição de **`r fmt_pp(contrib_lider)`** para a variação total do IPCA. `r if (!is.na(contrib_menor) && contrib_menor < 0) paste0("No campo deflacionário, **", grupo_menor, "** exerceu pressão de baixa com contribuição de **", fmt_pp(contrib_menor), "**,  compensando parcialmente as altas dos demais grupos.") else paste0("O grupo com menor pressão positiva foi **", grupo_menor, "**, que contribuiu com **", fmt_pp(contrib_menor), "**.")`
-
-A decomposição por grupos é especialmente relevante para distinguir inflação de demanda — associada a grupos como Artigos de Residência e Vestuário, sensíveis ao ciclo econômico — de choques de oferta, que tendem a se manifestar com maior intensidade em Alimentação e Bebidas e Transportes. A interpretação conjunta das contribuições e das variações absolutas de cada grupo orienta analistas e formuladores de política na identificação das raízes do processo inflacionário e na calibração das respostas de curto e médio prazo.
+A decomposição por grupo permite diferenciar inflações de oferta — concentradas em Alimentação, Habitação (energia) e Transportes (combustíveis) — de inflações de demanda, que tendem a se disseminar por grupos de serviços como Saúde, Educação e Despesas Pessoais. Essa distinção é relevante para a política monetária, visto que choques de oferta costumam ser transitórios e menos sensíveis à taxa de juros do que pressões originadas pela demanda doméstica.
 
 ---
 
-## Encerramento {#sec-encerramento}
+## Considerações Finais
 
-Os dados de **`r data_ref`** confirmam variação mensal do IPCA de **`r fmt(ultimo_ipca)`**, com acumulado de 12 meses em **`r fmt(acum_12m)`** — `r posicao_banda` da banda de tolerância da meta de **`r fmt(meta_atual)`**. A decomposição por grupos aponta **`r grupo_lider`** como o principal vetor de pressão no período, enquanto a análise sazonal contextualiza a leitura dentro do padrão histórico do índice, permitindo discernir entre movimentos estruturais e ruídos pontuais.
+O conjunto de indicadores analisados aponta para um IPCA de **`r fmt(ipca_ultimo)`%** em `r data_ref` e acumulado de **`r fmt(acum_12m_ult)`%** em doze meses, situação `r situacao_meta` (`r fmt(meta_ano)`%). O acumulado no ano corrente é de **`r fmt(acum_ano_ult)`%**. O principal vetor de pressão no mês de referência foi o grupo `r grupo_lider`, com contribuição de `r fmt(contrib_lider)` p.p.
 
-O próximo relatório incorporará a divulgação do IPCA pelo IBGE na primeira semana do mês seguinte. O acompanhamento contínuo da série e de suas componentes é fundamental para antecipar movimentos na taxa Selic e subsidiar o planejamento financeiro de famílias, empresas e setor público. Os scripts de coleta, tratamento e visualização utilizados neste relatório são reprodutíveis via Quarto e estão versionados no repositório do projeto.
+A análise sazonal e a decomposição por grupos fornecem camadas interpretativas complementares à leitura da variação mensal isolada. A comparação com o padrão histórico permite distinguir movimentos cíclicos esperados de sinais de alteração estrutural na dinâmica inflacionária.
+
+Todos os dados utilizados são públicos e reproduzíveis. Os scripts de coleta, tratamento e visualização estão disponíveis no diretório `R/` do projeto. Para atualizar o relatório com os dados mais recentes, basta renderizar este documento novamente — as funções de coleta consultam as APIs em tempo real, e o mecanismo `freeze: auto` do Quarto garante que apenas os trechos alterados sejam reprocessados.

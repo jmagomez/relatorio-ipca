@@ -1,281 +1,272 @@
-# Funções de visualização do IPCA.
-# Todas retornam objetos ggplot prontos para exibição ou composição com patchwork.
-# Paleta: #282f6b (azul), #d97706 (âmbar), #059669 (verde), #6b7280 (cinza).
+# Funções de visualização do painel IPCA
 
-.meses_pt <- c("Jan", "Fev", "Mar", "Abr", "Mai", "Jun",
-               "Jul", "Ago", "Set", "Out", "Nov", "Dez")
+library(ggplot2)
+library(dplyr)
+library(scales)
 
-.tema_base <- function() {
-  ggplot2::theme_minimal(base_size = 11) +
-    ggplot2::theme(
-      panel.grid.minor = ggplot2::element_blank(),
-      plot.caption     = ggplot2::element_text(color = "#6b7280", size = 8)
+# ── Constantes de estilo ───────────────────────────────────────────────────────
+
+.cor_primaria   <- "#282f6b"
+.cor_secundaria <- "#d97706"
+.cor_acento     <- "#059669"
+.cor_cinza      <- "#6b7280"
+
+.tema_ipca <- function() {
+  theme_minimal(base_size = 11) +
+    theme(
+      panel.grid.minor  = element_blank(),
+      plot.title        = element_text(face = "bold", color = .cor_primaria),
+      plot.subtitle     = element_text(color = .cor_cinza, size = 9),
+      axis.title        = element_text(color = .cor_cinza, size = 9),
+      legend.title      = element_blank(),
+      legend.position   = "bottom"
     )
 }
 
+# ── Funções de gráfico ─────────────────────────────────────────────────────────
 
-# grafico_ipca_mensal ----------------------------------------------------------
-
-#' Barras: variação mensal do IPCA (últimos 24 meses)
+#' Gráfico de barras do IPCA mensal (últimos 24 meses)
 #'
-#' Eixo y truncado ao intervalo dos dados (coord_cartesian), com rótulos
-#' numéricos e o valor de cada barra anotado via geom_text.
+#' Barras positivas em azul primário, negativas em âmbar. Eixo y truncado
+#' via `coord_cartesian` para ampliar o contraste visual entre barras.
+#' Cada barra recebe rótulo numérico com duas casas decimais.
 #'
-#' @param df Tibble com colunas `data` (Date) e `ipca_mm` (numeric), conforme
-#'   retornado por [coletar_ipca_mensal()].
+#' @param df Tibble com colunas `data` (Date) e `ipca_mm` (variação % mensal).
 #' @return Objeto ggplot.
 grafico_ipca_mensal <- function(df) {
-  dados <- df |>
+  df_plot <- df |>
     dplyr::arrange(data) |>
-    dplyr::slice_tail(n = 24) |>
-    dplyr::mutate(
-      cor   = dplyr::if_else(ipca_mm >= 0, "#282f6b", "#d97706"),
-      vjust = dplyr::if_else(ipca_mm >= 0, -0.35, 1.35),
-      label = scales::number(ipca_mm, accuracy = 0.01, decimal.mark = ",")
-    )
+    dplyr::slice_tail(n = 24)
 
-  y_min <- ifelse(
-    min(dados$ipca_mm, na.rm = TRUE) >= 0,
-    0,
-    min(dados$ipca_mm, na.rm = TRUE) * 1.40
-  )
-  y_max <- max(dados$ipca_mm, na.rm = TRUE) * 1.30  # margem para rótulos
+  y_min  <- min(df_plot$ipca_mm, na.rm = TRUE)
+  y_max  <- max(df_plot$ipca_mm, na.rm = TRUE)
+  margem <- (y_max - y_min) * 0.28
 
-  ggplot2::ggplot(dados, ggplot2::aes(x = data, y = ipca_mm)) +
-    ggplot2::geom_col(ggplot2::aes(fill = cor), width = 20) +
-    ggplot2::geom_text(
-      ggplot2::aes(label = label, vjust = vjust),
-      size  = 2.9,
-      color = "#1a1a1a"
+  ggplot(df_plot, aes(x = data, y = ipca_mm)) +
+    geom_col(
+      aes(fill = ipca_mm >= 0),
+      width = 25
     ) +
-    ggplot2::scale_fill_identity() +
-    ggplot2::scale_x_date(
-      date_breaks = "3 months",
-      date_labels = "%b\n%Y",
-      expand      = ggplot2::expansion(add = 30)
-    ) +
-    ggplot2::scale_y_continuous(
-      labels = ~ scales::number(.x, decimal.mark = ","),
-      expand = ggplot2::expansion(mult = 0)
-    ) +
-    ggplot2::coord_cartesian(ylim = c(y_min, y_max)) +
-    ggplot2::labs(
-      x       = NULL,
-      y       = "Variação mensal (%)",
-      title   = "IPCA — Variação mensal",
-      caption = "Fonte: BCB (série 433)"
-    ) +
-    .tema_base()
-}
-
-
-# grafico_ipca_12m -------------------------------------------------------------
-
-#' Linha: IPCA acumulado em 12 meses com meta variável e banda de tolerância
-#'
-#' A meta é expandida para frequência mensal via join por ano. A banda de
-#' tolerância é meta ± 1,5 p.p. O último valor é destacado por uma caixa
-#' no canto superior direito.
-#'
-#' @param df Tibble com colunas `data` (Date) e `acumulado_12m` (numeric),
-#'   conforme retornado por [calcular_acumulado_12m()].
-#' @param df_meta Tibble com colunas `data` (Date) e `meta` (numeric),
-#'   conforme retornado por [coletar_meta_inflacao()].
-#' @return Objeto ggplot.
-grafico_ipca_12m <- function(df, df_meta) {
-  meta_anual <- df_meta |>
-    dplyr::mutate(ano = lubridate::year(data)) |>
-    dplyr::select(ano, meta)
-
-  dados <- df |>
-    dplyr::filter(!is.na(acumulado_12m)) |>
-    dplyr::mutate(ano = lubridate::year(data)) |>
-    dplyr::left_join(meta_anual, by = "ano") |>
-    dplyr::select(-ano)
-
-  ultimo_valor <- dplyr::slice_tail(dados, n = 1)$acumulado_12m
-  rotulo_box   <- scales::number(
-    ultimo_valor,
-    accuracy     = 0.01,
-    decimal.mark = ",",
-    suffix       = "%"
-  )
-
-  ggplot2::ggplot(dados, ggplot2::aes(x = data)) +
-    ggplot2::geom_ribbon(
-      ggplot2::aes(ymin = meta - 1.5, ymax = meta + 1.5),
-      fill  = "#6b7280",
-      alpha = 0.15
-    ) +
-    ggplot2::geom_line(
-      ggplot2::aes(y = meta),
-      color     = "#059669",
-      linetype  = "dashed",
-      linewidth = 0.65
-    ) +
-    ggplot2::geom_line(
-      ggplot2::aes(y = acumulado_12m),
-      color     = "#282f6b",
-      linewidth = 1
-    ) +
-    ggplot2::annotate(
-      "label",
-      x             = Inf,
-      y             = Inf,
-      label         = paste0("12m: ", rotulo_box),
-      hjust         = 1.05,
-      vjust         = 1.4,
-      size          = 3.5,
-      fill          = "#282f6b",
-      color         = "white",
-      label.padding = ggplot2::unit(0.35, "lines"),
-      label.size    = 0,
-      label.r       = ggplot2::unit(0.25, "lines")
-    ) +
-    ggplot2::scale_x_date(date_breaks = "2 years", date_labels = "%Y") +
-    ggplot2::scale_y_continuous(
-      labels = ~ scales::number(.x, decimal.mark = ",", suffix = "%")
-    ) +
-    ggplot2::labs(
-      x       = NULL,
-      y       = "% a.a.",
-      title   = "IPCA acumulado em 12 meses",
-      subtitle = "Banda cinza: meta ± 1,5 p.p.  |  Tracejado verde: meta",
-      caption  = "Fonte: BCB (séries 433 e 13521)"
-    ) +
-    .tema_base()
-}
-
-
-# grafico_sazonal --------------------------------------------------------------
-
-#' Linhas sazonais: um traço por ano, ano atual destacado
-#'
-#' As cores por ano são lidas diretamente da coluna `cor` via
-#' scale_color_identity, com legenda gerada a partir dos valores únicos.
-#' O ano corrente recebe linha mais espessa (linewidth = 1,2).
-#'
-#' @param df_saz Tibble conforme retornado por [preparar_sazonal()], com
-#'   colunas `mes` (int), `ano` (int), `ipca_mm` (numeric),
-#'   `cor` (character hex) e `destaque` (logical).
-#' @return Objeto ggplot.
-grafico_sazonal <- function(df_saz) {
-  cores_por_ano <- df_saz |>
-    dplyr::distinct(ano, cor) |>
-    dplyr::arrange(ano)
-
-  ggplot2::ggplot(
-    df_saz,
-    ggplot2::aes(
-      x         = mes,
-      y         = ipca_mm,
-      color     = cor,
-      group     = ano,
-      linewidth = destaque
-    )
-  ) +
-    ggplot2::geom_line(lineend = "round") +
-    ggplot2::scale_color_identity(
-      name   = "Ano",
-      guide  = ggplot2::guide_legend(
-        override.aes = list(linewidth = 1),
-        ncol         = 2
+    geom_text(
+      aes(
+        label = format(round(ipca_mm, 2), nsmall = 2),
+        vjust = ifelse(ipca_mm >= 0, -0.4, 1.4)
       ),
-      breaks = cores_por_ano$cor,
-      labels = cores_por_ano$ano
+      size  = 2.8,
+      color = .cor_cinza
     ) +
-    ggplot2::scale_linewidth_manual(
-      values = c("FALSE" = 0.4, "TRUE" = 1.2),
+    scale_fill_manual(
+      values = c("TRUE" = .cor_primaria, "FALSE" = .cor_secundaria),
       guide  = "none"
     ) +
-    ggplot2::scale_x_continuous(
-      breaks = 1:12,
-      labels = .meses_pt,
-      expand = ggplot2::expansion(mult = 0.02)
+    scale_x_date(date_labels = "%b\n%y", date_breaks = "2 months") +
+    scale_y_continuous(
+      labels = scales::number_format(accuracy = 0.01)
     ) +
-    ggplot2::scale_y_continuous(
-      labels = ~ scales::number(.x, decimal.mark = ",")
+    coord_cartesian(ylim = c(y_min - margem, y_max + margem)) +
+    labs(
+      title    = "IPCA — variação mensal",
+      subtitle = "Últimos 24 meses (%)",
+      x        = NULL,
+      y        = "%"
     ) +
-    ggplot2::labs(
-      x       = NULL,
-      y       = "Variação mensal (%)",
-      title   = "Sazonalidade do IPCA",
-      caption = "Fonte: BCB (série 433)"
-    ) +
-    .tema_base() +
-    ggplot2::theme(legend.position = "right")
+    .tema_ipca()
 }
 
 
-# grafico_contribuicoes --------------------------------------------------------
+#' Gráfico de linha do IPCA acumulado em 12 meses com banda da meta
+#'
+#' Exibe a série de acumulado 12 meses, a meta anual variável (série 13521)
+#' convertida para frequência mensal e a banda meta ± 1,5 p.p. O último valor
+#' disponível é anotado em caixa no canto superior direito do gráfico.
+#'
+#' @param df      Tibble com colunas `data`, `ipca_mm` e `acum_12m`
+#'                (saída de `calcular_acumulado_12m()`).
+#' @param df_meta Tibble com colunas `data` e `meta_inflacao`
+#'                (saída de `preparar_meta_mensal()`).
+#' @return Objeto ggplot.
+grafico_ipca_12m <- function(df, df_meta) {
+  df_plot <- df |>
+    dplyr::left_join(
+      dplyr::select(df_meta, data, meta_inflacao),
+      by = "data"
+    ) |>
+    dplyr::filter(!is.na(acum_12m), !is.na(meta_inflacao))
 
-#' Barras horizontais: contribuição dos grupos ao IPCA no mês mais recente
+  ultimo <- dplyr::slice_tail(df_plot, n = 1)
+  rotulo <- sprintf("%.2f%%", ultimo$acum_12m)
+
+  ggplot(df_plot, aes(x = data)) +
+    geom_ribbon(
+      aes(ymin = meta_inflacao - 1.5, ymax = meta_inflacao + 1.5),
+      fill  = .cor_acento,
+      alpha = 0.15
+    ) +
+    geom_line(
+      aes(y = meta_inflacao),
+      color     = .cor_acento,
+      linewidth = 0.7,
+      linetype  = "dashed"
+    ) +
+    geom_line(
+      aes(y = acum_12m),
+      color     = .cor_primaria,
+      linewidth = 1
+    ) +
+    annotate(
+      geom     = "label",
+      x        = max(df_plot$data),
+      y        = Inf,
+      label    = rotulo,
+      hjust    = 1.05,
+      vjust    = 1.5,
+      fill     = .cor_primaria,
+      color    = "white",
+      size     = 3.5,
+      fontface = "bold",
+      label.padding = grid::unit(0.3, "lines"),
+      label.r       = grid::unit(0.15, "lines")
+    ) +
+    scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+    scale_y_continuous(
+      labels = scales::number_format(accuracy = 0.1, suffix = "%")
+    ) +
+    labs(
+      title    = "IPCA acumulado em 12 meses",
+      subtitle = "Meta (——) e banda ±1,5 p.p. em destaque",
+      x        = NULL,
+      y        = "%"
+    ) +
+    .tema_ipca()
+}
+
+
+#' Gráfico sazonal — sobreposição de anos (jan–dez)
 #'
-#' Ordena os grupos pela contribuição (maior no topo), colore positivos em
-#' azul (#282f6b) e negativos em âmbar (#d97706), e anota cada barra com
-#' o valor em p.p.
+#' Uma linha por ano com cor distinta. O ano mais recente recebe a cor primária
+#' e traço mais espesso; os demais anos recebem gradiente de azul claro a cinza.
+#' A legenda exibe todos os anos em uma única linha.
 #'
-#' @param df Tibble com colunas `grupo`, `variacao` e `peso` (e opcionalmente
-#'   `contribuicao` pré-calculada), conforme `$mes_atual` retornado por
-#'   [preparar_contribuicoes()].
+#' @param df_saz Tibble com colunas `mes` (int 1–12), `ano` (fator ordenado),
+#'               `ipca_mm` e `destaque` (logical), conforme retornado por
+#'               `preparar_sazonal()`.
+#' @return Objeto ggplot.
+grafico_sazonal <- function(df_saz) {
+  anos_niveis  <- levels(df_saz$ano)
+  n_anos       <- length(anos_niveis)
+  ano_dest_chr <- as.character(df_saz$ano[which(df_saz$destaque)[1]])
+
+  idx_dest   <- which(anos_niveis == ano_dest_chr)
+  idx_outros <- setdiff(seq_len(n_anos), idx_dest)
+
+  paleta                <- setNames(character(n_anos), anos_niveis)
+  paleta[idx_outros]    <- colorRampPalette(c("#c8ceea", .cor_cinza))(length(idx_outros))
+  paleta[idx_dest]      <- .cor_primaria
+
+  lw_legenda            <- rep(0.45, n_anos)
+  lw_legenda[idx_dest]  <- 1.3
+
+  meses_abr <- c("jan","fev","mar","abr","mai","jun",
+                 "jul","ago","set","out","nov","dez")
+
+  ggplot(df_saz, aes(x = mes, y = ipca_mm, group = ano, color = ano)) +
+    geom_line(
+      data      = dplyr::filter(df_saz, !destaque),
+      linewidth = 0.45,
+      alpha     = 0.85
+    ) +
+    geom_line(
+      data      = dplyr::filter(df_saz, destaque),
+      linewidth = 1.3
+    ) +
+    scale_color_manual(values = paleta) +
+    scale_x_continuous(breaks = 1:12, labels = meses_abr) +
+    guides(
+      color = guide_legend(
+        nrow         = 1,
+        override.aes = list(linewidth = lw_legenda)
+      )
+    ) +
+    labs(
+      title    = "IPCA mensal — padrão sazonal",
+      subtitle = "Variação % por mês do ano",
+      x        = NULL,
+      y        = "%"
+    ) +
+    .tema_ipca()
+}
+
+
+#' Gráfico de barras horizontais das contribuições dos grupos ao IPCA
+#'
+#' Grupos ordenados pela contribuição (maior no topo). Barras positivas em
+#' azul primário, negativas em âmbar. Rótulos indicam a contribuição em p.p.
+#' com sinal explícito.
+#'
+#' @param df Tibble com colunas `grupo` (chr), `variacao`, `peso` e
+#'           `contribuicao` — tipicamente `preparar_contribuicoes(...)$mes_atual`.
 #' @return Objeto ggplot.
 grafico_contribuicoes <- function(df) {
-  dados <- df |>
-    dplyr::mutate(
-      contribuicao = variacao * peso / 100,
-      grupo        = forcats::fct_reorder(grupo, contribuicao),
-      cor          = dplyr::if_else(contribuicao >= 0, "#282f6b", "#d97706"),
-      hjust_txt    = dplyr::if_else(contribuicao >= 0, -0.12, 1.12)
-    )
+  df_plot <- df |>
+    dplyr::mutate(grupo = reorder(grupo, contribuicao))
 
-  x_lim_max <- max(dados$contribuicao, na.rm = TRUE) * 1.30
-  x_lim_min <- min(0, min(dados$contribuicao, na.rm = TRUE) * 1.30)
+  x_lim <- max(abs(df_plot$contribuicao), na.rm = TRUE)
 
-  ggplot2::ggplot(dados, ggplot2::aes(x = contribuicao, y = grupo)) +
-    ggplot2::geom_col(ggplot2::aes(fill = cor), width = 0.65) +
-    ggplot2::geom_text(
-      ggplot2::aes(
-        label = scales::number(
-          contribuicao,
-          accuracy     = 0.01,
-          decimal.mark = ",",
-          suffix       = " p.p."
-        ),
-        hjust = hjust_txt
+  ggplot(df_plot, aes(x = contribuicao, y = grupo)) +
+    geom_col(
+      aes(fill = contribuicao >= 0),
+      width = 0.65
+    ) +
+    geom_text(
+      aes(
+        label = sprintf("%+.2f p.p.", contribuicao),
+        hjust = ifelse(contribuicao >= 0, -0.1, 1.1)
       ),
-      size = 3.4
+      size  = 3,
+      color = .cor_cinza
     ) +
-    ggplot2::scale_fill_identity() +
-    ggplot2::scale_x_continuous(
-      limits = c(x_lim_min, x_lim_max),
-      expand = ggplot2::expansion(mult = 0)
+    geom_vline(xintercept = 0, color = .cor_cinza, linewidth = 0.35) +
+    scale_fill_manual(
+      values = c("TRUE" = .cor_primaria, "FALSE" = .cor_secundaria),
+      guide  = "none"
     ) +
-    ggplot2::labs(
-      x       = "Contribuição (p.p.)",
-      y       = NULL,
-      title   = "Contribuição dos grupos ao IPCA",
-      caption = "Fonte: IBGE/SIDRA (tabela 7060)"
+    scale_x_continuous(
+      expand = expansion(mult = c(0.18, 0.22)),
+      labels = scales::number_format(accuracy = 0.01, suffix = " p.p.")
     ) +
-    .tema_base()
+    labs(
+      title    = "Contribuição dos grupos ao IPCA",
+      subtitle = "Mês de referência mais recente",
+      x        = "p.p.",
+      y        = NULL
+    ) +
+    .tema_ipca() +
+    theme(panel.grid.major.y = element_blank())
 }
 
 
-# salvar_grafico ---------------------------------------------------------------
-
-#' Salva um gráfico ggplot em output/ com resolução padrão para relatório HTML
+#' Salva uma lista nomeada de gráficos como PNG em um diretório
 #'
-#' Cria o diretório output/ se necessário e exporta o arquivo PNG.
+#' Cria o diretório de destino se ainda não existir.
+#' Os nomes da lista tornam-se nomes de arquivo (sem extensão).
 #'
-#' @param plot Objeto ggplot retornado por qualquer `grafico_*()`.
-#' @param nome Nome do arquivo sem extensão (ex.: `"ipca_mensal"`).
-#' @param largura Largura em polegadas (padrão: 10).
-#' @param altura Altura em polegadas (padrão: 5.5).
-#' @param dpi Resolução em pontos por polegada (padrão: 150).
-#' @return Caminho do arquivo salvo, invisível.
-salvar_grafico <- function(plot, nome, largura = 10, altura = 5.5, dpi = 150) {
-  if (!dir.exists("output")) dir.create("output")
-  caminho <- file.path("output", paste0(nome, ".png"))
-  ggplot2::ggsave(caminho, plot = plot, width = largura, height = altura,
-                  dpi = dpi, bg = "white")
-  invisible(caminho)
+#' @param graficos Lista nomeada de objetos ggplot.
+#' @param path     Diretório de destino. Padrão: `"output/"`.
+#' @param width    Largura em polegadas. Padrão: 10.
+#' @param height   Altura em polegadas. Padrão: 5.5.
+#' @param dpi      Resolução. Padrão: 150.
+#' @return Invisível: a lista `graficos` recebida.
+salvar_graficos <- function(graficos, path = "output/",
+                            width = 10, height = 5.5, dpi = 150) {
+  if (!dir.exists(path)) dir.create(path, recursive = TRUE)
+  for (nome in names(graficos)) {
+    ggplot2::ggsave(
+      filename = file.path(path, paste0(nome, ".png")),
+      plot     = graficos[[nome]],
+      width    = width,
+      height   = height,
+      dpi      = dpi
+    )
+  }
+  invisible(graficos)
 }

@@ -7,7 +7,7 @@
 <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
 
 
-<title>Relatório Mensal do IPCA</title>
+<title>Relatório IPCA</title>
 <style>
 /* Default styles provided by pandoc.
 ** See https://pandoc.org/MANUAL.html#variables-for-html for config info.
@@ -49,8 +49,8 @@ ul.task-list li input[type="checkbox"] {
 
 <header id="title-block-header" class="quarto-title-block default">
 <div class="quarto-title">
-<h1 class="title">Relatório Mensal do IPCA</h1>
-<p class="subtitle lead">Inflação ao Consumidor — Análise e Monitoramento</p>
+<h1 class="title">Relatório IPCA</h1>
+<p class="subtitle lead">Inflação ao Consumidor — Análise Conjuntural</p>
 </div>
 
 
@@ -61,7 +61,7 @@ ul.task-list li input[type="checkbox"] {
     <div>
     <div class="quarto-title-meta-heading">Data de Publicação</div>
     <div class="quarto-title-meta-contents">
-      <p class="date">7 de junho de 2026</p>
+      <p class="date">10 de junho de 2026</p>
     </div>
   </div>
   
@@ -75,19 +75,21 @@ ul.task-list li input[type="checkbox"] {
 
 <section id="introdução" class="level2">
 <h2 class="anchored" data-anchor-id="introdução">Introdução</h2>
-<p>O Índice Nacional de Preços ao Consumidor Amplo (IPCA), apurado mensalmente pelo Instituto Brasileiro de Geografia e Estatística (IBGE), é o indicador oficial da inflação no Brasil e o parâmetro de referência para o regime de metas estabelecido pelo Conselho Monetário Nacional (CMN). A meta anual é acompanhada com banda de tolerância de ± 1,5 ponto percentual, e o Banco Central do Brasil (BCB) responde por sua convergência por meio da taxa Selic. Este relatório consolida os dados de <strong>abril de 2026</strong> e os apresenta sob quatro perspectivas complementares: variação mensal, acumulado em 12 meses, comportamento sazonal e decomposição por grupos de despesa.</p>
-<p>Em <strong>abril de 2026</strong>, o IPCA registrou variação de <strong>0,67%</strong>, ante <strong>0,88%</strong> no mês anterior — o índice desacelerou na margem. No acumulado do ano o nível alcança <strong>2,60%</strong>; já a janela de doze meses, referência central para o acompanhamento da meta, totaliza <strong>4,39%</strong>, posicionando-se <strong>dentro</strong> da banda de tolerância (meta de 3,00% com limites entre 1,50% e 4,50%).</p>
+<p>O <strong>Índice Nacional de Preços ao Consumidor Amplo (IPCA)</strong> é o indicador oficial de inflação do Brasil, calculado mensalmente pelo IBGE. Sua cobertura abrange famílias com renda entre 1 e 40 salários mínimos residentes nas principais regiões metropolitanas do país, e a composição do índice reflete a estrutura de consumo apurada pela Pesquisa de Orçamentos Familiares (POF). Por ser a referência do sistema de metas de inflação, o IPCA baliza as decisões de política monetária do Banco Central do Brasil (BCB).</p>
+<p>O índice é decomposto em nove grupos de despesa — de Alimentação e Bebidas a Comunicação — cada qual com peso específico na cesta de consumo. Essa estrutura permite identificar não apenas o nível da inflação, mas também seus determinantes, distinguindo choques setoriais de pressões difusas. Os dados deste relatório foram coletados diretamente da API do BCB (série 433 e série 13521 via <strong>rbcb</strong>) e do SIDRA/IBGE (tabela 7060 via <strong>sidrar</strong>).</p>
+<p>Os dados mais recentes disponíveis referem-se a <strong>abril de 2026</strong>. A análise está organizada em quatro dimensões: variação mensal recente, inflação acumulada em doze meses em relação à meta, padrão sazonal histórico e decomposição por grupo de despesa.</p>
 <hr>
 </section>
-<section id="sec-mensal" class="level2">
-<h2 class="anchored" data-anchor-id="sec-mensal">Panorama Mensal</h2>
-<p>A variação mensal do IPCA mede a oscilação de preços de um mês para o outro, captando a pressão inflacionária pontual no período. O gráfico abaixo exibe os últimos 24 meses — janela suficiente para identificar tendências de curto prazo, sazonalidade recorrente e eventuais choques de preços isolados. Barras em azul correspondem a meses de alta; em âmbar, a episódios de deflação.</p>
+<section id="panorama-mensal" class="level2">
+<h2 class="anchored" data-anchor-id="panorama-mensal">Panorama Mensal</h2>
+<p>Em abril de 2026, o IPCA registrou variação de <strong>0.67%</strong>, caracterizando desaceleração em relação ao mês anterior (0.88%). O acumulado no ano corrente soma <strong>2.60%</strong>, refletindo o ritmo de ajuste de preços até o período de referência. O gráfico abaixo apresenta a evolução da variação mensal nos últimos 24 meses.</p>
+<p>A janela de 24 meses permite capturar pelo menos dois ciclos sazonais completos e identificar tendências de médio prazo sem o ruído de séries longas. Barras em azul indicam meses de inflação positiva; barras em âmbar sinalizam deflação — situação menos frequente no histórico brasileiro, mas relevante para identificar episódios de alívio em grupos específicos.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div id="fig-mensal" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%" alt="Barras da variação mensal do IPCA nos últimos 24 meses">
+<div id="fig-mensal" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-mensal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="output/ipca_mensal.png" id="fig-mensal" class="img-fluid figure-img" style="width:100.0%" alt="Barras da variação mensal do IPCA nos últimos 24 meses">
+<img src="output/ipca_mensal.png" id="fig-mensal" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-mensal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figura&nbsp;1
@@ -96,19 +98,19 @@ Figura&nbsp;1
 </div>
 </div>
 </div>
-<p>A variação de <strong>0,67%</strong> em abril de 2026 representa desaceleração frente ao mês anterior (0,88%). O IPCA cobre famílias com renda mensal de 1 a 40 salários mínimos residentes em regiões metropolitanas e municípios selecionados pelo IBGE, abrangendo cerca de 90% da população urbana brasileira.</p>
-<p>A sequência de variações mensais nos últimos dois anos revela o ritmo do processo inflacionário em curso. Leituras consecutivas abaixo de 0,50% ao mês geralmente indicam convergência para níveis compatíveis com a meta anual; valores sistematicamente superiores sinalizam pressão estrutural que exige atenção do Comitê de Política Monetária (Copom). O acompanhamento mensal desse indicador é insumo central para as decisões de taxa de juros e para a formação de expectativas de mercado.</p>
+<p>A leitura visual das barras evidencia a intensidade da pressão inflacionária mês a mês. Oscilações abruptas — barras muito mais altas ou mais baixas do que seus vizinhos — costumam refletir choques de oferta pontuais (energia, combustíveis, alimentos in natura) ou efeitos de base estatística, em particular quando o mês correspondente do ano anterior apresentou variação atípica.</p>
 <hr>
 </section>
-<section id="sec-12m" class="level2">
-<h2 class="anchored" data-anchor-id="sec-12m">Acumulado em 12 Meses</h2>
-<p>O IPCA acumulado em 12 meses é o indicador de referência para o regime de metas de inflação, pois elimina oscilações sazonais e ruídos de curto prazo, expondo a tendência estrutural dos preços. O cálculo adota a metodologia de produto acumulado — <code>(∏(1 + rₜ/100) − 1) × 100</code> — que é aritmeticamente precisa e evita a soma simples de percentuais mensais. O gráfico contrasta a série histórica do IPCA com a meta do CMN (tracejado verde) e a banda de tolerância de ± 1,5 p.p. (faixa cinza).</p>
+<section id="ipca-acumulado-em-12-meses" class="level2">
+<h2 class="anchored" data-anchor-id="ipca-acumulado-em-12-meses">IPCA Acumulado em 12 Meses</h2>
+<p>O IPCA acumulado em doze meses encerrou abril de 2026 em <strong>4.39%</strong>, situando-se acima do centro, dentro da banda. A meta estabelecida pelo Conselho Monetário Nacional (CMN) para o ano vigente é de <strong>3.00%</strong>, com tolerância de ±1,5 ponto percentual — portanto, a banda aceitável vai de 1.50% a 4.50%. O desvio em relação ao centro da meta é de <strong>1.39 p.p.</strong></p>
+<p>O horizonte de doze meses é preferível à variação mensal para avaliar a convergência à meta, pois atenua distorções sazonais e choques transitórios. A série acumulada também é o parâmetro que o BCB monitora formalmente: quando ultrapassa o limite superior por dois trimestres consecutivos, o presidente do Banco Central deve enviar carta aberta ao Ministério da Fazenda. O gráfico a seguir exibe a trajetória histórica do acumulado e a banda da meta ao longo do tempo.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div id="fig-12m" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%" alt="Linha do IPCA acumulado em 12 meses com meta variável e banda de tolerância">
+<div id="fig-12m" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-12m-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="output/ipca_12m.png" id="fig-12m" class="img-fluid figure-img" style="width:100.0%" alt="Linha do IPCA acumulado em 12 meses com meta variável e banda de tolerância">
+<img src="output/ipca_12m.png" id="fig-12m" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-12m-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figura&nbsp;2
@@ -117,19 +119,19 @@ Figura&nbsp;2
 </div>
 </div>
 </div>
-<p>Com <strong>4,39%</strong> no acumulado de doze meses, o IPCA situa-se <strong>dentro</strong> da banda de tolerância do CMN (meta de 3,00%, com limite inferior em 1,50% e superior em 4,50%). O cumprimento da meta evidencia que a política monetária tem sido eficaz em ancorar as expectativas inflacionárias.</p>
-<p>A visualização da meta ao longo do tempo evidencia o processo de calibração do CMN: a meta permaneceu em 4,5% por vários anos, recuou gradualmente para 3,5% e, a partir de 2025, adotou-se o regime de meta contínua avaliada por janela móvel de 12 meses, sem data de referência fixa. Essa mudança reforça a interpretação do gráfico acima como o painel central de monitoramento do BCB e torna a série de meta uma variável dinâmica ao longo do tempo, não mais um escalar fixo.</p>
+<p>A área sombreada em verde representa a banda de tolerância da meta vigente em cada período — variável ao longo do tempo, pois as metas foram revisadas pelo CMN em diferentes anos. A linha tracejada indica o centro da meta. Períodos em que a linha azul transita acima da banda superior correspondem a ciclos de aperto monetário; quando a linha cai abaixo da banda inferior, o Banco Central pode considerar afrouxamento das condições financeiras.</p>
 <hr>
 </section>
-<section id="sec-sazonal" class="level2">
-<h2 class="anchored" data-anchor-id="sec-sazonal">Sazonalidade</h2>
-<p>O gráfico sazonal sobrepõe as variações mensais do IPCA para cada ano disponível desde 2015, revelando padrões recorrentes ao longo do calendário. O ano corrente é destacado em azul escuro com traço mais espesso; os anos históricos aparecem em gradação de cinza — do mais distante (cinza claro) ao mais recente (cinza médio) — permitindo uma leitura hierárquica sem poluição visual.</p>
+<section id="padrão-sazonal" class="level2">
+<h2 class="anchored" data-anchor-id="padrão-sazonal">Padrão Sazonal</h2>
+<p>A análise sazonal sobrepõe as variações mensais de múltiplos anos para revelar padrões recorrentes ao longo dos doze meses do calendário. No Brasil, a inflação tende a ser mais intensa no primeiro trimestre — período marcado pela renovação de contratos de aluguel, reajuste de mensalidades escolares e pressões sobre a energia elétrica decorrentes do período úmido — e a arrefecer entre junho e agosto, meses de menor demanda por serviços ligados ao clima.</p>
+<p>O conhecimento do padrão sazonal é fundamental para interpretar leituras mensais: uma alta em março pode ser esperada e não sinalizar aceleração estrutural, enquanto um número elevado em agosto — fora do padrão — merece atenção analítica. O gráfico a seguir sobrepõe os anos desde 2015, com o ano corrente destacado em azul escuro e traço mais espesso.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div id="fig-sazonal" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%" alt="Sazonalidade do IPCA: variação mensal por mês do ano comparada entre anos">
+<div id="fig-sazonal" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%">
 <figure class="quarto-float quarto-float-fig figure">
 <div aria-describedby="fig-sazonal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="output/ipca_sazonal.png" id="fig-sazonal" class="img-fluid figure-img" style="width:100.0%" alt="Sazonalidade do IPCA: variação mensal por mês do ano comparada entre anos">
+<img src="output/sazonal.png" id="fig-sazonal" class="img-fluid figure-img" style="width:100.0%">
 </div>
 <figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-sazonal-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figura&nbsp;3
@@ -138,35 +140,35 @@ Figura&nbsp;3
 </div>
 </div>
 </div>
-<p>A análise histórica revela padrões sazonais consistentes no IPCA brasileiro. O primeiro trimestre concentra reajustes de serviços regulados — mensalidades escolares em fevereiro, energia elétrica, planos de saúde e tarifas de transporte —, pressionando o índice no início do ano. O segundo semestre tende a apresentar alívio, com destaque para os meses de agosto a outubro, quando a safra agrícola de inverno abastece o mercado e modera os preços de Alimentação e Bebidas.</p>
-<p>A comparação entre o traço do ano corrente e a nuvem histórica permite avaliar se 2026 segue o padrão típico ou apresenta desvios relevantes. Desvios positivos em meses historicamente brandos merecem atenção: podem indicar choques setoriais específicos, pressão cambial ou repasse de custos produtivos ainda não absorvido pela cadeia de preços. Desvios negativos, por sua vez, podem sinalizar alívio de demanda ou impacto de medidas de política econômica.</p>
+<p>O envelope formado pelas linhas históricas define o intervalo de comportamento esperado para cada mês. Quando a linha do ano corrente se afasta desse envelope — tanto para cima quanto para baixo —, isso indica a presença de choques não-sazonais ou mudanças estruturais no processo inflacionário que merecem investigação adicional, como alterações de política fiscal, câmbio ou preços administrados.</p>
 <hr>
 </section>
-<section id="sec-contrib" class="level2">
-<h2 class="anchored" data-anchor-id="sec-contrib">Contribuições dos Grupos</h2>
-<p>A decomposição por grupos de despesa revela quais segmentos do consumo puxaram o IPCA em abril de 2026. A contribuição de cada grupo é calculada como <code>variação × peso / 100</code>, resultando em pontos percentuais aditivos cuja soma reproduz, salvo arredondamento, a variação total do índice cheio. O gráfico ordena os nove grupos da maior para a menor contribuição, identificando os vetores dominantes da inflação no período.</p>
+<section id="contribuições-por-grupo" class="level2">
+<h2 class="anchored" data-anchor-id="contribuições-por-grupo">Contribuições por Grupo</h2>
+<p>A variação mensal do IPCA pode ser decomposta pela contribuição de cada um dos nove grupos que compõem o índice. A contribuição é calculada como o produto da variação mensal de cada grupo pelo seu peso na cesta de consumo, dividido por 100 — ou seja, quantos pontos percentuais aquele grupo adicionou (ou subtraiu) à inflação cheia do mês. Pela construção do índice, a soma das nove contribuições reproduz o IPCA mensal.</p>
+<p>Em abril de 2026, o grupo <strong>1.Alimentação e bebidas</strong> liderou as pressões inflacionárias, com contribuição de <strong>0.29 p.p.</strong> De um total de nove grupos, 9 registraram contribuição positiva e 0 contribuição negativa para o índice. A composição entre grupos pressores e grupos atenuadores oferece informação qualitativa relevante sobre a natureza da inflação corrente.</p>
 <div class="cell">
 <div class="cell-output-display">
-<div id="fig-contribuicoes" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%" alt="Barras horizontais das contribuições dos grupos ao IPCA no mês de referência">
+<div id="fig-contrib" class="quarto-float quarto-figure quarto-figure-center anchored" width="100%">
 <figure class="quarto-float quarto-float-fig figure">
-<div aria-describedby="fig-contribuicoes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
-<img src="output/ipca_contribuicoes.png" id="fig-contribuicoes" class="img-fluid figure-img" style="width:100.0%" alt="Barras horizontais das contribuições dos grupos ao IPCA no mês de referência">
+<div aria-describedby="fig-contrib-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<img src="output/contribuicoes.png" id="fig-contrib" class="img-fluid figure-img" style="width:100.0%">
 </div>
-<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-contribuicoes-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
+<figcaption class="quarto-float-caption-bottom quarto-float-caption quarto-float-fig quarto-uncaptioned" id="fig-contrib-caption-0ceaefa1-69ba-4598-a22c-09a6ac19f8ca">
 Figura&nbsp;4
 </figcaption>
 </figure>
 </div>
 </div>
 </div>
-<p>Em abril de 2026, <strong>1.Alimentação e bebidas</strong> foi o principal vetor inflacionário, com contribuição de <strong>0,29 p.p.</strong> para a variação total do IPCA. O grupo com menor pressão positiva foi <strong>8.Educação</strong>, que contribuiu com <strong>0,00 p.p.</strong>.</p>
-<p>A decomposição por grupos é especialmente relevante para distinguir inflação de demanda — associada a grupos como Artigos de Residência e Vestuário, sensíveis ao ciclo econômico — de choques de oferta, que tendem a se manifestar com maior intensidade em Alimentação e Bebidas e Transportes. A interpretação conjunta das contribuições e das variações absolutas de cada grupo orienta analistas e formuladores de política na identificação das raízes do processo inflacionário e na calibração das respostas de curto e médio prazo.</p>
+<p>A decomposição por grupo permite diferenciar inflações de oferta — concentradas em Alimentação, Habitação (energia) e Transportes (combustíveis) — de inflações de demanda, que tendem a se disseminar por grupos de serviços como Saúde, Educação e Despesas Pessoais. Essa distinção é relevante para a política monetária, visto que choques de oferta costumam ser transitórios e menos sensíveis à taxa de juros do que pressões originadas pela demanda doméstica.</p>
 <hr>
 </section>
-<section id="sec-encerramento" class="level2">
-<h2 class="anchored" data-anchor-id="sec-encerramento">Encerramento</h2>
-<p>Os dados de <strong>abril de 2026</strong> confirmam variação mensal do IPCA de <strong>0,67%</strong>, com acumulado de 12 meses em <strong>4,39%</strong> — dentro da banda de tolerância da meta de <strong>3,00%</strong>. A decomposição por grupos aponta <strong>1.Alimentação e bebidas</strong> como o principal vetor de pressão no período, enquanto a análise sazonal contextualiza a leitura dentro do padrão histórico do índice, permitindo discernir entre movimentos estruturais e ruídos pontuais.</p>
-<p>O próximo relatório incorporará a divulgação do IPCA pelo IBGE na primeira semana do mês seguinte. O acompanhamento contínuo da série e de suas componentes é fundamental para antecipar movimentos na taxa Selic e subsidiar o planejamento financeiro de famílias, empresas e setor público. Os scripts de coleta, tratamento e visualização utilizados neste relatório são reprodutíveis via Quarto e estão versionados no repositório do projeto.</p>
+<section id="considerações-finais" class="level2">
+<h2 class="anchored" data-anchor-id="considerações-finais">Considerações Finais</h2>
+<p>O conjunto de indicadores analisados aponta para um IPCA de <strong>0.67%</strong> em abril de 2026 e acumulado de <strong>4.39%</strong> em doze meses, situação acima do centro, dentro da banda (3.00%). O acumulado no ano corrente é de <strong>2.60%</strong>. O principal vetor de pressão no mês de referência foi o grupo 1.Alimentação e bebidas, com contribuição de 0.29 p.p.</p>
+<p>A análise sazonal e a decomposição por grupos fornecem camadas interpretativas complementares à leitura da variação mensal isolada. A comparação com o padrão histórico permite distinguir movimentos cíclicos esperados de sinais de alteração estrutural na dinâmica inflacionária.</p>
+<p>Todos os dados utilizados são públicos e reproduzíveis. Os scripts de coleta, tratamento e visualização estão disponíveis no diretório <code>R/</code> do projeto. Para atualizar o relatório com os dados mais recentes, basta renderizar este documento novamente — as funções de coleta consultam as APIs em tempo real, e o mecanismo <code>freeze: auto</code> do Quarto garante que apenas os trechos alterados sejam reprocessados.</p>
 </section>
 
 </main>

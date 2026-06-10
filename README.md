@@ -1,58 +1,53 @@
-# Relatório Mensal do IPCA
+# Relatório IPCA
 
-Relatório automatizado em Quarto com análise mensal do IPCA (Índice Nacional de Preços ao Consumidor Amplo), publicado via Posit Connect Cloud.
+Relatório mensal automatizado da inflação brasileira (IPCA), produzido com **Quarto** e publicável via Posit Connect Cloud.
 
 ## Fontes de dados
 
-| Série | Origem | Conteúdo |
+| Série | Fonte | Conteúdo |
 |---|---|---|
-| 433 | BCB / `rbcb` | IPCA variação mensal |
-| 13521 | BCB / `rbcb` | Meta de inflação anual |
-| Tabela 7060 | SIDRA/IBGE / `sidrar` | IPCA por grupos de despesa |
+| 433 | BCB via `rbcb` | Variação mensal do IPCA |
+| 13521 | BCB via `rbcb` | Meta de inflação (anual) |
+| Tabela 7060 | SIDRA/IBGE via `sidrar` | IPCA por grupos de despesa |
 
-## Estrutura do projeto
+## Estrutura
 
 ```
-.
-├── _quarto.yml            # Configuração do projeto Quarto
-├── relatorio_ipca.qmd     # Documento principal
-├── R/
-│   ├── coleta.R           # Coleta de dados via API
-│   ├── tratamento.R       # Transformações e cálculos
-│   └── graficos.R         # Visualizações ggplot2
-└── output/                # PNGs gerados (não versionados)
+R/
+  coleta.R        # Coleta via API (rbcb, sidrar)
+  tratamento.R    # Transformações puras (acumulados, sazonalidade, contribuições)
+  graficos.R      # Funções ggplot2 + salvar_graficos()
+relatorio_ipca.qmd   # Documento Quarto
+_quarto.yml          # Configuração do projeto (tema, TOC, freeze)
 ```
 
-## Como rodar
-
-### Pré-requisitos
-
-- [R ≥ 4.1](https://cran.r-project.org/)
-- [Quarto ≥ 1.4](https://quarto.org/)
-
-### Instalar dependências R
+## Pré-requisitos
 
 ```r
 install.packages(c(
-  "rbcb", "sidrar",
-  "dplyr", "lubridate", "slider", "forcats",
-  "ggplot2", "scales",
-  "knitr", "rmarkdown"
+  "rbcb", "sidrar", "slider",
+  "dplyr", "tidyr", "lubridate",
+  "ggplot2", "scales"
 ))
 ```
 
-### Renderizar o relatório
+[Quarto 1.3+](https://quarto.org/docs/get-started/)
+
+## Como renderizar
 
 ```bash
 quarto render relatorio_ipca.qmd
 ```
 
-O arquivo `relatorio_ipca.html` será gerado na raiz do projeto e os gráficos em `output/`.
+Gera `relatorio_ipca.html` (autocontido) na raiz. Os gráficos PNG ficam em `output/`.
 
-## Atualização mensal
-
-O relatório busca dados diretamente nas APIs do BCB e do IBGE a cada render. Com `freeze: auto` no `_quarto.yml`, o Quarto reexecuta os chunks apenas quando o `.qmd` for modificado. Para forçar atualização dos dados:
+Para forçar reexecução completa sem cache:
 
 ```bash
 quarto render relatorio_ipca.qmd --no-freeze
 ```
+
+## Atualização mensal
+
+O mecanismo `freeze: auto` reprocessa apenas os chunks cujo código foi alterado.
+Para incorporar novos dados do mês, basta renderizar — as funções de coleta consultam as APIs em tempo real.
