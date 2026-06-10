@@ -9,73 +9,914 @@
     "has_parameters": false
   },
   "packages": {
-    "askpass": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "askpass", "Version": "1.2.1", "Source": "CRAN" } },
-    "base64enc": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "base64enc", "Version": "0.1-6", "Source": "CRAN" } },
-    "bslib": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "bslib", "Version": "0.11.0", "Source": "CRAN" } },
-    "cachem": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "cachem", "Version": "1.1.0", "Source": "CRAN" } },
-    "cli": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "cli", "Version": "3.6.6", "Source": "CRAN" } },
-    "cpp11": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "cpp11", "Version": "0.5.5", "Source": "CRAN" } },
-    "curl": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "curl", "Version": "7.1.0", "Source": "CRAN" } },
-    "digest": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "digest", "Version": "0.6.39", "Source": "CRAN" } },
-    "dplyr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "dplyr", "Version": "1.2.1", "Source": "CRAN" } },
-    "evaluate": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "evaluate", "Version": "1.0.5", "Source": "CRAN" } },
-    "farver": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "farver", "Version": "2.1.2", "Source": "CRAN" } },
-    "fastmap": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "fastmap", "Version": "1.2.0", "Source": "CRAN" } },
-    "fontawesome": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "fontawesome", "Version": "0.5.3", "Source": "CRAN" } },
-    "forcats": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "forcats", "Version": "1.0.1", "Source": "CRAN" } },
-    "fs": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "fs", "Version": "2.1.0", "Source": "CRAN" } },
-    "generics": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "generics", "Version": "0.1.4", "Source": "CRAN" } },
-    "ggplot2": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "ggplot2", "Version": "4.0.3", "Source": "CRAN" } },
-    "glue": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "glue", "Version": "1.8.1", "Source": "CRAN" } },
-    "gtable": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "gtable", "Version": "0.3.6", "Source": "CRAN" } },
-    "highr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "highr", "Version": "0.12", "Source": "CRAN" } },
-    "htmltools": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "htmltools", "Version": "0.5.9", "Source": "CRAN" } },
-    "httr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "httr", "Version": "1.4.8", "Source": "CRAN" } },
-    "isoband": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "isoband", "Version": "0.3.0", "Source": "CRAN" } },
-    "jquerylib": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "jquerylib", "Version": "0.1.4", "Source": "CRAN" } },
-    "jsonlite": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "jsonlite", "Version": "2.0.0", "Source": "CRAN" } },
-    "knitr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "knitr", "Version": "1.51", "Source": "CRAN" } },
-    "labeling": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "labeling", "Version": "0.4.3", "Source": "CRAN" } },
-    "lifecycle": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "lifecycle", "Version": "1.0.5", "Source": "CRAN" } },
-    "lubridate": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "lubridate", "Version": "1.9.5", "Source": "CRAN" } },
-    "magrittr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "magrittr", "Version": "2.0.5", "Source": "CRAN" } },
-    "memoise": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "memoise", "Version": "2.0.1", "Source": "CRAN" } },
-    "mime": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "mime", "Version": "0.13", "Source": "CRAN" } },
-    "openssl": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "openssl", "Version": "2.4.1", "Source": "CRAN" } },
-    "pillar": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "pillar", "Version": "1.11.1", "Source": "CRAN" } },
-    "pkgconfig": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "pkgconfig", "Version": "2.0.3", "Source": "CRAN" } },
-    "purrr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "purrr", "Version": "1.2.2", "Source": "CRAN" } },
-    "R6": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "R6", "Version": "2.6.1", "Source": "CRAN" } },
-    "rappdirs": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "rappdirs", "Version": "0.3.4", "Source": "CRAN" } },
-    "rbcb": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "rbcb", "Version": "0.1.14", "Source": "CRAN" } },
-    "RColorBrewer": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "RColorBrewer", "Version": "1.1-3", "Source": "CRAN" } },
-    "rjson": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "rjson", "Version": "0.2.23", "Source": "CRAN" } },
-    "rlang": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "rlang", "Version": "1.2.0", "Source": "CRAN" } },
-    "rmarkdown": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "rmarkdown", "Version": "2.31", "Source": "CRAN" } },
-    "rvest": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "rvest", "Version": "1.0.5", "Source": "CRAN" } },
-    "S7": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "S7", "Version": "0.2.2", "Source": "CRAN" } },
-    "sass": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "sass", "Version": "0.4.10", "Source": "CRAN" } },
-    "scales": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "scales", "Version": "1.4.0", "Source": "CRAN" } },
-    "selectr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "selectr", "Version": "0.5-1", "Source": "CRAN" } },
-    "sidrar": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "sidrar", "Version": "0.2.9", "Source": "CRAN" } },
-    "slider": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "slider", "Version": "0.3.3", "Source": "CRAN" } },
-    "stringi": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "stringi", "Version": "1.8.7", "Source": "CRAN" } },
-    "stringr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "stringr", "Version": "1.6.0", "Source": "CRAN" } },
-    "sys": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "sys", "Version": "3.4.3", "Source": "CRAN" } },
-    "tibble": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "tibble", "Version": "3.3.1", "Source": "CRAN" } },
-    "tidyselect": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "tidyselect", "Version": "1.2.1", "Source": "CRAN" } },
-    "timechange": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "timechange", "Version": "0.4.0", "Source": "CRAN" } },
-    "tinytex": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "tinytex", "Version": "0.59", "Source": "CRAN" } },
-    "utf8": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "utf8", "Version": "1.2.6", "Source": "CRAN" } },
-    "vctrs": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "vctrs", "Version": "0.7.3", "Source": "CRAN" } },
-    "viridisLite": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "viridisLite", "Version": "0.4.3", "Source": "CRAN" } },
-    "warp": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "warp", "Version": "0.2.3", "Source": "CRAN" } },
-    "withr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "withr", "Version": "3.0.2", "Source": "CRAN" } },
-    "xfun": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "xfun", "Version": "0.58", "Source": "CRAN" } },
-    "xml2": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "xml2", "Version": "1.5.2", "Source": "CRAN" } },
-    "xts": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "xts", "Version": "0.14.2", "Source": "CRAN" } },
-    "yaml": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "yaml", "Version": "2.3.12", "Source": "CRAN" } },
-    "zoo": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "zoo", "Version": "1.8-15", "Source": "CRAN" } }
+    "askpass": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "askpass",
+        "Version": "1.2.1",
+        "Imports": "sys (>= 2.1)",
+        "Title": "Password Entry Utilities for R, Git, and SSH",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "base64enc": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "base64enc",
+        "Version": "0.1-6",
+        "Depends": "R (>= 2.9.0)",
+        "Title": "Tools for 'base64' Encoding",
+        "License": "GPL-2 | GPL-3",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "bslib": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "bslib",
+        "Version": "0.11.0",
+        "Depends": "R (>= 2.10)",
+        "Imports": "base64enc, cachem, fastmap (>= 1.1.1), grDevices, htmltools (>= 0.5.8), jquerylib (>= 0.1.3), jsonlite, lifecycle, memoise (>= 2.0.1), mime, rlang, sass (>= 0.4.9)",
+        "Title": "Custom 'Bootstrap' 'Sass' Themes for 'shiny' and 'rmarkdown'",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "cachem": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "cachem",
+        "Version": "1.1.0",
+        "Imports": "rlang, fastmap (>= 1.2.0)",
+        "Title": "Cache R Objects with Automatic Pruning",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "cli": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "cli",
+        "Version": "3.6.6",
+        "Depends": "R (>= 3.4)",
+        "Imports": "utils",
+        "Title": "Helpers for Developing Command Line Interfaces",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "cpp11": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "cpp11",
+        "Version": "0.5.5",
+        "Depends": "R (>= 4.0.0)",
+        "Title": "A C++11 Interface for R's C Interface",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "curl": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "curl",
+        "Version": "7.1.0",
+        "Depends": "R (>= 3.0.0)",
+        "Title": "A Modern and Flexible Web Client for R",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "digest": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "digest",
+        "Version": "0.6.39",
+        "Depends": "R (>= 3.3.0)",
+        "Imports": "utils",
+        "Title": "Create Compact Hash Digests of R Objects",
+        "License": "GPL (>= 2)",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "dplyr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "dplyr",
+        "Version": "1.2.1",
+        "Depends": "R (>= 4.1.0)",
+        "Imports": "cli (>= 3.6.2), generics, glue (>= 1.3.2), lifecycle (>= 1.0.5), magrittr (>= 1.5), methods, pillar (>= 1.9.0), R6, rlang (>= 1.1.7), tibble (>= 3.2.0), tidyselect (>= 1.2.0), utils, vctrs (>= 0.7.1)",
+        "Title": "A Grammar of Data Manipulation",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "evaluate": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "evaluate",
+        "Version": "1.0.5",
+        "Depends": "R (>= 3.6.0)",
+        "Title": "Parsing and Evaluation Tools that Provide More Details than the Default",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "farver": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "farver",
+        "Version": "2.1.2",
+        "Title": "High Performance Colour Space Manipulation",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "fastmap": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "fastmap",
+        "Version": "1.2.0",
+        "Title": "Fast Data Structures",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "fontawesome": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "fontawesome",
+        "Version": "0.5.3",
+        "Depends": "R (>= 3.3.0)",
+        "Imports": "rlang (>= 1.0.6), htmltools (>= 0.5.1.1)",
+        "Title": "Easily Work with 'Font Awesome' Icons",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "forcats": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "forcats",
+        "Version": "1.0.1",
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli (>= 3.4.0), glue, lifecycle, magrittr, rlang (>= 1.0.0), tibble",
+        "Title": "Tools for Working with Categorical Variables (Factors)",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "fs": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "fs",
+        "Version": "2.1.0",
+        "Depends": "R (>= 4.1)",
+        "Imports": "methods",
+        "Title": "Cross-Platform File System Operations Based on 'libuv'",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "generics": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "generics",
+        "Version": "0.1.4",
+        "Depends": "R (>= 3.6)",
+        "Imports": "methods",
+        "Title": "Common S3 Generics not Provided by Base R Methods Related to Model Fitting",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "ggplot2": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "ggplot2",
+        "Version": "4.0.3",
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli, grDevices, grid, gtable (>= 0.3.6), isoband, lifecycle (> 1.0.1), rlang (>= 1.1.0), S7, scales (>= 1.4.0), stats, vctrs (>= 0.6.0), withr (>= 2.5.0)",
+        "Title": "Create Elegant Data Visualisations Using the Grammar of Graphics",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "glue": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "glue",
+        "Version": "1.8.1",
+        "Depends": "R (>= 4.1)",
+        "Imports": "methods",
+        "Title": "Interpreted String Literals",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "gtable": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "gtable",
+        "Version": "0.3.6",
+        "Depends": "R (>= 4.0)",
+        "Imports": "cli, glue, grid, lifecycle, rlang (>= 1.1.0), stats",
+        "Title": "Arrange 'Grobs' in Tables",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "highr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "highr",
+        "Version": "0.12",
+        "Depends": "R (>= 3.3.0)",
+        "Imports": "xfun (>= 0.18)",
+        "Title": "Syntax Highlighting for R Source Code",
+        "License": "GPL",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "htmltools": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "htmltools",
+        "Version": "0.5.9",
+        "Depends": "R (>= 2.14.1)",
+        "Imports": "base64enc, digest, fastmap (>= 1.1.0), grDevices, rlang (>= 1.0.0), utils",
+        "Title": "Tools for HTML",
+        "License": "GPL (>= 2)",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "httr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "httr",
+        "Version": "1.4.8",
+        "Depends": "R (>= 3.6)",
+        "Imports": "curl (>= 5.1.0), jsonlite, mime, openssl (>= 0.8), R6",
+        "Title": "Tools for Working with URLs and HTTP",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "isoband": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "isoband",
+        "Version": "0.3.0",
+        "Imports": "cli, grid, rlang, utils",
+        "LinkingTo": "cpp11",
+        "Title": "Generate Isolines and Isobands from Regularly Spaced Elevation Grids",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "jquerylib": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "jquerylib",
+        "Version": "0.1.4",
+        "Imports": "htmltools",
+        "Title": "Obtain 'jQuery' as an HTML Dependency Object",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "jsonlite": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "jsonlite",
+        "Version": "2.0.0",
+        "Depends": "methods",
+        "Title": "A Simple and Robust JSON Parser and Generator for R",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "knitr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "knitr",
+        "Version": "1.51",
+        "Depends": "R (>= 3.6.0)",
+        "Imports": "evaluate (>= 0.15), highr (>= 0.11), methods, tools, xfun (>= 0.52), yaml (>= 2.1.19)",
+        "Title": "A General-Purpose Package for Dynamic Report Generation in R",
+        "License": "GPL",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "labeling": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "labeling",
+        "Version": "0.4.3",
+        "Imports": "stats, graphics",
+        "Title": "Axis Labeling",
+        "License": "MIT + file LICENSE | Unlimited",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "lifecycle": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "lifecycle",
+        "Version": "1.0.5",
+        "Depends": "R (>= 3.6)",
+        "Imports": "cli (>= 3.4.0), rlang (>= 1.1.0)",
+        "Title": "Manage the Life Cycle of your Package Functions",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "lubridate": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "lubridate",
+        "Version": "1.9.5",
+        "Depends": "methods, R (>= 3.2)",
+        "Imports": "generics, timechange (>= 0.4.0)",
+        "Title": "Make Dealing with Dates a Little Easier",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "magrittr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "magrittr",
+        "Version": "2.0.5",
+        "Depends": "R (>= 3.4.0)",
+        "Title": "A Forward-Pipe Operator for R",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "memoise": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "memoise",
+        "Version": "2.0.1",
+        "Imports": "rlang (>= 0.4.10), cachem",
+        "Title": "'Memoisation' of Functions",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "mime": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "mime",
+        "Version": "0.13",
+        "Imports": "tools",
+        "Title": "Map Filenames to MIME Types",
+        "License": "GPL",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "openssl": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "openssl",
+        "Version": "2.4.1",
+        "Imports": "askpass",
+        "Title": "Toolkit for Encryption, Signatures and Certificates Based on OpenSSL",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "pillar": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "pillar",
+        "Version": "1.11.1",
+        "Imports": "cli (>= 2.3.0), glue, lifecycle, rlang (>= 1.0.2), utf8 (>= 1.1.0), utils, vctrs (>= 0.5.0)",
+        "Title": "Coloured Formatting for Columns",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "pkgconfig": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "pkgconfig",
+        "Version": "2.0.3",
+        "Imports": "utils",
+        "Title": "Private Configuration for 'R' Packages",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "purrr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "purrr",
+        "Version": "1.2.2",
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli (>= 3.6.1), lifecycle (>= 1.0.3), magrittr (>= 1.5.0), rlang (>= 1.1.1), vctrs (>= 0.6.3)",
+        "LinkingTo": "cli",
+        "Title": "Functional Programming Tools",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "R6": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "R6",
+        "Version": "2.6.1",
+        "Depends": "R (>= 3.6)",
+        "Title": "Encapsulated Classes with Reference Semantics",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "rappdirs": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "rappdirs",
+        "Version": "0.3.4",
+        "Depends": "R (>= 4.1)",
+        "Title": "Application Directories: Determine Where to Save Data, Caches, and Logs",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "rbcb": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "rbcb",
+        "Version": "0.1.14",
+        "Imports": "httr, jsonlite, tibble, xts, xml2, utils, stats, methods, purrr, digest",
+        "Title": "R Interface to Brazilian Central Bank Web Services",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "RColorBrewer": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "RColorBrewer",
+        "Version": "1.1-3",
+        "Depends": "R (>= 2.0.0)",
+        "Title": "ColorBrewer Palettes",
+        "License": "Apache License 2.0",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "rjson": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "rjson",
+        "Version": "0.2.23",
+        "Depends": "R (>= 4.0.0)",
+        "Title": "JSON for R",
+        "License": "GPL-2",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "rlang": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "rlang",
+        "Version": "1.2.0",
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "utils",
+        "Title": "Functions for Base Types and Core R and 'Tidyverse' Features",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "rmarkdown": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "rmarkdown",
+        "Version": "2.31",
+        "Depends": "R (>= 3.0)",
+        "Imports": "bslib (>= 0.2.5.1), evaluate (>= 0.13), fontawesome (>= 0.5.0), htmltools (>= 0.5.1), jquerylib, jsonlite, knitr (>= 1.43), methods, tinytex (>= 0.31), tools, utils, xfun (>= 0.36), yaml (>= 2.1.19)",
+        "Title": "Dynamic Documents for R",
+        "License": "GPL-3",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "rvest": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "rvest",
+        "Version": "1.0.5",
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli, glue, httr (>= 0.5), lifecycle (>= 1.0.3), magrittr, rlang (>= 1.1.0), selectr, tibble, xml2 (>= 1.4.0)",
+        "Title": "Easily Harvest (Scrape) Web Pages",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "S7": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "S7",
+        "Version": "0.2.2",
+        "Depends": "R (>= 3.5.0)",
+        "Imports": "utils",
+        "Title": "An Object Oriented System Meant to Become a Successor to S3 and S4",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "sass": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "sass",
+        "Version": "0.4.10",
+        "Imports": "fs (>= 1.2.4), rlang (>= 0.4.10), htmltools (>= 0.5.1), R6, rappdirs",
+        "Title": "Syntactically Awesome Style Sheets ('Sass')",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "scales": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "scales",
+        "Version": "1.4.0",
+        "Depends": "R (>= 4.1)",
+        "Imports": "cli, farver (>= 2.0.3), glue, labeling, lifecycle, R6, RColorBrewer, rlang (>= 1.1.0), viridisLite",
+        "Title": "Scale Functions for Visualization",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "selectr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "selectr",
+        "Version": "0.5-1",
+        "Depends": "R (>= 3.0)",
+        "Imports": "methods, stringr, R6",
+        "Title": "Translate CSS Selectors to XPath Expressions",
+        "License": "BSD_3_clause + file LICENCE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "sidrar": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "sidrar",
+        "Version": "0.2.9",
+        "Depends": "R (>= 3.2.0)",
+        "Imports": "magrittr, httr, rjson, rvest, stringr, xml2",
+        "Title": "An Interface to IBGE's SIDRA API",
+        "License": "GPL-3",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "slider": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "slider",
+        "Version": "0.3.3",
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "cli (>= 3.6.1), rlang (>= 1.1.1), vctrs (>= 0.6.3), warp",
+        "LinkingTo": "vctrs (>= 0.6.3)",
+        "Title": "Sliding Window Functions",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "stringi": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "stringi",
+        "Version": "1.8.7",
+        "Depends": "R (>= 3.4)",
+        "Imports": "tools, utils, stats",
+        "Title": "Fast and Portable Character String Processing Facilities",
+        "License": "file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "stringr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "stringr",
+        "Version": "1.6.0",
+        "Depends": "R (>= 4.1.0)",
+        "Imports": "cli, glue (>= 1.6.1), lifecycle (>= 1.0.3), magrittr, rlang (>= 1.0.0), stringi (>= 1.5.3), vctrs (>= 0.4.0)",
+        "Title": "Simple, Consistent Wrappers for Common String Operations",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "sys": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "sys",
+        "Version": "3.4.3",
+        "Title": "Powerful and Reliable Tools for Running System Commands in R",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "tibble": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "tibble",
+        "Version": "3.3.1",
+        "Depends": "R (>= 3.4.0)",
+        "Imports": "cli, lifecycle (>= 1.0.0), magrittr, methods, pillar (>= 1.8.1), pkgconfig, rlang (>= 1.0.2), utils, vctrs (>= 0.5.0)",
+        "Title": "Simple Data Frames",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "tidyselect": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "tidyselect",
+        "Version": "1.2.1",
+        "Depends": "R (>= 3.4)",
+        "Imports": "cli (>= 3.3.0), glue (>= 1.3.0), lifecycle (>= 1.0.3), rlang (>= 1.0.4), vctrs (>= 0.5.2), withr",
+        "Title": "Select from a Set of Strings",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "timechange": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "timechange",
+        "Version": "0.4.0",
+        "Depends": "R (>= 3.3)",
+        "LinkingTo": "cpp11 (>= 0.2.7)",
+        "Title": "Efficient Manipulation of Date-Times",
+        "License": "GPL (>= 3)",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "tinytex": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "tinytex",
+        "Version": "0.59",
+        "Imports": "xfun (>= 0.48)",
+        "Title": "Helper Functions to Install and Maintain TeX Live, and Compile LaTeX Documents",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "utf8": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "utf8",
+        "Version": "1.2.6",
+        "Depends": "R (>= 2.10)",
+        "Title": "Unicode Text Processing",
+        "License": "Apache License (== 2.0) | file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "vctrs": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "vctrs",
+        "Version": "0.7.3",
+        "Depends": "R (>= 4.0.0)",
+        "Imports": "cli (>= 3.4.0), glue, lifecycle (>= 1.0.3), rlang (>= 1.1.7)",
+        "Title": "Vector Helpers",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "viridisLite": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "viridisLite",
+        "Version": "0.4.3",
+        "Depends": "R (>= 2.10)",
+        "Title": "Colorblind-Friendly Color Maps (Lite Version)",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "warp": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "warp",
+        "Version": "0.2.3",
+        "Depends": "R (>= 4.0.0)",
+        "Title": "Group Dates",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "withr": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "withr",
+        "Version": "3.0.2",
+        "Depends": "R (>= 3.6.0)",
+        "Imports": "graphics, grDevices",
+        "Title": "Run Code 'With' Temporarily Modified Global State",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "no",
+        "Source": "CRAN"
+      }
+    },
+    "xfun": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "xfun",
+        "Version": "0.58",
+        "Depends": "R (>= 3.2.0)",
+        "Imports": "grDevices, stats, tools",
+        "Title": "Supporting Functions for Packages Maintained by 'Yihui Xie'",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "xml2": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "xml2",
+        "Version": "1.5.2",
+        "Depends": "R (>= 3.6.0)",
+        "Imports": "cli, methods, rlang (>= 1.1.0)",
+        "Title": "Parse XML",
+        "License": "MIT + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "xts": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "xts",
+        "Version": "0.14.2",
+        "Depends": "R (>= 3.6.0), zoo (>= 1.7-12)",
+        "Imports": "methods",
+        "LinkingTo": "zoo",
+        "Title": "eXtensible Time Series",
+        "License": "GPL (>= 2)",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "yaml": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "yaml",
+        "Version": "2.3.12",
+        "Title": "Methods to Convert R Data to YAML and Back",
+        "License": "BSD_3_clause + file LICENSE",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    },
+    "zoo": {
+      "Source": "CRAN",
+      "Repository": "https://packagemanager.posit.co/cran/latest",
+      "description": {
+        "Package": "zoo",
+        "Version": "1.8-15",
+        "Depends": "R (>= 3.1.0), stats",
+        "Imports": "utils, graphics, grDevices, lattice (>= 0.20-27)",
+        "Title": "S3 Infrastructure for Regular and Irregular Time Series (Z's Ordered Observations)",
+        "License": "GPL-2 | GPL-3",
+        "NeedsCompilation": "yes",
+        "Source": "CRAN"
+      }
+    }
   },
   "files": {
     "relatorio_ipca.qmd": { "checksum": "1b1952b07d0124c4fbcfda84532e5d11" },
@@ -93,9 +934,9 @@
     "relatorio_ipca_files/libs/quarto-html/popper.min.js": { "checksum": "3a4a291ccf3f1ea0f82b641542fd3827" },
     "relatorio_ipca_files/libs/quarto-html/quarto-syntax-highlighting-15634bcf2e68342d4ad2dfa704d543f6.css": { "checksum": "15634bcf2e68342d4ad2dfa704d543f6" },
     "relatorio_ipca_files/libs/quarto-html/quarto.js": { "checksum": "6f4245742deb3cc92337dbe2701ccfe1" },
+    "relatorio_ipca_files/libs/quarto-html/tabsets/tabsets.js": { "checksum": "e8d6a8862b33ccc461f8fd532e05b365" },
     "relatorio_ipca_files/libs/quarto-html/tippy.css": { "checksum": "ebd6f8ce46a677e1a4f5f8a8317109a9" },
-    "relatorio_ipca_files/libs/quarto-html/tippy.umd.min.js": { "checksum": "d828775275749701b48bd9d958814111" },
-    "relatorio_ipca_files/libs/quarto-html/tabsets/tabsets.js": { "checksum": "e8d6a8862b33ccc461f8fd532e05b365" }
+    "relatorio_ipca_files/libs/quarto-html/tippy.umd.min.js": { "checksum": "d828775275749701b48bd9d958814111" }
   },
   "users": null
 }
