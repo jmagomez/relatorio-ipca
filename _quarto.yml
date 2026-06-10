@@ -1,5 +1,7 @@
 project:
   type: default
+  render:
+    - relatorio_ipca.qmd
 
 format:
   html:
