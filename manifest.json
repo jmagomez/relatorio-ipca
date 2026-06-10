@@ -35,11 +35,7 @@
     "tidyselect": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "tidyselect", "Version": "1.2.1", "Source": "CRAN" } },
     "withr": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "withr", "Version": "3.0.2", "Source": "CRAN" } },
     "gtable": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "gtable", "Version": "0.3.6", "Source": "CRAN" } },
-    "isoband": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "isoband", "Version": "0.3.0", "Source": "CRAN" } },
-    "MASS": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "MASS", "Version": "7.3.65", "Source": "CRAN" } },
-    "mgcv": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "mgcv", "Version": "1.9.4", "Source": "CRAN" } },
-    "nlme": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "nlme", "Version": "3.1.169", "Source": "CRAN" } },
-    "Matrix": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "Matrix", "Version": "1.7.5", "Source": "CRAN" } }
+    "isoband": { "Source": "CRAN", "Repository": "https://packagemanager.posit.co/cran/latest", "description": { "Package": "isoband", "Version": "0.3.0", "Source": "CRAN" } }
   },
   "files": {
     "relatorio_ipca.qmd": { "checksum": "1b1952b07d0124c4fbcfda84532e5d11" },
