@@ -1,0 +1,64 @@
+name: Boletim Macro Semanal
+
+on:
+  schedule:
+    - cron: "0 10 * * 1"   # toda segunda 07h BRT (UTC-3)
+  workflow_dispatch:
+    inputs:
+      data_ref:
+        description: "Data de referência (YYYY-MM-DD, vazio = hoje)"
+        default: ""
+
+permissions:
+  contents: write
+
+jobs:
+  gerar-boletim:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          # token com escrita necessário para o git push funcionar
+          token: ${{ secrets.GITHUB_TOKEN }}
+
+      - name: Configura identidade git
+        run: |
+          git config user.name  "github-actions[bot]"
+          git config user.email "github-actions[bot]@users.noreply.github.com"
+
+      - uses: r-lib/actions/setup-r@v2
+        with:
+          r-version: "release"
+
+      # setup-r-dependencies requer DESCRIPTION ou renv.lock;
+      # instalação direta é mais simples para este projeto
+      - name: Instala pacotes R
+        run: |
+          Rscript -e "install.packages(
+            c('rbcb', 'knitr', 'rmarkdown', 'kableExtra'),
+            repos = 'https://cloud.r-project.org'
+          )"
+
+      - uses: quarto-dev/quarto-actions/setup@v2
+
+      - name: Instala Claude Code
+        run: npm install -g @anthropic-ai/claude-code
+
+      - name: Gera boletim
+        env:
+          ANTHROPIC_API_KEY: ${{ secrets.ANTHROPIC_API_KEY }}
+        run: |
+          claude -p "/gerar-boletim ${{ inputs.data_ref }}" \
+            --dangerously-skip-permissions
+
+      # O publicador já faz git add + git commit;
+      # aqui apenas publicamos o que ele deixou pronto
+      - name: Push
+        run: git push
+
+      - uses: actions/upload-artifact@v4
+        if: always()   # salva logs mesmo se o job falhar
+        with:
+          name: logs-${{ github.run_id }}
+          path: logs/
