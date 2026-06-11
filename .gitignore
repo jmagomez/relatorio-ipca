@@ -10,3 +10,15 @@
 
 # ── Artefatos gerados ─────────────────────────────────────────────────────────
 output/
+
+# ── IDE e ambiente local ───────────────────────────────────────────────────────
+.vscode/
+
+# ── Logs dinâmicos (mudam a cada execução) ────────────────────────────────────
+logs/execucao.jsonl
+logs/erros.md
+
+# ── Scripts de exploração / debug ─────────────────────────────────────────────
+download_series.R
+inspect_series.R
+verificar_csvs.R

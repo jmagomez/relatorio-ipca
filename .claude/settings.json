@@ -1,0 +1,20 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(Rscript:*)", "Bash(quarto:*)",
+      "Bash(git add:*)", "Bash(git commit:*)",
+      "Read(**)", "Write(**)", "Edit(**)"
+    ],
+    "ask":  ["Bash(git push:*)", "Bash(gh:*)"],
+    "deny": ["Bash(rm:*)", "Bash(sudo:*)", "Bash(curl:*)"]
+  },
+  "hooks": {
+    "PostToolUse": [{
+      "matcher": "Task",
+      "hooks": [{
+        "type": "command",
+        "command": "python -c \"import sys,json,datetime; d=json.load(sys.stdin); open('logs/execucao.jsonl','a').write(json.dumps({'ts':datetime.datetime.utcnow().isoformat()+'Z','agent':d.get('tool_input',{}).get('subagent_type','?'),'status':'error' if d.get('tool_response',{}).get('isError') else 'ok'})+chr(10))\""
+      }]
+    }]
+  }
+}

@@ -1,18 +1,17 @@
-# CLAUDE.md — Relatório Mensal do IPCA
+# Boletim Macro Semanal
 
-## Objetivo
-Relatório Quarto com análise do IPCA, atualizado mensalmente,
-publicado via Posit Connect Cloud.
+## Fontes (todas via rbcb::get_series)
+- IPCA mensal: SGS 433
+- Câmbio R$/US$: SGS 1
+- Selic meta: SGS 432
+- IBC-Br original: SGS 24363
+- IBC-Br com ajuste sazonal: SGS 24364
 
-## Fontes
-- Série 433 (rbcb) — IPCA mensal
-- Série 13521 (rbcb) — Meta de inflação
-- Tabela 7060 (sidrar) — IPCA por grupos
+## Convenção IBC-Br
+- var_mes da série SA (24364)
+- var_ano e var_12m da série original (24363)
 
-## Estrutura
-- R/coleta.R, R/tratamento.R, R/graficos.R
-- relatorio_ipca.qmd
-
-## Convenções
-- snake_case, pt-BR
-- Cor #282f6b, meta verde tracejada
+## Regras
+- Falha por série, não global
+- NA → "indicador indisponível nesta semana"
+- Publicador só roda com revisao.md = "ok"
