@@ -79,6 +79,21 @@ jobs:
           path: |
             logs/
 
+      - name: Envia boletim por e-mail
+        if: success()   # só envia se o boletim foi gerado
+        uses: dawidd6/action-send-mail@v6
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Boletim Macro <${{ secrets.MAIL_USERNAME }}>
+          to: jmagomez@gmail.com
+          subject: "📊 Boletim Macro Semanal — ${{ inputs.data_ref || 'edição da semana' }}"
+          html_body: file://boletim.html
+          attachments: boletim.html
+          
       - name: Envia report por e-mail
         if: always()   # envia tanto em sucesso quanto em falha
         uses: dawidd6/action-send-mail@v6
