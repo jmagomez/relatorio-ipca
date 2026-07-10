@@ -78,8 +78,23 @@ jobs:
           fi
 
       - uses: actions/upload-artifact@v4
-        if: always()   # salva logs mesmo se o job falhar
+      
+      - name: Envia report por e-mail
+        if: always()   # envia tanto em sucesso quanto em falha
+        uses: dawidd6/action-send-mail@v6
         with:
-          name: logs-${{ github.run_id }}
-          path: |
-            logs/
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Boletim Macro <${{ secrets.MAIL_USERNAME }}>
+          to: jmagomez@gmail.com
+          subject: "Boletim Macro Semanal — ${{ job.status }} (run ${{ github.run_number }})"
+          body: |
+            Execução do workflow Boletim Macro Semanal.
+
+            Status: ${{ job.status }}
+            Data/ref: ${{ inputs.data_ref || 'automática (hoje)' }}
+            Disparo: ${{ github.event_name }}
+            Log completo: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
