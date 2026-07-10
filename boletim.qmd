@@ -1,5 +1,5 @@
 ---
-title: "Boletim Macro Semanal — 9 de julho de 2026"
+title: "Boletim Macro Semanal — 8 de julho de 2026"
 format:
   html:
     theme: cosmo
@@ -35,20 +35,20 @@ ipca_var_ano <- 3.20    # % acumulado no ano
 ipca_var_12m <- 4.72    # % acumulado em 12 meses
 
 # ------------------------------------------------------------------
-# Câmbio R$/US$ — SGS 1  |  coleta desta semana falhou
+# Câmbio R$/US$ — SGS 1  |  referência: 08/07/2026
 # ------------------------------------------------------------------
-cambio_nivel   <- NA   # R$
-cambio_var_mes <- NA   # %
-cambio_var_ano <- NA   # %
-cambio_var_12m <- NA   # %
+cambio_nivel   <- 5.16    # R$
+cambio_var_mes <- -0.77   # %
+cambio_var_ano <- -5.19   # %
+cambio_var_12m <- -5.53   # %
 
 # ------------------------------------------------------------------
-# Selic meta — SGS 432  |  coleta desta semana falhou
+# Selic meta — SGS 432  |  referência: 08/07/2026
 # ------------------------------------------------------------------
-selic_nivel   <- NA   # p.p. a.a.
-selic_var_mes <- NA
-selic_var_ano <- NA
-selic_var_12m <- NA
+selic_nivel   <- 14.25   # p.p. a.a.
+selic_var_mes <-  0.00   # p.p.
+selic_var_ano <- -0.75   # p.p.
+selic_var_12m <- -0.75   # p.p.
 
 # ------------------------------------------------------------------
 # IBC-Br
@@ -58,8 +58,8 @@ selic_var_12m <- NA
 # ------------------------------------------------------------------
 ibcbr_nivel   <- 113.73  # índice — SGS 24363
 ibcbr_var_mes <-   0.51  # % — SGS 24364 (série SA)
-ibcbr_var_ano <-   1.31  # % — SGS 24363 (série original)
-ibcbr_var_12m <-   1.63  # % — SGS 24363 (série original)
+ibcbr_var_ano <-   6.01  # % — SGS 24363 (série original)
+ibcbr_var_12m <-   0.92  # % — SGS 24363 (série original)
 ```
 
 ## Quadro-resumo
@@ -83,13 +83,13 @@ quadro <- data.frame(
   `Var. mês` = c(
     paste0(fmt(ipca_var_mes), "%"),
     ifelse(is.na(cambio_var_mes), fmt(cambio_var_mes), paste0(fmt(cambio_var_mes), "%")),
-    ifelse(is.na(selic_var_mes), fmt(selic_var_mes), paste0(fmt(selic_var_mes), "%")),
+    ifelse(is.na(selic_var_mes), fmt(selic_var_mes), paste0(fmt(selic_var_mes), " p.p.")),
     paste0(fmt(ibcbr_var_mes), "% (SGS 24364 SA)")
   ),
   `Var. 12 meses` = c(
     paste0(fmt(ipca_var_12m), "%"),
     ifelse(is.na(cambio_var_12m), fmt(cambio_var_12m), paste0(fmt(cambio_var_12m), "%")),
-    ifelse(is.na(selic_var_12m), fmt(selic_var_12m), paste0(fmt(selic_var_12m), "%")),
+    ifelse(is.na(selic_var_12m), fmt(selic_var_12m), paste0(fmt(selic_var_12m), " p.p.")),
     paste0(fmt(ibcbr_var_12m), "% (SGS 24363)")
   ),
   check.names = FALSE
@@ -114,17 +114,19 @@ totaliza `r fmt(ipca_var_ano)`%. O acumulado em doze meses alcançou
 
 ### Taxa de Câmbio
 
-A coleta da taxa de câmbio R$/US$ (SGS&nbsp;1) não foi concluída com sucesso
-nesta semana. Nível atual: `r fmt(cambio_nivel)`. Variação no mês:
-`r fmt(cambio_var_mes)`. Variação no ano: `r fmt(cambio_var_ano)`. Variação em
-doze meses: `r fmt(cambio_var_12m)`.
+A taxa de câmbio R$/US$ (SGS&nbsp;1) encerrou o pregão de 8 de julho de 2026
+cotada em R$ `r fmt(cambio_nivel)`. No mês, a moeda norte-americana recuou
+`r fmt(abs(cambio_var_mes))`% frente ao real. No acumulado do ano, a variação é de
+`r fmt(cambio_var_ano)`%, e no acumulado em doze meses a queda chega a
+`r fmt(abs(cambio_var_12m))`%.
 
 ### Taxa Selic
 
-A coleta da taxa Selic meta (SGS&nbsp;432) não foi concluída com sucesso nesta
-semana. Nível atual: `r fmt(selic_nivel)`. Variação no mês:
-`r fmt(selic_var_mes)`. Variação no ano: `r fmt(selic_var_ano)`. Variação em
-doze meses: `r fmt(selic_var_12m)`.
+A taxa Selic meta (SGS&nbsp;432), definida pelo Comitê de Política Monetária
+(Copom), está em `r fmt(selic_nivel)` p.p. a.a. em 8 de julho de 2026. No mês,
+a variação foi de `r fmt(selic_var_mes)` p.p. No acumulado do ano, a taxa
+recuou `r fmt(abs(selic_var_ano))` p.p., e no acumulado em doze meses a redução
+totaliza `r fmt(abs(selic_var_12m))` p.p.
 
 ---
 
@@ -143,9 +145,8 @@ original (SGS&nbsp;24363) é de `r fmt(ibcbr_var_ano)`%.
 
 ---
 
-*Boletim elaborado com base nos dados disponíveis em 9 de julho de 2026.
+*Boletim elaborado com base nos dados disponíveis em 8 de julho de 2026.
 Fontes primárias: Banco Central do Brasil — Sistema Gerenciador de Séries
 Temporais (SGS). Séries utilizadas: IPCA mensal (SGS&nbsp;433), câmbio R$/US$
 (SGS&nbsp;1), Selic meta (SGS&nbsp;432), IBC-Br original (SGS&nbsp;24363) e
-IBC-Br com ajuste sazonal (SGS&nbsp;24364). Câmbio e Selic meta não puderam
-ser atualizados nesta semana devido a falha pontual na coleta dessas séries.*
+IBC-Br com ajuste sazonal (SGS&nbsp;24364).*
