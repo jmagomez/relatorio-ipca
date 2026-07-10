@@ -43,23 +43,14 @@ jobs:
           r-version: "release"
           use-public-rspm: true   # instala pacotes como binários (rápido, sem compilar)
 
-      # Instala TODOS os pacotes usados pela camada R/ do projeto.
-      # A versão anterior instalava apenas rbcb/knitr/rmarkdown/kableExtra,
-      # faltando sidrar, dplyr, tidyr, lubridate, slider, ggplot2 e scales.
-     - name: Instala pacotes R
+      # Instala todos os pacotes usados pela camada R/ do projeto, via
+      # binários do RSPM, e falha imediatamente se algum não instalar.
+      - name: Instala pacotes R
         run: |
-          Rscript -e "
-            pkgs <- c('rbcb', 'sidrar', 'dplyr', 'tidyr', 'lubridate', 'slider',
-                      'ggplot2', 'scales', 'knitr', 'rmarkdown', 'kableExtra')
-            install.packages(pkgs)
-            faltando <- setdiff(pkgs, rownames(installed.packages()))
-            if (length(faltando) > 0) {
-              stop('Pacotes NAO instalados: ', paste(faltando, collapse = ', '))
-            }
-          "
+          Rscript -e "pkgs <- c('rbcb','sidrar','dplyr','tidyr','lubridate','slider','ggplot2','scales','knitr','rmarkdown','kableExtra'); install.packages(pkgs); faltando <- setdiff(pkgs, rownames(installed.packages())); if (length(faltando) > 0) stop('Pacotes NAO instalados: ', paste(faltando, collapse=', '))"
 
       - uses: quarto-dev/quarto-actions/setup@v2
-      
+
       - name: Instala Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
@@ -87,7 +78,7 @@ jobs:
           name: logs-${{ github.run_id }}
           path: |
             logs/
-      
+
       - name: Envia report por e-mail
         if: always()   # envia tanto em sucesso quanto em falha
         uses: dawidd6/action-send-mail@v6
