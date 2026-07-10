@@ -78,6 +78,11 @@ jobs:
           fi
 
       - uses: actions/upload-artifact@v4
+        if: always()   # salva logs mesmo se o job falhar
+        with:
+          name: logs-${{ github.run_id }}
+          path: |
+            logs/
       
       - name: Envia report por e-mail
         if: always()   # envia tanto em sucesso quanto em falha
