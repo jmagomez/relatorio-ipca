@@ -1,5 +1,6 @@
 ---
-title: "Boletim Macro Semanal — 8 de julho de 2026"
+title: "Boletim Macro Semanal"
+subtitle: "Data de referência: 2026-07-08"
 format:
   html:
     theme: cosmo
@@ -13,84 +14,80 @@ lang: pt
 ```{r setup, include=FALSE}
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
-# Retorna mensagem-padrão quando o valor é NA ou NULL
-# Números válidos são sempre exibidos com 2 casas decimais
-fmt <- function(x) {
+# Data de referência deste boletim
+data_ref_boletim <- "2026-07-08"
+
+# Retorna mensagem-padrão quando o valor é NA ou NULL.
+# Nunca deve ser impresso "NA" no HTML: todo número exibido no texto ou
+# na tabela passa por fmt() antes de ser mostrado.
+fmt <- function(x, digits = 2, prefix = "", suffix = "") {
   if (is.null(x) || length(x) != 1 || is.na(x)) {
     return("indicador indisponível nesta semana")
   }
-  if (is.numeric(x)) {
-    return(sprintf("%.2f", x))
-  }
-  x
+  valor <- formatC(x, format = "f", digits = digits, decimal.mark = ",", big.mark = ".")
+  paste0(prefix, valor, suffix)
 }
 
-# ------------------------------------------------------------------
-# IPCA — SGS 433  |  referência: maio/2026
-# SGS 433 publica a variação mensal como valor da série (não há nível)
-# ------------------------------------------------------------------
-ipca_valor   <- 0.58    # % — variação mensal publicada pela série
-ipca_var_mes <- 0.58    # %
-ipca_var_ano <- 3.20    # % acumulado no ano
-ipca_var_12m <- 4.72    # % acumulado em 12 meses
+# Formata datas de referência no padrão mm/aaaa, sem depender de locale.
+fmt_data <- function(x) {
+  if (is.null(x) || length(x) != 1 || is.na(x)) {
+    return("indicador indisponível nesta semana")
+  }
+  format(as.Date(x), "%m/%Y")
+}
 
-# ------------------------------------------------------------------
-# Câmbio R$/US$ — SGS 1  |  referência: 08/07/2026
-# ------------------------------------------------------------------
-cambio_nivel   <- 5.16    # R$
-cambio_var_mes <- -0.77   # %
-cambio_var_ano <- -5.19   # %
-cambio_var_12m <- -5.53   # %
+dados <- read.csv("output/dados/resumo.csv", stringsAsFactors = FALSE)
 
-# ------------------------------------------------------------------
-# Selic meta — SGS 432  |  referência: 08/07/2026
-# ------------------------------------------------------------------
-selic_nivel   <- 14.25   # p.p. a.a.
-selic_var_mes <-  0.00   # p.p.
-selic_var_ano <- -0.75   # p.p.
-selic_var_12m <- -0.75   # p.p.
+# Extrai a linha de um indicador; devolve NAs se o indicador não constar
+# no arquivo, para que o restante do boletim degrade sem erro.
+extrai <- function(nome) {
+  linha <- dados[dados$indicador == nome, ]
+  if (nrow(linha) == 0) {
+    return(list(
+      valor_atual = NA_real_, data_ref = NA_character_,
+      var_mes = NA_real_, var_ano = NA_real_, var_12m = NA_real_
+    ))
+  }
+  as.list(linha[1, ])
+}
 
-# ------------------------------------------------------------------
-# IBC-Br
-#   Nível (índice)  : série original        — SGS 24363 | abr/2026
-#   var_mes         : série com aj. sazonal — SGS 24364 | abr/2026
-#   var_ano, var_12m: série original        — SGS 24363 | abr/2026
-# ------------------------------------------------------------------
-ibcbr_nivel   <- 113.73  # índice — SGS 24363
-ibcbr_var_mes <-   0.51  # % — SGS 24364 (série SA)
-ibcbr_var_ano <-   6.01  # % — SGS 24363 (série original)
-ibcbr_var_12m <-   0.92  # % — SGS 24363 (série original)
+ipca   <- extrai("IPCA")
+cambio <- extrai("Cambio R$/US$")
+selic  <- extrai("Selic meta")
+ibc    <- extrai("IBC-Br")
 ```
 
-## Quadro-resumo
+## Quadro
+
+Quadro-resumo dos indicadores acompanhados nesta semana. Data de referência do boletim: `r data_ref_boletim`.
 
 ```{r quadro-resumo}
 library(knitr)
 
 quadro <- data.frame(
   Indicador = c(
-    "IPCA (mai/2026)",
+    paste0("IPCA (", fmt_data(ipca$data_ref), ")"),
     "Câmbio R$/US$",
     "Selic meta",
-    "IBC-Br (abr/2026)"
+    paste0("IBC-Br (", fmt_data(ibc$data_ref), ")")
   ),
   `Último valor` = c(
-    paste0(fmt(ipca_valor), "%"),
-    ifelse(is.na(cambio_nivel), fmt(cambio_nivel), paste0("R$ ", fmt(cambio_nivel))),
-    ifelse(is.na(selic_nivel), fmt(selic_nivel), paste0(fmt(selic_nivel), " p.p. a.a.")),
-    paste0(fmt(ibcbr_nivel), " (índice)")
+    fmt(ipca$valor_atual, suffix = "%"),
+    fmt(cambio$valor_atual, prefix = "R$ "),
+    fmt(selic$valor_atual, suffix = " p.p. a.a."),
+    fmt(ibc$valor_atual, suffix = " (índice)")
   ),
   `Var. mês` = c(
-    paste0(fmt(ipca_var_mes), "%"),
-    ifelse(is.na(cambio_var_mes), fmt(cambio_var_mes), paste0(fmt(cambio_var_mes), "%")),
-    ifelse(is.na(selic_var_mes), fmt(selic_var_mes), paste0(fmt(selic_var_mes), " p.p.")),
-    paste0(fmt(ibcbr_var_mes), "% (SGS 24364 SA)")
+    fmt(ipca$var_mes, suffix = "%"),
+    fmt(cambio$var_mes, suffix = "%"),
+    fmt(selic$var_mes, suffix = " p.p."),
+    fmt(ibc$var_mes, suffix = "% (SA, SGS 24364)")
   ),
   `Var. 12 meses` = c(
-    paste0(fmt(ipca_var_12m), "%"),
-    ifelse(is.na(cambio_var_12m), fmt(cambio_var_12m), paste0(fmt(cambio_var_12m), "%")),
-    ifelse(is.na(selic_var_12m), fmt(selic_var_12m), paste0(fmt(selic_var_12m), " p.p.")),
-    paste0(fmt(ibcbr_var_12m), "% (SGS 24363)")
+    fmt(ipca$var_12m, suffix = "%"),
+    fmt(cambio$var_12m, suffix = "%"),
+    fmt(selic$var_12m, suffix = " p.p."),
+    fmt(ibc$var_12m, suffix = "% (original, SGS 24363)")
   ),
   check.names = FALSE
 )
@@ -104,49 +101,52 @@ kable(quadro, align = c("l", "r", "r", "r"))
 
 O Índice Nacional de Preços ao Consumidor Amplo (IPCA), apurado pelo IBGE e
 divulgado pelo Banco Central via SGS&nbsp;433, registrou variação de
-`r fmt(ipca_var_mes)`% em maio de 2026. No acumulado do ano corrente, o índice
-totaliza `r fmt(ipca_var_ano)`%. O acumulado em doze meses alcançou
-`r fmt(ipca_var_12m)`%.
+`r fmt(ipca$var_mes, suffix = "%")` em `r fmt_data(ipca$data_ref)`. No
+acumulado do ano corrente, o índice totaliza `r fmt(ipca$var_ano, suffix = "%")`.
+No acumulado em doze meses, a variação alcança `r fmt(ipca$var_12m, suffix = "%")`.
 
 ---
 
-## Câmbio e Juros
+## Câmbio e juros
 
-### Taxa de Câmbio
+### Taxa de câmbio
 
-A taxa de câmbio R$/US$ (SGS&nbsp;1) encerrou o pregão de 8 de julho de 2026
-cotada em R$ `r fmt(cambio_nivel)`. No mês, a moeda norte-americana recuou
-`r fmt(abs(cambio_var_mes))`% frente ao real. No acumulado do ano, a variação é de
-`r fmt(cambio_var_ano)`%, e no acumulado em doze meses a queda chega a
-`r fmt(abs(cambio_var_12m))`%.
+A taxa de câmbio R$/US$ (SGS&nbsp;1) está cotada em
+`r fmt(cambio$valor_atual, prefix = "R$ ")` na referência de
+`r fmt_data(cambio$data_ref)`. No mês, a variação é de
+`r fmt(cambio$var_mes, suffix = "%")`. No acumulado do ano, a variação é de
+`r fmt(cambio$var_ano, suffix = "%")`, e no acumulado em doze meses a
+variação é de `r fmt(cambio$var_12m, suffix = "%")`.
 
 ### Taxa Selic
 
-A taxa Selic meta (SGS&nbsp;432), definida pelo Comitê de Política Monetária
-(Copom), está em `r fmt(selic_nivel)` p.p. a.a. em 8 de julho de 2026. No mês,
-a variação foi de `r fmt(selic_var_mes)` p.p. No acumulado do ano, a taxa
-recuou `r fmt(abs(selic_var_ano))` p.p., e no acumulado em doze meses a redução
-totaliza `r fmt(abs(selic_var_12m))` p.p.
+A meta da taxa Selic (SGS&nbsp;432), definida pelo Comitê de Política
+Monetária (Copom), está em `r fmt(selic$valor_atual, suffix = " p.p. a.a.")`
+na referência de `r fmt_data(selic$data_ref)`. No mês, a variação foi de
+`r fmt(selic$var_mes, suffix = " p.p.")`. No acumulado do ano, a variação é de
+`r fmt(selic$var_ano, suffix = " p.p.")`, e no acumulado em doze meses a
+variação é de `r fmt(selic$var_12m, suffix = " p.p.")`.
 
 ---
 
-## Atividade Econômica
+## Atividade
 
-O Índice de Atividade Econômica do Banco Central (IBC-Br) atingiu o valor de
-`r fmt(ibcbr_nivel)` em abril de 2026, conforme a série original
-(SGS&nbsp;24363).
+O Índice de Atividade Econômica do Banco Central (IBC-Br) tem nível de
+`r fmt(ibc$valor_atual, suffix = " pontos")` na referência de
+`r fmt_data(ibc$data_ref)`.
 
-Na comparação mensal com ajuste sazonal, a série dessazonalizada (SGS&nbsp;24364)
-registrou variação de `r fmt(ibcbr_var_mes)`% em relação ao mês anterior.
+Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central,
+SGS&nbsp;24364) apresenta variação de `r fmt(ibc$var_mes, suffix = "%")`.
 
-No horizonte de doze meses, a série original (SGS&nbsp;24363) aponta variação
-acumulada de `r fmt(ibcbr_var_12m)`%. O acumulado no ano pela mesma série
-original (SGS&nbsp;24363) é de `r fmt(ibcbr_var_ano)`%.
+No horizonte de doze meses, a série original (fonte: Banco Central,
+SGS&nbsp;24363) apresenta variação de `r fmt(ibc$var_12m, suffix = "%")`. No
+acumulado do ano, a mesma série original (SGS&nbsp;24363) mostra variação de
+`r fmt(ibc$var_ano, suffix = "%")`.
 
 ---
 
-*Boletim elaborado com base nos dados disponíveis em 8 de julho de 2026.
+*Boletim elaborado com base nos dados disponíveis em `r data_ref_boletim`.
 Fontes primárias: Banco Central do Brasil — Sistema Gerenciador de Séries
-Temporais (SGS). Séries utilizadas: IPCA mensal (SGS&nbsp;433), câmbio R$/US$
-(SGS&nbsp;1), Selic meta (SGS&nbsp;432), IBC-Br original (SGS&nbsp;24363) e
-IBC-Br com ajuste sazonal (SGS&nbsp;24364).*
+Temporais (SGS), via `rbcb::get_series`. Séries utilizadas: IPCA mensal
+(SGS&nbsp;433), câmbio R$/US$ (SGS&nbsp;1), Selic meta (SGS&nbsp;432), IBC-Br
+original (SGS&nbsp;24363) e IBC-Br com ajuste sazonal (SGS&nbsp;24364).*
