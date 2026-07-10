@@ -51,7 +51,7 @@ jobs:
           Rscript -e "
             pkgs <- c('rbcb', 'sidrar', 'dplyr', 'tidyr', 'lubridate', 'slider',
                       'ggplot2', 'scales', 'knitr', 'rmarkdown', 'kableExtra')
-            install.packages(pkgs)   # sem repos: usa o RSPM binario do setup-r
+            install.packages(pkgs)
             faltando <- setdiff(pkgs, rownames(installed.packages()))
             if (length(faltando) > 0) {
               stop('Pacotes NAO instalados: ', paste(faltando, collapse = ', '))
@@ -59,7 +59,7 @@ jobs:
           "
 
       - uses: quarto-dev/quarto-actions/setup@v2
-
+      
       - name: Instala Claude Code
         run: npm install -g @anthropic-ai/claude-code
 
