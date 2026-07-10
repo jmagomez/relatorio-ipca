@@ -46,13 +46,17 @@ jobs:
       # Instala TODOS os pacotes usados pela camada R/ do projeto.
       # A versão anterior instalava apenas rbcb/knitr/rmarkdown/kableExtra,
       # faltando sidrar, dplyr, tidyr, lubridate, slider, ggplot2 e scales.
-      - name: Instala pacotes R
+     - name: Instala pacotes R
         run: |
-          Rscript -e "install.packages(
-            c('rbcb', 'sidrar', 'dplyr', 'tidyr', 'lubridate', 'slider',
-              'ggplot2', 'scales', 'knitr', 'rmarkdown', 'kableExtra'),
-            repos = 'https://cloud.r-project.org'
-          )"
+          Rscript -e "
+            pkgs <- c('rbcb', 'sidrar', 'dplyr', 'tidyr', 'lubridate', 'slider',
+                      'ggplot2', 'scales', 'knitr', 'rmarkdown', 'kableExtra')
+            install.packages(pkgs)   # sem repos: usa o RSPM binario do setup-r
+            faltando <- setdiff(pkgs, rownames(installed.packages()))
+            if (length(faltando) > 0) {
+              stop('Pacotes NAO instalados: ', paste(faltando, collapse = ', '))
+            }
+          "
 
       - uses: quarto-dev/quarto-actions/setup@v2
 
