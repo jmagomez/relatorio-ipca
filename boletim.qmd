@@ -132,7 +132,7 @@ variação é de `r fmt(selic$var_12m, suffix = " p.p.")`.
 ## Atividade
 
 O Índice de Atividade Econômica do Banco Central (IBC-Br) tem nível de
-`r fmt(ibc$valor_atual, suffix = " pontos")` na referência de
+`r fmt(ibc$valor_atual, suffix = " (índice)")` na referência de
 `r fmt_data(ibc$data_ref)`.
 
 Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central,

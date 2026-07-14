@@ -1,23 +1,47 @@
-{"ts": "2026-07-09T01:09:07.681247Z", "agent": "pesquisador-dados", "status": "ok"}
-{"ts": "2026-07-09T01:13:32.108438Z", "agent": "analista", "status": "ok"}
-{"ts": "2026-07-09T01:16:17.569429Z", "agent": "redator", "status": "ok"}
-{"ts": "2026-07-09T01:17:01.551185Z", "agent": "revisor", "status": "ok"}
-{"ts": "2026-07-09T01:20:47.510677Z", "agent": "redator", "status": "ok"}
-{"ts": "2026-07-09T01:21:27.892182Z", "agent": "revisor", "status": "ok"}
-{"ts": "2026-07-09T01:22:18.530490Z", "agent": "publicador", "status": "ok"}
-{"ts": "2026-07-10T01:12:07.373Z", "agent": "pesquisador-dados", "status": "ok"}
-{"ts": "2026-07-10T01:12:42.656896Z", "agent": "pesquisador-dados", "status": "ok"}
-{"ts": "2026-07-10T01:15:55Z", "agent": "analista", "status": "ok"}
-{"ts": "2026-07-10T01:16:08.562040Z", "agent": "analista", "status": "ok"}
-{"ts": "2026-07-10T01:20:00.000000Z", "agent": "redator", "status": "ok"}
-{"ts": "2026-07-10T01:17:32.024928Z", "agent": "redator", "status": "ok"}
-{"ts": "2026-07-10T01:25:00.000000Z", "agent": "revisor", "status": "ok"}
-{"ts": "2026-07-10T01:19:28.554257Z", "agent": "revisor", "status": "ok"}
-{"ts": "2026-07-10T01:30:00.000000Z", "agent": "redator", "status": "ok"}
-{"ts": "2026-07-10T01:35:00.000000Z", "agent": "revisor", "status": "ok"}
-{"ts": "2026-07-10T01:21:34.918203Z", "agent": "publicador", "status": "ok"}
-{"ts": "2026-07-10T01:36:00.000000Z", "agent": "publicador", "status": "ok"}
-{"ts": "2026-07-10T17:03:48.140131Z", "agent": "pesquisador-dados", "status": "ok"}
-{"ts": "2026-07-10T17:06:34.406444Z", "agent": "analista", "status": "ok"}
-{"ts": "2026-07-10T17:07:18.859602Z", "agent": "redator", "status": "ok"}
-{"ts": "2026-07-10T17:08:18.837952Z", "agent": "revisor", "status": "ok"}
+{
+  "timestamp": ["2026-07-14T23:35:58Z"],
+  "reference_date": ["2026-07-13"],
+  "series": {
+    "ipca.csv": {
+      "status": ["success"],
+      "rows": [558],
+      "last_date": ["2026-06-01"],
+      "last_value": [0.16]
+    },
+    "cambio.csv": {
+      "status": ["success"],
+      "rows": [502],
+      "last_date": ["2026-07-13"],
+      "last_value": [5.1183]
+    },
+    "selic.csv": {
+      "status": ["success"],
+      "rows": [731],
+      "last_date": ["2026-07-13"],
+      "last_value": [14.25]
+    },
+    "ibcbr.csv": {
+      "status": ["success"],
+      "rows": [280],
+      "last_date": ["2026-04-01"],
+      "last_value": [113.7271]
+    },
+    "ibcbr_sa.csv": {
+      "status": ["success"],
+      "rows": [280],
+      "last_date": ["2026-04-01"],
+      "last_value": [111.1521]
+    }
+  }
+}
+{"ts": "2026-07-14T23:36:18.415130Z", "agent": "pesquisador-dados", "status": "ok"}
+{"ts": "2026-07-14T23:38:14.018Z", "agent": "resumo-indicadores", "status": "ok", "reference_date": "2026-07-13", "output": "output/dados/resumo.csv", "rows_written": 4, "indicadores": ["IPCA", "Cambio R$/US$", "Selic meta", "IBC-Br"], "metodologia": {"ipca": "produtorio (1+x/100) para var_ano e var_12m", "cambio": "variacao % entre niveis (asof: valor mais recente <= data alvo); var_ano vs 31/dez ano anterior", "selic": "diferenca em p.p. (valor_hoje - valor_ref)", "ibcbr": "var_mes de serie SA (24364); var_ano e var_12m de serie original (24363)"}, "na_count": 0}
+{"ts": "2026-07-14T23:38:28.031829Z", "agent": "analista", "status": "ok"}
+{"ts": "2026-07-14T23:45:00Z", "agent": "redator-boletim", "status": "ok", "reference_date": "2026-07-13", "input": "output/dados/resumo.csv", "output": "boletim.qmd", "na_count": 0, "checks": {"data_ref_no_titulo": true, "data_ref_no_subtitulo": true, "fmt_na_fallback": "indicador indisponível nesta semana", "ibcbr_convencao": "var_mes de SGS 24364 (SA); var_ano e var_12m de SGS 24363 (original)", "coerencia_valores": "conferida linha a linha contra resumo.csv"}, "acao": "boletim.qmd ja estava atualizado e consistente com resumo.csv; nenhuma alteracao de conteudo foi necessaria"}
+{"ts": "2026-07-14T23:39:12.306039Z", "agent": "redator", "status": "ok"}
+{"ts": "2026-07-14T23:52:00Z", "agent": "revisor-boletim", "status": "reprovado", "reference_date": "2026-07-13", "input": ["boletim.qmd", "output/dados/resumo.csv", "CLAUDE.MD"], "output": "logs/revisao.md", "checks": {"divergencia_numerica": false, "unidades_selic_pp": true, "ibcbr_duas_series_identificadas": true, "na_fallback": true, "coerencia_direcao": true, "tom_descritivo": true, "unidade_ibcbr_consistente": false}, "issues_found": 1, "detalhe": "Unidade do IBC-Br inconsistente: quadro-resumo usa \"(indice)\" e secao Atividade usa \"pontos\" para o mesmo valor (ibc$valor_atual)"}
+{"ts": "2026-07-14T23:41:04.672430Z", "agent": "revisor", "status": "ok"}
+{"ts": "2026-07-14T23:55:00Z", "agent": "corretor-boletim", "status": "ok", "reference_date": "2026-07-13", "input": "logs/revisao.md", "output": "boletim.qmd", "acao": "padronizacao de unidade do IBC-Br na secao Atividade", "detalhe": "trocado suffix = \" pontos\" por suffix = \" (indice)\" em fmt(ibc$valor_atual, ...) na secao Atividade, para ficar identico ao rotulo usado no Quadro-resumo", "escopo": "alteracao unica, sem mudanca de outros valores ou secoes", "coerencia_resumo_csv": "mantida, nenhum valor numerico foi alterado"}
+{"ts": "2026-07-14T23:41:33.984576Z", "agent": "redator", "status": "ok"}
+{"ts": "2026-07-14T23:59:00Z", "agent": "revisor-boletim", "status": "aprovado", "reference_date": "2026-07-13", "input": ["boletim.qmd", "output/dados/resumo.csv", "CLAUDE.MD"], "output": "logs/revisao.md", "checks": {"divergencia_numerica": false, "unidades_selic_pp": true, "ibcbr_duas_series_identificadas": true, "na_fallback": true, "coerencia_direcao": true, "tom_descritivo": true, "unidade_ibcbr_consistente": true}, "issues_found": 0, "detalhe": "Correcao da rodada anterior confirmada: unidade do IBC-Br agora e \" (indice)\" tanto no Quadro-resumo quanto na secao Atividade. Todos os valores numericos batem exatamente com resumo.csv; convencao IBC-Br (var_mes de SGS 24364 SA; var_ano e var_12m de SGS 24363 original) respeitada; data de referencia 2026-07-13 presente no titulo, subtitulo, texto e rodape; unidades corretas em todas as secoes; NA tratado corretamente pela funcao fmt()/fmt_data(); tom descritivo sem linguagem de previsao."}
+{"ts": "2026-07-14T23:42:48.156946Z", "agent": "revisor", "status": "ok"}
