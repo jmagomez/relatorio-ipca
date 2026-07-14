@@ -83,12 +83,13 @@ jobs:
           name: logs-${{ github.run_id }}
           path: |
             logs/
+
       - name: Insere link do Connect Cloud no corpo do e-mail
         if: success()
         run: |
           sed 's|</body>|<hr><p><a href="https://connect.posit.cloud/jmagomez/content/019f5da4-43ea-2bed-6bbd-90e3f7aaca72">📈 Abrir a versão interativa no Connect Cloud</a></p></body>|' \
             boletim.html > corpo-email.html
-            
+
       - name: Envia boletim por e-mail
         if: success()   # só envia se o boletim foi gerado
         uses: dawidd6/action-send-mail@v6
@@ -104,24 +105,6 @@ jobs:
           html_body: file://corpo-email.html
           attachments: boletim.html
 
-       - name: Notifica publicação no Connect Cloud
-        if: steps.push.outputs.publicado == 'true'
-        uses: dawidd6/action-send-mail@v6
-        with:
-          server_address: smtp.gmail.com
-          server_port: 465
-          secure: true
-          username: ${{ secrets.MAIL_USERNAME }}
-          password: ${{ secrets.MAIL_PASSWORD }}
-          from: Relatório IPCA <${{ secrets.MAIL_USERNAME }}>
-          to: jmagomez@gmail.com
-          subject: "Relatório IPCA atualizado — ${{ steps.push.outputs.commit_msg }}"
-          html_body: |
-            <p>O relatório IPCA foi atualizado e publicado no Connect Cloud.</p>
-            <p><a href="https://connect.posit.cloud/jmagomez/content/019f5da4-43ea-2bed-6bbd-90e3f7aaca72">Abrir relatório</a></p>
-            <p><small>Commit: ${{ steps.push.outputs.commit_msg }} (${{ steps.push.outputs.commit_sha }})</small></p>   
-
-         
       - name: Envia report por e-mail
         if: always()   # envia tanto em sucesso quanto em falha
         uses: dawidd6/action-send-mail@v6
