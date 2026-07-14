@@ -65,11 +65,16 @@ jobs:
       # Só faz push se houver commit novo, evitando erro quando a rotina
       # para antes de commitar (ex.: revisor não aprovou).
       - name: Push
+        id: push
         run: |
           if [ "$(git rev-parse HEAD)" != "$(git rev-parse origin/${GITHUB_REF_NAME} 2>/dev/null || echo none)" ]; then
             git push
+            echo "publicado=true" >> "$GITHUB_OUTPUT"
+            echo "commit_msg=$(git log -1 --pretty=%s)" >> "$GITHUB_OUTPUT"
+            echo "commit_sha=$(git rev-parse HEAD)" >> "$GITHUB_OUTPUT"
           else
             echo "Nenhum commit novo — push ignorado."
+            echo "publicado=false" >> "$GITHUB_OUTPUT"
           fi
 
       - uses: actions/upload-artifact@v4
@@ -93,7 +98,25 @@ jobs:
           subject: "📊 Boletim Macro Semanal — ${{ inputs.data_ref || 'edição da semana' }}"
           html_body: file://boletim.html
           attachments: boletim.html
-          
+
+       - name: Notifica publicação no Connect Cloud
+        if: steps.push.outputs.publicado == 'true'
+        uses: dawidd6/action-send-mail@v6
+        with:
+          server_address: smtp.gmail.com
+          server_port: 465
+          secure: true
+          username: ${{ secrets.MAIL_USERNAME }}
+          password: ${{ secrets.MAIL_PASSWORD }}
+          from: Relatório IPCA <${{ secrets.MAIL_USERNAME }}>
+          to: jmagomez@gmail.com
+          subject: "Relatório IPCA atualizado — ${{ steps.push.outputs.commit_msg }}"
+          html_body: |
+            <p>O relatório IPCA foi atualizado e publicado no Connect Cloud.</p>
+            <p><a href="https://connect.posit.cloud/jmagomez/content/019f5da4-43ea-2bed-6bbd-90e3f7aaca72">Abrir relatório</a></p>
+            <p><small>Commit: ${{ steps.push.outputs.commit_msg }} (${{ steps.push.outputs.commit_sha }})</small></p>   
+
+         
       - name: Envia report por e-mail
         if: always()   # envia tanto em sucesso quanto em falha
         uses: dawidd6/action-send-mail@v6
