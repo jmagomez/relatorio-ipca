@@ -83,15 +83,19 @@ jobs:
           name: logs-${{ github.run_id }}
           path: |
             logs/
+          if-no-files-found: ignore   # ausência de logs/ não gera erro nem warning
 
+      # Os dois passos abaixo só rodam quando um boletim NOVO foi publicado.
+      # Sem essa condição, uma execução em que o revisor não aprovou (push
+      # ignorado) enviaria por e-mail o boletim.html ANTIGO como se fosse novo.
       - name: Insere link do Connect Cloud no corpo do e-mail
-        if: success()
+        if: success() && steps.push.outputs.publicado == 'true'
         run: |
           sed 's|</body>|<hr><p><a href="https://connect.posit.cloud/jmagomez/content/019f5da4-43ea-2bed-6bbd-90e3f7aaca72">📈 Abrir a versão interativa no Connect Cloud</a></p></body>|' \
             boletim.html > corpo-email.html
 
       - name: Envia boletim por e-mail
-        if: success()   # só envia se o boletim foi gerado
+        if: success() && steps.push.outputs.publicado == 'true'
         uses: dawidd6/action-send-mail@v6
         with:
           server_address: smtp.gmail.com
@@ -122,5 +126,6 @@ jobs:
 
             Status: ${{ job.status }}
             Data/ref: ${{ inputs.data_ref || 'automática (hoje)' }}
+            Boletim novo publicado: ${{ steps.push.outputs.publicado || 'não chegou ao push' }}
             Disparo: ${{ github.event_name }}
             Log completo: ${{ github.server_url }}/${{ github.repository }}/actions/runs/${{ github.run_id }}
