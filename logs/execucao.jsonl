@@ -45,3 +45,7 @@
 {"ts": "2026-07-14T23:41:33.984576Z", "agent": "redator", "status": "ok"}
 {"ts": "2026-07-14T23:59:00Z", "agent": "revisor-boletim", "status": "aprovado", "reference_date": "2026-07-13", "input": ["boletim.qmd", "output/dados/resumo.csv", "CLAUDE.MD"], "output": "logs/revisao.md", "checks": {"divergencia_numerica": false, "unidades_selic_pp": true, "ibcbr_duas_series_identificadas": true, "na_fallback": true, "coerencia_direcao": true, "tom_descritivo": true, "unidade_ibcbr_consistente": true}, "issues_found": 0, "detalhe": "Correcao da rodada anterior confirmada: unidade do IBC-Br agora e \" (indice)\" tanto no Quadro-resumo quanto na secao Atividade. Todos os valores numericos batem exatamente com resumo.csv; convencao IBC-Br (var_mes de SGS 24364 SA; var_ano e var_12m de SGS 24363 original) respeitada; data de referencia 2026-07-13 presente no titulo, subtitulo, texto e rodape; unidades corretas em todas as secoes; NA tratado corretamente pela funcao fmt()/fmt_data(); tom descritivo sem linguagem de previsao."}
 {"ts": "2026-07-14T23:42:48.156946Z", "agent": "revisor", "status": "ok"}
+{"ts": "2026-07-20T12:16:34.762608Z", "agent": "pesquisador-dados", "status": "ok"}
+{"ts": "2026-07-20T12:19:37.121312Z", "agent": "analista", "status": "ok"}
+{"ts": "2026-07-20T12:20:09.808966Z", "agent": "redator", "status": "ok"}
+{"ts": "2026-07-20T12:22:12.993430Z", "agent": "revisor", "status": "ok"}
