@@ -13,6 +13,16 @@ output/
 
 # ── IDE e ambiente local ───────────────────────────────────────────────────────
 .vscode/
+.idea/
+
+# ── Sistema operacional ───────────────────────────────────────────────────────
+.DS_Store
+Thumbs.db
+
+# ── Python / segredos ─────────────────────────────────────────────────────────
+__pycache__/
+.env
+.env.*
 
 # ── Logs dinâmicos (mudam a cada execução) ────────────────────────────────────
 logs/execucao.jsonl
