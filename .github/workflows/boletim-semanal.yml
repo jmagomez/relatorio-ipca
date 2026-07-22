@@ -96,7 +96,7 @@ jobs:
 
       - name: Envia boletim por e-mail
         if: success() && steps.push.outputs.publicado == 'true'
-        uses: dawidd6/action-send-mail@v6
+        uses: dawidd6/action-send-mail@v18
         with:
           server_address: smtp.gmail.com
           server_port: 465
@@ -111,7 +111,7 @@ jobs:
 
       - name: Envia report por e-mail
         if: always()   # envia tanto em sucesso quanto em falha
-        uses: dawidd6/action-send-mail@v6
+        uses: dawidd6/action-send-mail@v18
         with:
           server_address: smtp.gmail.com
           server_port: 465
