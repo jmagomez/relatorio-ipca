@@ -77,7 +77,7 @@ jobs:
             echo "publicado=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()   # salva logs mesmo se o job falhar
         with:
           name: logs-${{ github.run_id }}
