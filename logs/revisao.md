@@ -1,53 +1,46 @@
 ok
 
-# Revisão do Boletim Macro Semanal — referência 2026-07-20
+# Revisão do Boletim Macro Semanal — referência 2026-07-27
 
-Documento revisado: `boletim.qmd`
-Fonte de dados conferida: `output/dados/resumo.csv`
-Regras conferidas: `CLAUDE.MD`
+## Itens verificados
 
-## Checklist
+1. **Números vs. resumo.csv**: todos os valores exibidos em `boletim.qmd` são
+   gerados dinamicamente via `extrai()`/`fmt()` a partir de
+   `output/dados/resumo.csv` (sem valores numéricos hardcoded no texto). Os
+   nomes de indicador usados no código (`IPCA`, `Cambio R$/US$`, `Selic meta`,
+   `IBC-Br`) e as colunas (`valor_atual`, `data_ref`, `var_mes`, `var_ano`,
+   `var_12m`) correspondem exatamente ao cabeçalho e ao conteúdo do CSV
+   (IPCA 0,16/0,16/3,36/4,64; Câmbio 5,07/-2,75/-7,92/-8,28; Selic
+   14,25/0,00/-0,75/-0,75; IBC-Br 109,53/0,07/2,20/0,80). Nenhuma divergência
+   encontrada.
 
-1. **Números batem com resumo.csv**
-   - IPCA: valor_atual 0,16 (06/2026), var_mes 0,16, var_ano 3,36, var_12m 4,64 — todos reproduzidos corretamente no quadro e no texto de "Inflação".
-   - Câmbio: valor_atual 5,12 (07/2026), var_mes 1,06, var_ano -6,99, var_12m -8,18 — todos reproduzidos corretamente no quadro e no texto de "Câmbio e juros".
-   - Selic meta: valor_atual 14,25 (07/2026), var_mes 0,00, var_ano -0,75, var_12m -0,75 — todos reproduzidos corretamente.
-   - IBC-Br: valor_atual 109,53 (05/2026), var_mes 0,07, var_ano 2,20, var_12m 0,80 — todos reproduzidos corretamente.
-   - Nenhuma divergência numérica encontrada.
+2. **Unidades**: Selic exibida consistentemente em "p.p." e "p.p. a.a."
+   (nunca em pontos-base/bps); câmbio com prefixo "R$ " no nível e "%" nas
+   variações; IPCA em "%". Compatível com a coluna `unidade` do CSV.
 
-2. **Unidades corretas**
-   - Selic expressa em "p.p." e "p.p. a.a." (não em pontos-base) — correto.
-   - Câmbio em "%" para variações e "R$" para o nível — correto.
-   - IPCA em "%" — correto.
-   - IBC-Br em nível ("índice") e variações em "%" — correto.
+3. **IBC-Br**: quadro-resumo e seção "Atividade" citam explicitamente as duas
+   séries com identificação de fonte — SA/SGS 24364 para `var_mes` e
+   original/SGS 24363 para `var_ano` e `var_12m` — de acordo com a convenção
+   do CLAUDE.MD.
 
-3. **IBC-Br com identificação das duas séries**
-   - var_mes atribuída à série com ajuste sazonal, SGS 24364, citada explicitamente no quadro ("(SA, SGS 24364)") e no corpo do texto ("a série com ajuste sazonal (fonte: Banco Central, SGS 24364)...").
-   - var_ano e var_12m atribuídas à série original, SGS 24363, citada explicitamente no quadro ("(original, SGS 24363)") e no texto ("a série original (fonte: Banco Central, SGS 24363)...").
-   - Atribuição consistente com a convenção definida em CLAUDE.MD (var_mes da SA; var_ano e var_12m da original).
+4. **Tratamento de NA**: a função `fmt()`/`fmt_data()` retorna
+   "indicador indisponível nesta semana" para `NA`/`NULL`, atendendo à regra
+   do CLAUDE.MD. (Nesta rodada o CSV não contém NA, mas o mecanismo está
+   correto e por indicador, não falha global.)
 
-4. **Tratamento de NA**
-   - As funções `fmt()`/`fmt_data()` retornam a string "indicador indisponível nesta semana" para valores NA/NULL, conforme a regra do CLAUDE.MD ("NA → 'indicador indisponível nesta semana'").
-   - Não há nenhum indicador com NA em `resumo.csv` nesta semana, portanto o caminho de fallback não é exercido no HTML atual, mas o código está corretamente implementado e cobre todos os pontos em que números são exibidos.
-   - Nenhum "NA" literal é impresso em nenhum ponto do documento.
+5. **Coerência de sinal**: o câmbio tem `var_mes` = -2,75% nesta semana. O
+   texto usa apenas linguagem neutra ("a variação é de X%"), sem palavras
+   como "alta", "subiu" ou "avançou" associadas a esse valor negativo (nem em
+   nenhum outro indicador). Nenhum trecho descreve valor negativo como alta.
 
-5. **Coerência (alta x valor negativo)**
-   - O texto não emprega adjetivos de direção (ex.: "alta", "queda", "avanço", "recuo"); todas as menções usam a formulação neutra "variação de X%/p.p.", inclusive para os valores negativos (câmbio -6,99%/-8,18%; Selic -0,75 p.p.).
-   - Não há contradição entre qualificação textual e sinal do valor.
+6. **Estilo**: segue as convenções do CLAUDE.MD (fontes via `rbcb::get_series`,
+   identificação de séries SGS, convenção IBC-Br, falha por série).
 
-6. **Estilo (vícios do CLAUDE.md)**
-   - Regra "falha por série, não global" respeitada: `extrai()` degrada para NA por indicador sem interromper o restante do boletim.
-   - Fontes SGS citadas com os números de série corretos (433, 1, 432, 24363, 24364), como no CLAUDE.MD.
-   - Não há hedging, meta-comentário ou frases de preenchimento (ex.: "é importante notar", "vale ressaltar"); a prosa é direta e técnica, com formatação numérica pt-BR consistente (vírgula decimal).
+7. **Tom**: descritivo em todo o documento, sem verbos ou expressões de
+   previsão/tendência futura.
 
-7. **Tom descritivo, sem previsão**
-   - Todas as frases descrevem valores já observados ("registrou", "está cotada em", "está em", "tem nível de", "apresenta variação de"), sem verbos ou construções prospectivas (ex.: "deve", "tende a", "espera-se", "projeta-se").
-   - Nenhuma projeção ou recomendação é feita.
+8. **Data de referência**: 2026-07-27 aparece corretamente no YAML
+   (`subtitle`), na variável `data_ref_boletim`, no corpo ("Quadro" e
+   rodapé). Não há resquícios de 2026-07-20 no arquivo.
 
-## Observação não bloqueante
-
-- O quadro-resumo (seção "Quadro") não inclui uma coluna "Var. ano"; esse dado aparece apenas no corpo do texto de cada seção. Isso não constitui erro nem divergência — é uma opção de layout —, mas fica registrado como sugestão de melhoria futura.
-
-## Veredito
-
-ok
+Nenhuma inconsistência encontrada.

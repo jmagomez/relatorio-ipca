@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-07-20"
+subtitle: "Data de referência: 2026-07-27"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-07-20"
+data_ref_boletim <- "2026-07-27"
 
 # Retorna mensagem-padrão quando o valor é NA ou NULL.
 # Nunca deve ser impresso "NA" no HTML: todo número exibido no texto ou
