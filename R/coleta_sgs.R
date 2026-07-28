@@ -5,7 +5,7 @@ library(rbcb)
 library(dplyr)
 
 # Configurações
-data_ref <- as.Date("2026-07-27")
+data_ref <- as.Date("2026-07-28")
 dir_dados <- "/home/runner/work/relatorio-ipca/relatorio-ipca/output/dados"
 dir_logs <- "/home/runner/work/relatorio-ipca/relatorio-ipca/logs"
 arquivo_erros <- file.path(dir_logs, "erros.md")

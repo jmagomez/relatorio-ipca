@@ -1,1 +1,0 @@
-# Erros (nenhum erro recente)

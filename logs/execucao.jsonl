@@ -57,3 +57,7 @@
 {"ts": "2026-07-28T01:13:19.037560Z", "agent": "redator", "status": "ok"}
 {"ts": "2026-07-28T01:20:00Z", "agent": "revisor", "status": "ok", "reference_date": "2026-07-27", "checks": {"divergencia_numerica": false, "unidades_selic_pp": true, "ibcbr_duas_series_identificadas": true, "na_fallback": true, "coerencia_direcao": true, "estilo_claude_md": true, "tom_descritivo_sem_previsao": true, "data_ref_consistente": true}, "issues_found": 0}
 {"ts": "2026-07-28T01:15:22.489697Z", "agent": "revisor", "status": "ok"}
+{"ts": "2026-07-28T01:52:38.484272Z", "agent": "pesquisador-dados", "status": "ok"}
+{"ts": "2026-07-28T01:56:32.754724Z", "agent": "analista", "status": "ok"}
+{"ts": "2026-07-28T01:57:37.669026Z", "agent": "redator", "status": "ok"}
+{"ts": "2026-07-28T02:01:31.965902Z", "agent": "revisor", "status": "ok"}
