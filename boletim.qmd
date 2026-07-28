@@ -17,6 +17,13 @@ knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 # Data de referência deste boletim
 data_ref_boletim <- "2026-07-27"
 
+# ATENÇÃO — cifrão em texto markdown:
+# o Pandoc trata o conteúdo entre dois "$" como fórmula matemática, então
+# "R$/US$" é renderizado como "R/US" (os cifrões somem). Todo cifrão que
+# for parar no HTML deve ser escapado como \$ — o que, dentro de uma string
+# de R, se escreve "\\$". Isso vale tanto para o texto corrido quanto para
+# valores gerados pelo fmt() e pelas células da tabela.
+
 # Retorna mensagem-padrão quando o valor é NA ou NULL.
 # Nunca deve ser impresso "NA" no HTML: todo número exibido no texto ou
 # na tabela passa por fmt() antes de ser mostrado.
@@ -52,6 +59,8 @@ extrai <- function(nome) {
 }
 
 ipca   <- extrai("IPCA")
+# O nome abaixo casa com a coluna "indicador" do resumo.csv — é chave de
+# busca, não texto markdown, e por isso NÃO leva escape.
 cambio <- extrai("Cambio R$/US$")
 selic  <- extrai("Selic meta")
 ibc    <- extrai("IBC-Br")
@@ -67,13 +76,13 @@ library(knitr)
 quadro <- data.frame(
   Indicador = c(
     paste0("IPCA (", fmt_data(ipca$data_ref), ")"),
-    "Câmbio R$/US$",
+    "Câmbio R\\$/US\\$",
     "Selic meta",
     paste0("IBC-Br (", fmt_data(ibc$data_ref), ")")
   ),
   `Último valor` = c(
     fmt(ipca$valor_atual, suffix = "%"),
-    fmt(cambio$valor_atual, prefix = "R$ "),
+    fmt(cambio$valor_atual, prefix = "R\\$ "),
     fmt(selic$valor_atual, suffix = " p.p. a.a."),
     fmt(ibc$valor_atual, suffix = " (índice)")
   ),
@@ -111,8 +120,8 @@ No acumulado em doze meses, a variação alcança `r fmt(ipca$var_12m, suffix = 
 
 ### Taxa de câmbio
 
-A taxa de câmbio R$/US$ (SGS&nbsp;1) está cotada em
-`r fmt(cambio$valor_atual, prefix = "R$ ")` na referência de
+A taxa de câmbio R\$/US\$ (SGS&nbsp;1) está cotada em
+`r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de
 `r fmt_data(cambio$data_ref)`. No mês, a variação é de
 `r fmt(cambio$var_mes, suffix = "%")`. No acumulado do ano, a variação é de
 `r fmt(cambio$var_ano, suffix = "%")`, e no acumulado em doze meses a
@@ -148,5 +157,5 @@ acumulado do ano, a mesma série original (SGS&nbsp;24363) mostra variação de
 *Boletim elaborado com base nos dados disponíveis em `r data_ref_boletim`.
 Fontes primárias: Banco Central do Brasil — Sistema Gerenciador de Séries
 Temporais (SGS), via `rbcb::get_series`. Séries utilizadas: IPCA mensal
-(SGS&nbsp;433), câmbio R$/US$ (SGS&nbsp;1), Selic meta (SGS&nbsp;432), IBC-Br
+(SGS&nbsp;433), câmbio R\$/US\$ (SGS&nbsp;1), Selic meta (SGS&nbsp;432), IBC-Br
 original (SGS&nbsp;24363) e IBC-Br com ajuste sazonal (SGS&nbsp;24364).*
