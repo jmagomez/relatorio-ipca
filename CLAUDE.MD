@@ -11,6 +11,14 @@
 - var_mes da série SA (24364)
 - var_ano e var_12m da série original (24363)
 
+## Convenção de cifrão no .qmd
+- O Pandoc lê o trecho entre dois `$` como fórmula matemática:
+  `R$/US$` é publicado como "R/US"
+- No .qmd, todo cifrão destinado ao HTML vai como `\$`
+  (dentro de string R, `"\\$"`)
+- Exceção: `extrai("Cambio R$/US$")` é chave de busca do
+  resumo.csv e não leva escape
+
 ## Regras
 - Falha por série, não global
 - NA → "indicador indisponível nesta semana"
