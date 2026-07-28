@@ -5,6 +5,14 @@ project:
 
 format:
   html:
+    # O Pandoc lê o trecho entre dois cifrões como fórmula matemática inline,
+    # e por isso "R$/US$" era publicado como "R/US". Nenhum documento deste
+    # projeto usa notação matemática, então a extensão fica desligada e o
+    # cifrão passa a ser sempre literal.
+    #
+    # Esta linha é a garantia da unidade R$/US$: o boletim.qmd é reescrito do
+    # zero pelo agente redator toda semana, mas o _quarto.yml não. NÃO REMOVA.
+    from: markdown-tex_math_dollars
     theme: cosmo
     toc: true
     toc-title: "Sumário"
