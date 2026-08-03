@@ -1,94 +1,76 @@
 ok
 
-# Revisão do Boletim Macro Semanal — referência 2026-07-28
+Parecer detalhado — rodada de referência 2026-08-03.
 
-## Itens verificados
+Todos os números do boletim.qmd foram conferidos campo a campo contra
+output/dados/resumo.csv, e todas as chamadas extrai()/fmt() usam o
+indicador, o campo e o sufixo corretos. Nenhuma divergência numérica
+encontrada.
 
-1. **Números vs. resumo.csv**: todos os valores exibidos em `boletim.qmd`
-   (texto e quadro) são gerados dinamicamente via `extrai()`/`fmt()`/`fmt_data()`
-   a partir de `output/dados/resumo.csv`, sem valores hardcoded. Conferência
-   linha a linha:
-   - IPCA: valor_atual 0,16% (06/2026); var_mes 0,16%; var_ano 3,36%;
-     var_12m 4,64% — batem com o CSV e com texto/quadro.
-   - Câmbio R$/US$: valor_atual R$ 5,10 (data_ref 27/07/2026, legítima —
-     último fechamento disponível, distinta da data de referência do
-     boletim); var_mes -1,33%; var_ano -7,30%; var_12m -8,72% — batem com
-     o CSV e com texto/quadro (inclusive o var_12m, que mudou em relação a
-     rodadas anteriores e está refletido corretamente por vir do CSV, não
-     de valor fixo no código).
-   - Selic meta: valor_atual 14,25 p.p. a.a. (07/2026); var_mes 0,00 p.p.;
-     var_ano -0,75 p.p.; var_12m -0,75 p.p. — batem com o CSV.
-   - IBC-Br: valor_atual 109,53 (índice, 05/2026); var_mes 0,07%;
-     var_ano 2,20%; var_12m 0,80% — batem com o CSV.
-   Nenhuma divergência numérica encontrada.
+1. Números vs. resumo.csv
+   - IPCA: valor_atual/var_mes 0,16% (linha "registrou variação de..."),
+     var_ano 3,36% ("acumulado do ano"), var_12m 4,64% ("doze meses").
+     Quadro replica os mesmos valores. OK.
+   - Câmbio: valor_atual 5,08 ("R$ 5,08"), var_mes -1,92%, var_ano -7,73%,
+     var_12m -9,37% — todos exibidos via abs() no texto (1,92% / 7,73% /
+     9,37%) e com sinal no quadro (-1,92% / -7,73% / -9,37%). Módulo
+     confere exatamente com o CSV. OK.
+   - Selic: valor_atual 14,25% a.a., var_mes 0,00 p.p., var_ano -0,75 p.p.,
+     var_12m -0,75 p.p. — nível e variações batem linha a linha com o CSV.
+     OK.
+   - IBC-Br: valor_atual 109,53 (índice), var_mes 0,07%, var_ano 2,20%,
+     var_12m 0,80% — todos batem com o CSV, e a atribuição de série segue
+     a convenção do CLAUDE.MD (var_mes → SA/24364; var_ano e var_12m →
+     original/24363). OK.
 
-2. **Unidades**: Selic sempre em "p.p." / "p.p. a.a." (nunca bps); câmbio
-   com prefixo "R$ " nos valores de nível e "%" nas variações; IPCA em "%";
-   IBC-Br em "(índice)" no nível e "%" nas variações. Compatível com a
-   coluna `unidade` do CSV.
+2. Unidade da Selic — o resumo.csv traz unidade "% a.a." para o nível
+   (14,25), e o boletim.qmd usa esse sufixo apenas para valor_atual
+   (`fmt(selic$valor_atual, suffix = "% a.a.")`). As três variações usam
+   sufixo " p.p." (nunca pontos-base), e o texto explicita a distinção:
+   "O nível da taxa é expresso em percentual ao ano (% a.a.); já as
+   variações abaixo são reportadas em pontos percentuais (p.p.), nunca em
+   pontos-base." Não há mistura entre nível e variação. Correto — é a
+   leitura pretendida nesta rodada, não um erro.
 
-3. **Convenção IBC-Br**: `var_mes` usa a série com ajuste sazonal
-   (SGS 24364), citada explicitamente no quadro ("% (SA, SGS 24364)") e no
-   corpo ("série com ajuste sazonal ... SGS 24364"); `var_ano` e `var_12m`
-   usam a série original (SGS 24363), citada no quadro ("% (original,
-   SGS 24363)") e no corpo ("série original ... SGS 24363"). Conforme
-   CLAUDE.MD.
+3. Câmbio R$/US$ — aparece com os dois cifrões, sempre escapados
+   (`R\$/US\$` no texto corrido, `R\\$/US\\$` dentro das strings de R do
+   quadro) tanto no corpo do texto quanto no quadro-resumo, e os valores
+   monetários usam prefixo "R$ " (`fmt(cambio$valor_atual, prefix =
+   "R\\$ ")`). Consistente com a proteção descrita no CLAUDE.MD.
 
-4. **Tratamento de NA**: `fmt()`/`fmt_data()` retornam "indicador
-   indisponível nesta semana" para NA/NULL, por indicador (a função
-   `extrai()` já isola cada indicador com NAs próprios em caso de ausência
-   no CSV, sem derrubar o boletim inteiro). Nesta rodada o CSV não contém
-   NA, mas o mecanismo está correto.
+4. Divergência de data do câmbio (data_ref 2026-07-31 vs. data de
+   referência do boletim 2026-08-03) é tratada explicitamente no texto
+   ("data distinta da data de referência geral deste boletim... por se
+   tratar do último fechamento disponível"), condizente com 2026-08-03
+   ser segunda-feira. Não é resquício de rodada anterior — é o
+   comportamento esperado.
 
-5. **Coerência de sinal**: câmbio tem var_mes/var_ano/var_12m todos
-   negativos (-1,33% / -7,30% / -8,72%); Selic tem var_ano/var_12m
-   negativos (-0,75 p.p.). Em nenhum trecho esses valores são descritos
-   como "alta" — o texto usa linguagem neutra ("a variação é de X%"/"foi
-   de X p.p."). Nenhuma incoerência de sinal encontrada.
+5. IBC-Br — cita as duas séries com identificação de fonte e código SGS
+   em todas as ocorrências (série original, SGS 24363, para nível,
+   var_ano e var_12m; série com ajuste sazonal, SGS 24364, para var_mes),
+   seguindo a convenção do CLAUDE.MD.
 
-6. **Data de referência (2026-07-28)**: aparece corretamente no YAML
-   (`subtitle: "Data de referência: 2026-07-28"`), na variável
-   `data_ref_boletim <- "2026-07-28"`, no corpo ("Data de referência do
-   boletim: 2026-07-28") e no rodapé ("dados disponíveis em 2026-07-28").
-   Não há resquícios de 2026-07-13/20/27 como data de referência do
-   boletim. A data 2026-07-27 aparece apenas como `data_ref` legítima do
-   indicador câmbio (vindo do CSV), o que é esperado e não constitui
-   resquício.
+6. NA — fmt() e fmt_data() retornam "indicador indisponível nesta semana"
+   para NA/NULL; nenhum indicador desta rodada está com NA, mas a lógica
+   está correta e cobre o caso.
 
-7. **Unidade do câmbio R$/US$ e escape de cifrão**:
-   - `_quarto.yml` mantém `from: markdown-tex_math_dollars`, desligando a
-     leitura de `$...$` como fórmula matemática.
-   - O YAML de `boletim.qmd` não redeclara `from:` (bloco `format: html:`
-     contém apenas `theme`, `toc`, `toc-depth`, `number-sections`,
-     `self-contained`), preservando a proteção do `_quarto.yml`.
-   - `boletim.qmd` usa cifrão escapado (`R\$/US\$` no texto corrido e
-     `"R\\$ "`/`"Câmbio R\\$/US\\$"` dentro das strings de R, que produzem
-     literalmente `R\$/US\$` e `R\$ ` como texto markdown). Como o escape
-     de pontuação com backslash (`\$` → `$`) é uma regra do markdown do
-     Pandoc independente da extensão `tex_math_dollars` estar ligada ou
-     desligada, o resultado renderizado é sempre "R$/US$" (dois cifrões,
-     texto e quadro) e "R$ " (valores), de forma correta e consistente em
-     todas as ocorrências do arquivo. É redundante frente à proteção já
-     dada pelo `_quarto.yml` (bastaria escrever `$` sem barra), mas não é
-     incorreto nem gera divergência — não há necessidade de alteração.
-   - Nota à parte (fora do escopo de edição): o `boletim.html` atualmente
-     commitado no repositório, referente à rodada 2026-07-27, mostra
-     "R\<span class="math inline">\(/US\)</span>" quebrado. Conforme
-     contexto fornecido, trata-se de artefato antigo, anterior ao fix do
-     cifrão, e não reflete o `boletim.qmd`/`_quarto.yml` atuais — não é
-     motivo de reprovação desta rodada, mas fica registrado para que o
-     HTML seja re-renderizado na publicação.
+7. Coerência (alta x valor negativo) — as três variações do câmbio são
+   negativas no CSV e o texto usa verbos de queda ("recuou", "queda de",
+   "retração de") com o valor absoluto; a conclusão de que "o Real se
+   valorizou frente ao dólar" está correta (queda na cotação R$/US$
+   implica valorização do Real). Sem contradição entre sinal e narrativa.
 
-8. **Estilo**: segue as convenções do CLAUDE.MD — fontes citadas via
-   SGS com número da série, `rbcb::get_series` mencionado no rodapé,
-   convenção IBC-Br respeitada, falha por série (via `extrai()`),
-   mensagem padrão de indisponibilidade. Nenhum vício de estilo
-   identificado (sem jargão redundante, sem repetição indevida de
-   qualificadores).
+8. Estilo — texto descritivo, sem uso de linguagem de previsão/projeção
+   (não há "deve", "espera-se", "projeta" etc.); segue as convenções do
+   CLAUDE.MD (fontes, séries do IBC-Br, tratamento de NA).
 
-9. **Tom**: descritivo em todo o documento. Não há verbos/expressões de
-   previsão ou tendência futura (não aparecem "deve", "vai", "tende a",
-   "projeta-se" ou equivalentes).
+9. _quarto.yml mantém a linha `from: markdown-tex_math_dollars` (linha 15,
+   sob format/html), com o comentário de proteção intacto. O YAML do
+   boletim.qmd (linhas 1–12) não redeclara `from:` em nenhum nível —
+   confere.
 
-Nenhuma inconsistência numérica, de unidade, de convenção ou de tom
-encontrada. Aprovado.
+Observação não bloqueante: o quadro-resumo exibe a variação do câmbio com
+sinal (-1,92% etc.), enquanto o texto corrido usa o valor absoluto
+acompanhado de verbo de queda. São representações diferentes do mesmo
+número, mas ambas corretas e não conflitantes — trata-se de escolha de
+redação coerente, não de erro de magnitude.

@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-07-28"
+subtitle: "Data de referência: 2026-08-03"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-07-28"
+data_ref_boletim <- "2026-08-03"
 
 # ATENÇÃO — cifrão em texto markdown:
 # o Pandoc trata o conteúdo entre dois "$" como fórmula matemática, então
@@ -76,14 +76,14 @@ library(knitr)
 quadro <- data.frame(
   Indicador = c(
     paste0("IPCA (", fmt_data(ipca$data_ref), ")"),
-    "Câmbio R\\$/US\\$",
-    "Selic meta",
+    paste0("Câmbio R\\$/US\\$ (", fmt_data(cambio$data_ref), ")"),
+    "Selic meta (% a.a.; variações em p.p.)",
     paste0("IBC-Br (", fmt_data(ibc$data_ref), ")")
   ),
   `Último valor` = c(
     fmt(ipca$valor_atual, suffix = "%"),
     fmt(cambio$valor_atual, prefix = "R\\$ "),
-    fmt(selic$valor_atual, suffix = " p.p. a.a."),
+    fmt(selic$valor_atual, suffix = "% a.a."),
     fmt(ibc$valor_atual, suffix = " (índice)")
   ),
   `Var. mês` = c(
@@ -120,18 +120,23 @@ No acumulado em doze meses, a variação alcança `r fmt(ipca$var_12m, suffix = 
 
 ### Taxa de câmbio
 
-A taxa de câmbio R\$/US\$ (SGS&nbsp;1) está cotada em
+A taxa de câmbio R\$/US\$ (SGS&nbsp;1), cotação de fechamento, está em
 `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de
-`r fmt_data(cambio$data_ref)`. No mês, a variação é de
-`r fmt(cambio$var_mes, suffix = "%")`. No acumulado do ano, a variação é de
-`r fmt(cambio$var_ano, suffix = "%")`, e no acumulado em doze meses a
-variação é de `r fmt(cambio$var_12m, suffix = "%")`.
+`r fmt_data(cambio$data_ref)` — data distinta da data de referência geral
+deste boletim, `r data_ref_boletim`, por se tratar do último fechamento
+disponível. No mês, a moeda recuou `r fmt(abs(cambio$var_mes), suffix = "%")`.
+No acumulado do ano, acumula queda de `r fmt(abs(cambio$var_ano), suffix = "%")`,
+e no acumulado em doze meses, retração de
+`r fmt(abs(cambio$var_12m), suffix = "%")`. As três variações do período são
+negativas, ou seja, o Real se valorizou frente ao dólar nesses horizontes.
 
 ### Taxa Selic
 
 A meta da taxa Selic (SGS&nbsp;432), definida pelo Comitê de Política
-Monetária (Copom), está em `r fmt(selic$valor_atual, suffix = " p.p. a.a.")`
-na referência de `r fmt_data(selic$data_ref)`. No mês, a variação foi de
+Monetária (Copom), está em `r fmt(selic$valor_atual, suffix = "% a.a.")`
+na referência de `r fmt_data(selic$data_ref)`. O nível da taxa é expresso em
+percentual ao ano (% a.a.); já as variações abaixo são reportadas em pontos
+percentuais (p.p.), nunca em pontos-base. No mês, a variação foi de
 `r fmt(selic$var_mes, suffix = " p.p.")`. No acumulado do ano, a variação é de
 `r fmt(selic$var_ano, suffix = " p.p.")`, e no acumulado em doze meses a
 variação é de `r fmt(selic$var_12m, suffix = " p.p.")`.
@@ -140,7 +145,8 @@ variação é de `r fmt(selic$var_12m, suffix = " p.p.")`.
 
 ## Atividade
 
-O Índice de Atividade Econômica do Banco Central (IBC-Br) tem nível de
+O Índice de Atividade Econômica do Banco Central (IBC-Br), série original
+(fonte: Banco Central, SGS&nbsp;24363), tem nível de
 `r fmt(ibc$valor_atual, suffix = " (índice)")` na referência de
 `r fmt_data(ibc$data_ref)`.
 
