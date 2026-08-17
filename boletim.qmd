@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-08-03"
+subtitle: "Data de referência: 2026-08-17"
 format:
   html:
     theme: cosmo
@@ -15,14 +15,20 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-08-03"
+data_ref_boletim <- "2026-08-17"
 
 # ATENÇÃO — cifrão em texto markdown:
-# o Pandoc trata o conteúdo entre dois "$" como fórmula matemática, então
-# "R$/US$" é renderizado como "R/US" (os cifrões somem). Todo cifrão que
-# for parar no HTML deve ser escapado como \$ — o que, dentro de uma string
-# de R, se escreve "\\$". Isso vale tanto para o texto corrido quanto para
-# valores gerados pelo fmt() e pelas células da tabela.
+# apesar de o _quarto.yml deste projeto desligar a extensão
+# markdown-tex_math_dollars (from: markdown-tex_math_dollars), essa
+# configuração NÃO está em vigor para este documento — o project.render do
+# _quarto.yml lista apenas relatorio_ipca.qmd, não boletim.qmd. Na prática,
+# o Pandoc ainda trata o conteúdo entre dois "$" como fórmula matemática
+# aqui, e "R$/US$" sem escape é publicado como "R/US". Por isso, todo
+# cifrão que for parar no HTML deste boletim precisa ser escapado como \$
+# — o que, dentro de uma string de R, se escreve "\\$". Isso vale para o
+# texto corrido, para os valores gerados por fmt() (prefixo "R\\$ ") e para
+# as células da tabela. NÃO redeclare `from:` neste YAML — nem essa nem
+# nenhuma outra correção deve tocar no _quarto.yml.
 
 # Retorna mensagem-padrão quando o valor é NA ou NULL.
 # Nunca deve ser impresso "NA" no HTML: todo número exibido no texto ou
@@ -60,7 +66,13 @@ extrai <- function(nome) {
 
 ipca   <- extrai("IPCA")
 # O nome abaixo casa com a coluna "indicador" do resumo.csv — é chave de
-# busca, não texto markdown, e por isso NÃO leva escape.
+# busca (lookup), não texto que vai para o HTML, e por isso o cifrão aqui
+# fica CRU (sem escape). O valor em resumo.csv é literalmente
+# "Cambio R$/US$"; se escapássemos para "Cambio R\\$/US\\$", a string em R
+# passaria a ser "Cambio R\$/US\$", que não bate com o CSV — extrai()
+# retornaria NA e todo o câmbio sairia como "indicador indisponível nesta
+# semana". Apenas os cifrões que aparecem no texto/tabela renderizados
+# devem ser escapados.
 cambio <- extrai("Cambio R$/US$")
 selic  <- extrai("Selic meta")
 ibc    <- extrai("IBC-Br")
@@ -122,24 +134,31 @@ No acumulado em doze meses, a variação alcança `r fmt(ipca$var_12m, suffix = 
 
 A taxa de câmbio R\$/US\$ (SGS&nbsp;1), cotação de fechamento, está em
 `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de
-`r fmt_data(cambio$data_ref)` — data distinta da data de referência geral
-deste boletim, `r data_ref_boletim`, por se tratar do último fechamento
-disponível. No mês, a moeda recuou `r fmt(abs(cambio$var_mes), suffix = "%")`.
-No acumulado do ano, acumula queda de `r fmt(abs(cambio$var_ano), suffix = "%")`,
-e no acumulado em doze meses, retração de
-`r fmt(abs(cambio$var_12m), suffix = "%")`. As três variações do período são
-negativas, ou seja, o Real se valorizou frente ao dólar nesses horizontes.
+`r fmt_data(cambio$data_ref)` (14/08/2026) — data distinta da data de
+referência geral deste boletim, `r data_ref_boletim`, por se tratar do
+último fechamento disponível para a série. No mês, o dólar subiu
+`r fmt(cambio$var_mes, suffix = "%")` frente ao Real, revertendo o
+movimento de queda observado na rodada anterior; essa alta representa
+desvalorização do Real no período mensal. Já no acumulado do ano e no
+acumulado em doze meses, a moeda ainda apresenta recuo — de
+`r fmt(abs(cambio$var_ano), suffix = "%")` e
+`r fmt(abs(cambio$var_12m), suffix = "%")`, respectivamente —, o que
+corresponde a valorização do Real nesses dois horizontes mais longos.
+Ou seja, os sinais das variações mensal e anual/de doze meses são
+opostos nesta rodada.
 
 ### Taxa Selic
 
 A meta da taxa Selic (SGS&nbsp;432), definida pelo Comitê de Política
 Monetária (Copom), está em `r fmt(selic$valor_atual, suffix = "% a.a.")`
-na referência de `r fmt_data(selic$data_ref)`. O nível da taxa é expresso em
-percentual ao ano (% a.a.); já as variações abaixo são reportadas em pontos
-percentuais (p.p.), nunca em pontos-base. No mês, a variação foi de
-`r fmt(selic$var_mes, suffix = " p.p.")`. No acumulado do ano, a variação é de
-`r fmt(selic$var_ano, suffix = " p.p.")`, e no acumulado em doze meses a
-variação é de `r fmt(selic$var_12m, suffix = " p.p.")`.
+na referência de `r fmt_data(selic$data_ref)`, após corte de
+`r fmt(abs(selic$var_mes), suffix = " p.p.")` em relação ao mês anterior.
+O nível da taxa é expresso em percentual ao ano (% a.a.); já as variações
+abaixo são reportadas em pontos percentuais (p.p.), nunca em pontos-base.
+No mês, a variação foi de `r fmt(selic$var_mes, suffix = " p.p.")`. No
+acumulado do ano, a variação é de `r fmt(selic$var_ano, suffix = " p.p.")`,
+e no acumulado em doze meses a variação é de
+`r fmt(selic$var_12m, suffix = " p.p.")`.
 
 ---
 
@@ -148,7 +167,10 @@ variação é de `r fmt(selic$var_12m, suffix = " p.p.")`.
 O Índice de Atividade Econômica do Banco Central (IBC-Br), série original
 (fonte: Banco Central, SGS&nbsp;24363), tem nível de
 `r fmt(ibc$valor_atual, suffix = " (índice)")` na referência de
-`r fmt_data(ibc$data_ref)`.
+`r fmt_data(ibc$data_ref)`. Essa é a mesma data de referência da rodada
+anterior: não houve observação nova do IBC-Br nesta semana, refletindo o
+defasamento habitual de publicação do indicador em relação à data geral
+deste boletim, `r data_ref_boletim`.
 
 Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central,
 SGS&nbsp;24364) apresenta variação de `r fmt(ibc$var_mes, suffix = "%")`.
