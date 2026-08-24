@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-08-17"
+subtitle: "Data de referência: 2026-08-24"
 format:
   html:
     theme: cosmo
@@ -15,19 +15,17 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-08-17"
+data_ref_boletim <- "2026-08-24"
 
 # ATENÇÃO — cifrão em texto markdown:
-# apesar de o _quarto.yml deste projeto desligar a extensão
-# markdown-tex_math_dollars (from: markdown-tex_math_dollars), essa
-# configuração NÃO está em vigor para este documento — o project.render do
-# _quarto.yml lista apenas relatorio_ipca.qmd, não boletim.qmd. Na prática,
-# o Pandoc ainda trata o conteúdo entre dois "$" como fórmula matemática
-# aqui, e "R$/US$" sem escape é publicado como "R/US". Por isso, todo
-# cifrão que for parar no HTML deste boletim precisa ser escapado como \$
-# — o que, dentro de uma string de R, se escreve "\\$". Isso vale para o
-# texto corrido, para os valores gerados por fmt() (prefixo "R\\$ ") e para
-# as células da tabela. NÃO redeclare `from:` neste YAML — nem essa nem
+# o _quarto.yml deste projeto desliga a extensão markdown-tex_math_dollars
+# (from: markdown-tex_math_dollars), que é o que impede o Pandoc de ler o
+# trecho entre dois "$" como fórmula matemática. Ainda assim, todo cifrão
+# que for parar no HTML deste boletim é escrito de forma escapada (\$, que
+# dentro de uma string de R se escreve "\\$") por segurança — essa forma é
+# válida com ou sem a proteção do _quarto.yml ativa. Isso vale para o texto
+# corrido, para os valores gerados por fmt() (prefixo "R\\$ ") e para as
+# células da tabela. NÃO redeclare `from:` neste YAML — nem essa nem
 # nenhuma outra correção deve tocar no _quarto.yml.
 
 # Retorna mensagem-padrão quando o valor é NA ou NULL.
@@ -134,18 +132,16 @@ No acumulado em doze meses, a variação alcança `r fmt(ipca$var_12m, suffix = 
 
 A taxa de câmbio R\$/US\$ (SGS&nbsp;1), cotação de fechamento, está em
 `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de
-`r fmt_data(cambio$data_ref)` (14/08/2026) — data distinta da data de
-referência geral deste boletim, `r data_ref_boletim`, por se tratar do
-último fechamento disponível para a série. No mês, o dólar subiu
-`r fmt(cambio$var_mes, suffix = "%")` frente ao Real, revertendo o
-movimento de queda observado na rodada anterior; essa alta representa
-desvalorização do Real no período mensal. Já no acumulado do ano e no
-acumulado em doze meses, a moeda ainda apresenta recuo — de
+`r fmt_data(cambio$data_ref)`, último fechamento disponível para a série. No
+mês, o dólar subiu `r fmt(cambio$var_mes, suffix = "%")` frente ao Real, o que
+representa desvalorização do Real no período mensal. Já no acumulado do ano e
+no acumulado em doze meses, a moeda apresenta recuo — de
 `r fmt(abs(cambio$var_ano), suffix = "%")` e
 `r fmt(abs(cambio$var_12m), suffix = "%")`, respectivamente —, o que
-corresponde a valorização do Real nesses dois horizontes mais longos.
-Ou seja, os sinais das variações mensal e anual/de doze meses são
-opostos nesta rodada.
+corresponde a valorização do Real nesses dois horizontes mais longos. Ou
+seja, os sinais das variações mensal e anual/de doze meses seguem opostos
+nesta rodada: desvalorização do Real na margem mensal e valorização do Real
+nos horizontes mais longos.
 
 ### Taxa Selic
 
@@ -167,18 +163,23 @@ e no acumulado em doze meses a variação é de
 O Índice de Atividade Econômica do Banco Central (IBC-Br), série original
 (fonte: Banco Central, SGS&nbsp;24363), tem nível de
 `r fmt(ibc$valor_atual, suffix = " (índice)")` na referência de
-`r fmt_data(ibc$data_ref)`. Essa é a mesma data de referência da rodada
-anterior: não houve observação nova do IBC-Br nesta semana, refletindo o
-defasamento habitual de publicação do indicador em relação à data geral
-deste boletim, `r data_ref_boletim`.
+`r fmt_data(ibc$data_ref)`. Trata-se de observação nova em relação à rodada
+anterior, refletindo o defasamento habitual de publicação do indicador em
+relação à data geral deste boletim, `r data_ref_boletim`.
 
 Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central,
-SGS&nbsp;24364) apresenta variação de `r fmt(ibc$var_mes, suffix = "%")`.
+SGS&nbsp;24364) apresenta variação de `r fmt(ibc$var_mes, suffix = "%")`,
+recuo na margem em relação ao mês imediatamente anterior.
 
 No horizonte de doze meses, a série original (fonte: Banco Central,
-SGS&nbsp;24363) apresenta variação de `r fmt(ibc$var_12m, suffix = "%")`. No
-acumulado do ano, a mesma série original (SGS&nbsp;24363) mostra variação de
-`r fmt(ibc$var_ano, suffix = "%")`.
+SGS&nbsp;24363) apresenta variação de `r fmt(ibc$var_12m, suffix = "%")`,
+resultado positivo no interanual. No acumulado do ano, a mesma série
+original (SGS&nbsp;24363) mostra variação de
+`r fmt(ibc$var_ano, suffix = "%")`. Assim, a série dessazonalizada recua na
+margem mensal enquanto a série original permanece em patamar superior ao do
+mesmo período do ano anterior — os dois resultados são reportados
+separadamente, sem síntese entre a leitura de curtíssimo prazo (SA) e a
+leitura interanual (original).
 
 ---
 
