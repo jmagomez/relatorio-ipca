@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-08-24"
+subtitle: "Data de referência: 2026-08-31"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-08-24"
+data_ref_boletim <- "2026-08-31"
 
 # ATENÇÃO — cifrão em texto markdown:
 # o _quarto.yml deste projeto desliga a extensão markdown-tex_math_dollars
@@ -120,9 +120,11 @@ kable(quadro, align = c("l", "r", "r", "r"))
 
 O Índice Nacional de Preços ao Consumidor Amplo (IPCA), apurado pelo IBGE e
 divulgado pelo Banco Central via SGS&nbsp;433, registrou variação de
-`r fmt(ipca$var_mes, suffix = "%")` em `r fmt_data(ipca$data_ref)`. No
-acumulado do ano corrente, o índice totaliza `r fmt(ipca$var_ano, suffix = "%")`.
-No acumulado em doze meses, a variação alcança `r fmt(ipca$var_12m, suffix = "%")`.
+`r fmt(ipca$var_mes, suffix = "%")` em `r fmt_data(ipca$data_ref)`, referência
+que segue sem atualização nesta semana — o resultado de agosto/2026 ainda não
+foi divulgado. No acumulado do ano corrente, o índice totaliza
+`r fmt(ipca$var_ano, suffix = "%")`. No acumulado em doze meses, a variação
+alcança `r fmt(ipca$var_12m, suffix = "%")`.
 
 ---
 
@@ -163,9 +165,10 @@ e no acumulado em doze meses a variação é de
 O Índice de Atividade Econômica do Banco Central (IBC-Br), série original
 (fonte: Banco Central, SGS&nbsp;24363), tem nível de
 `r fmt(ibc$valor_atual, suffix = " (índice)")` na referência de
-`r fmt_data(ibc$data_ref)`. Trata-se de observação nova em relação à rodada
-anterior, refletindo o defasamento habitual de publicação do indicador em
-relação à data geral deste boletim, `r data_ref_boletim`.
+`r fmt_data(ibc$data_ref)`. Não houve observação nova do indicador nesta
+semana: a referência segue em junho/2026, pois o dado de julho/2026 ainda não
+foi divulgado pelo Banco Central até a data deste boletim,
+`r data_ref_boletim`.
 
 Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central,
 SGS&nbsp;24364) apresenta variação de `r fmt(ibc$var_mes, suffix = "%")`,
