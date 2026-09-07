@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-08-31"
+subtitle: "Data de referência: 2026-09-07"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-08-31"
+data_ref_boletim <- "2026-09-07"
 
 # ATENÇÃO — cifrão em texto markdown:
 # o _quarto.yml deste projeto desliga a extensão markdown-tex_math_dollars
@@ -121,10 +121,10 @@ kable(quadro, align = c("l", "r", "r", "r"))
 O Índice Nacional de Preços ao Consumidor Amplo (IPCA), apurado pelo IBGE e
 divulgado pelo Banco Central via SGS&nbsp;433, registrou variação de
 `r fmt(ipca$var_mes, suffix = "%")` em `r fmt_data(ipca$data_ref)`, referência
-que segue sem atualização nesta semana — o resultado de agosto/2026 ainda não
-foi divulgado. No acumulado do ano corrente, o índice totaliza
-`r fmt(ipca$var_ano, suffix = "%")`. No acumulado em doze meses, a variação
-alcança `r fmt(ipca$var_12m, suffix = "%")`.
+mais recente disponível para a série até a data deste boletim. No acumulado
+do ano corrente, o índice totaliza `r fmt(ipca$var_ano, suffix = "%")`. No
+acumulado em doze meses, a variação alcança
+`r fmt(ipca$var_12m, suffix = "%")`.
 
 ---
 
@@ -141,22 +141,22 @@ no acumulado em doze meses, a moeda apresenta recuo — de
 `r fmt(abs(cambio$var_ano), suffix = "%")` e
 `r fmt(abs(cambio$var_12m), suffix = "%")`, respectivamente —, o que
 corresponde a valorização do Real nesses dois horizontes mais longos. Ou
-seja, os sinais das variações mensal e anual/de doze meses seguem opostos
-nesta rodada: desvalorização do Real na margem mensal e valorização do Real
-nos horizontes mais longos.
+seja, os sinais das variações mensal e anual/de doze meses são opostos nesta
+leitura: desvalorização do Real na margem mensal e valorização do Real nos
+horizontes mais longos.
 
 ### Taxa Selic
 
 A meta da taxa Selic (SGS&nbsp;432), definida pelo Comitê de Política
 Monetária (Copom), está em `r fmt(selic$valor_atual, suffix = "% a.a.")`
-na referência de `r fmt_data(selic$data_ref)`, após corte de
-`r fmt(abs(selic$var_mes), suffix = " p.p.")` em relação ao mês anterior.
-O nível da taxa é expresso em percentual ao ano (% a.a.); já as variações
-abaixo são reportadas em pontos percentuais (p.p.), nunca em pontos-base.
-No mês, a variação foi de `r fmt(selic$var_mes, suffix = " p.p.")`. No
-acumulado do ano, a variação é de `r fmt(selic$var_ano, suffix = " p.p.")`,
-e no acumulado em doze meses a variação é de
-`r fmt(selic$var_12m, suffix = " p.p.")`.
+na referência de `r fmt_data(selic$data_ref)`. O nível da taxa é expresso em
+percentual ao ano (% a.a.); já as variações abaixo são reportadas em pontos
+percentuais (p.p.), nunca em pontos-base. No mês, a variação foi de
+`r fmt(selic$var_mes, suffix = " p.p.")`, o que corresponde a estabilidade da
+meta na comparação mensal. No acumulado do ano, a variação é de
+`r fmt(selic$var_ano, suffix = " p.p.")`, e no acumulado em doze meses a
+variação também é de `r fmt(selic$var_12m, suffix = " p.p.")`; em ambos os
+horizontes mais longos, o resultado corresponde a recuo da meta.
 
 ---
 
@@ -165,10 +165,8 @@ e no acumulado em doze meses a variação é de
 O Índice de Atividade Econômica do Banco Central (IBC-Br), série original
 (fonte: Banco Central, SGS&nbsp;24363), tem nível de
 `r fmt(ibc$valor_atual, suffix = " (índice)")` na referência de
-`r fmt_data(ibc$data_ref)`. Não houve observação nova do indicador nesta
-semana: a referência segue em junho/2026, pois o dado de julho/2026 ainda não
-foi divulgado pelo Banco Central até a data deste boletim,
-`r data_ref_boletim`.
+`r fmt_data(ibc$data_ref)`, referência mais recente disponível para a série
+até a data deste boletim, `r data_ref_boletim`.
 
 Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central,
 SGS&nbsp;24364) apresenta variação de `r fmt(ibc$var_mes, suffix = "%")`,
