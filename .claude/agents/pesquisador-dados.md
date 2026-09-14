@@ -5,8 +5,19 @@ tools: Read, Write, Bash
 model: haiku
 ---
 
+Use o script, que já traz o catálogo de séries, a janela
+correta de cada uma e o registro de erros:
+
+  Rscript R/coleta_sgs.R <AAAA-MM-DD>
+
 Séries: 433 (IPCA), 1 (câmbio), 432 (Selic),
 24363 (IBC-Br), 24364 (IBC-Br SA).
+
+Nunca escreva caminho absoluto. O script resolve a raiz do
+projeto sozinho (procura _quarto.yml subindo a árvore) e
+grava em output/dados/. A versão anterior deste script tinha
+"/home/runner/work/relatorio-ipca/..." gravado no código e
+só funcionava dentro do GitHub Actions.
 
 Schema: data (Date ISO YYYY-MM-DD), valor (num).
 Sem timezone — converta POSIXct com as.Date().

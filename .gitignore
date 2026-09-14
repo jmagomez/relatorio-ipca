@@ -1,34 +1,39 @@
-# ── R ─────────────────────────────────────────────────────────────────────────
+# Artefatos de render do Quarto — gerados por `quarto render`, nunca editados
+# à mão. A versão anterior versionava boletim.html, relatorio_ipca.html e a
+# pasta relatorio_ipca_files/libs/ (Bootstrap, jQuery, Tippy) mesmo com
+# `embed-resources: true`, que já embute tudo no HTML final.
+relatorio_ipca.html
+/_freeze/
+/.quarto/
+*_files/
+/output/*.png
+/output/figure/
+
+# Figuras intermediárias do knitr
+figure/
+
+# Sessão R
+.Rproj.user/
 .Rhistory
 .RData
-.Rproj.user/
+.Ruserdata
 *.Rproj
 
-# ── Quarto ────────────────────────────────────────────────────────────────────
-.quarto/
-*_files/
+# Logs de execução geram ruído de diff a cada rodada; mantidos apenas os que
+# a rotina precisa reler entre agentes.
+/logs/erros.md
 
-# ── Artefatos gerados ─────────────────────────────────────────────────────────
-output/
-
-# ── IDE e ambiente local ───────────────────────────────────────────────────────
-.vscode/
-.idea/
-
-# ── Sistema operacional ───────────────────────────────────────────────────────
+# Sistema operacional / editores
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
 
-# ── Python / segredos ─────────────────────────────────────────────────────────
-__pycache__/
-.env
-.env.*
-
-# ── Logs dinâmicos (mudam a cada execução) ────────────────────────────────────
-logs/execucao.jsonl
-logs/erros.md
-
-# ── Scripts de exploração / debug ─────────────────────────────────────────────
-download_series.R
-inspect_series.R
-verificar_csvs.R
+# Versionados de propósito:
+#   output/dados/*.csv   — séries coletadas, entrada do boletim semanal
+#   logs/revisao.md      — parecer do revisor, lido pelo publicador
+#   logs/execucao.jsonl  — trilha de execução dos agentes
+#   boletim.html         — NÃO desversione. O agente publicador o commita, e é
+#                          esse commit que o workflow usa como sinal de "houve
+#                          boletim novo" para disparar o e-mail. Ignorá-lo faria
+#                          o publicador não gerar commit e o envio nunca ocorrer.
