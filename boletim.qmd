@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-09-07"
+subtitle: "Data de referência: 2026-09-14"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-09-07"
+data_ref_boletim <- "2026-09-14"
 
 # ATENÇÃO — cifrão em texto markdown:
 # o _quarto.yml deste projeto desliga a extensão markdown-tex_math_dollars
@@ -121,10 +121,13 @@ kable(quadro, align = c("l", "r", "r", "r"))
 O Índice Nacional de Preços ao Consumidor Amplo (IPCA), apurado pelo IBGE e
 divulgado pelo Banco Central via SGS&nbsp;433, registrou variação de
 `r fmt(ipca$var_mes, suffix = "%")` em `r fmt_data(ipca$data_ref)`, referência
-mais recente disponível para a série até a data deste boletim. No acumulado
-do ano corrente, o índice totaliza `r fmt(ipca$var_ano, suffix = "%")`. No
+mais recente disponível para a série até a data deste boletim — resultado que
+caracteriza deflação no mês, e não alta de preços. No acumulado do ano
+corrente, o índice acumula alta de `r fmt(ipca$var_ano, suffix = "%")`. No
 acumulado em doze meses, a variação alcança
-`r fmt(ipca$var_12m, suffix = "%")`.
+`r fmt(ipca$var_12m, suffix = "%")`. Ou seja, a leitura mensal negativa
+convive com acumulados positivos no ano e em doze meses, o que é compatível
+com deflação pontual em um mês isolado da série.
 
 ---
 
@@ -135,15 +138,14 @@ acumulado em doze meses, a variação alcança
 A taxa de câmbio R\$/US\$ (SGS&nbsp;1), cotação de fechamento, está em
 `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de
 `r fmt_data(cambio$data_ref)`, último fechamento disponível para a série. No
-mês, o dólar subiu `r fmt(cambio$var_mes, suffix = "%")` frente ao Real, o que
-representa desvalorização do Real no período mensal. Já no acumulado do ano e
-no acumulado em doze meses, a moeda apresenta recuo — de
+mês, o Real apreciou-se frente ao dólar, com a cotação recuando
+`r fmt(abs(cambio$var_mes), suffix = "%")`. No acumulado do ano e no
+acumulado em doze meses, o movimento tem o mesmo sentido — recuo de
 `r fmt(abs(cambio$var_ano), suffix = "%")` e
 `r fmt(abs(cambio$var_12m), suffix = "%")`, respectivamente —, o que
-corresponde a valorização do Real nesses dois horizontes mais longos. Ou
-seja, os sinais das variações mensal e anual/de doze meses são opostos nesta
-leitura: desvalorização do Real na margem mensal e valorização do Real nos
-horizontes mais longos.
+corresponde a valorização do Real nos três horizontes considerados: mensal,
+anual e de doze meses. Em síntese, o dólar ficou mais barato frente ao Real
+em todos os prazos observados nesta semana.
 
 ### Taxa Selic
 
@@ -156,7 +158,8 @@ percentuais (p.p.), nunca em pontos-base. No mês, a variação foi de
 meta na comparação mensal. No acumulado do ano, a variação é de
 `r fmt(selic$var_ano, suffix = " p.p.")`, e no acumulado em doze meses a
 variação também é de `r fmt(selic$var_12m, suffix = " p.p.")`; em ambos os
-horizontes mais longos, o resultado corresponde a recuo da meta.
+horizontes mais longos, o resultado corresponde a recuo da meta em relação ao
+patamar observado um ano antes.
 
 ---
 
@@ -166,7 +169,9 @@ O Índice de Atividade Econômica do Banco Central (IBC-Br), série original
 (fonte: Banco Central, SGS&nbsp;24363), tem nível de
 `r fmt(ibc$valor_atual, suffix = " (índice)")` na referência de
 `r fmt_data(ibc$data_ref)`, referência mais recente disponível para a série
-até a data deste boletim, `r data_ref_boletim`.
+até a data deste boletim, `r data_ref_boletim`. A série segue defasada em
+relação à data de publicação deste boletim, e não houve atualização do dado
+nesta semana.
 
 Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central,
 SGS&nbsp;24364) apresenta variação de `r fmt(ibc$var_mes, suffix = "%")`,
