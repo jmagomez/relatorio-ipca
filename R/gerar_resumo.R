@@ -14,7 +14,7 @@
 #   entre níveis; Selic em pontos percentuais (diferença simples).
 # - IBC-Br: valor_atual e data_ref vêm da série original (24363); var_mes vem
 #   da série com ajuste sazonal (24364, mês vs mês anterior); var_ano e
-#   var_12m vêm da série original (24363).
+#   var_12m vêm da série original (24363), por média de período.
 #
 # Falhas são isoladas por série (tryCatch): um problema em uma fonte não
 # impede o cálculo das demais. Campos não calculáveis recebem NA — a linha
@@ -171,23 +171,31 @@ calcular_ibcbr <- function(ref_date) {
   data_ref    <- data_em_ou_antes(original, ref_date)
   valor_atual <- valor_em_ou_antes(original, ref_date)
 
-  alvo_ano <- as.Date(sprintf("%d-12-01", lubridate::year(data_ref) - 1))
-  alvo_12m <- data_ref %m-% years(1)
+  # var_mes: série COM ajuste sazonal (24364), mês contra mês anterior. É a
+  # única comparação ponto a ponto legítima, porque a série já está
+  # dessazonalizada.
+  sa_atual    <- valor_em_ou_antes(sa, data_ref)
+  sa_mes_ref  <- valor_em_ou_antes(sa, data_ref %m-% months(1))
 
-  valor_ano_ref <- valor_em_ou_antes(original, alvo_ano)
-  valor_12m_ref <- valor_em_ou_antes(original, alvo_12m)
-
-  sa_atual <- valor_em_ou_antes(sa, data_ref)
-  alvo_mes_sa <- data_ref %m-% months(1)
-  sa_mes_ref  <- valor_em_ou_antes(sa, alvo_mes_sa)
+  # var_ano e var_12m: série ORIGINAL (24363), por **média de período**.
+  #
+  # Correção de um erro do cálculo anterior. Antes, `var_ano` comparava o nível
+  # do índice sem ajuste sazonal contra o nível de 31/dez do ano anterior, e
+  # `var_12m` comparava nível contra nível doze meses antes. Índice de volume
+  # bruto carrega sazonalidade: a diferença entre dois meses mede tanto o
+  # crescimento quanto a diferença sazonal entre eles, e um dezembro atípico
+  # contamina o ano inteiro. "Acumulado no ano" e "variação em 12 meses" de
+  # índice de volume são definidos pelo IBGE e pelo BCB como comparação entre
+  # **médias** de períodos correspondentes.
+  serie_original <- original[, c("data", "valor")]
 
   data.frame(
     indicador = "IBC-Br", unidade = "indice",
     valor_atual = round(valor_atual, 2),
     data_ref = as.character(data_ref),
     var_mes = round(variacao_pct(sa_atual, sa_mes_ref), 2),
-    var_ano = round(variacao_pct(valor_atual, valor_ano_ref), 2),
-    var_12m = round(variacao_pct(valor_atual, valor_12m_ref), 2),
+    var_ano = round(acumulado_no_ano_media(serie_original, data_ref), 2),
+    var_12m = round(variacao_interanual_media(serie_original, data_ref, n = 12L), 2),
     stringsAsFactors = FALSE
   )
 }
@@ -229,8 +237,19 @@ formatar_csv <- function(df) {
   df
 }
 
+# Execução como script: `Rscript R/gerar_resumo.R [AAAA-MM-DD]`.
+# A data de referência vem do argumento de linha de comando, nunca fixa no
+# código — a versão anterior carregava "2026-07-28" gravado aqui, o que fazia
+# toda execução posterior recalcular o resumo de uma data antiga.
 if (identical(environment(), globalenv()) && sys.nframe() == 0L) {
-  resumo <- gerar_resumo("2026-07-28")
+  argumentos <- commandArgs(trailingOnly = TRUE)
+  ref <- if (length(argumentos) >= 1L && nzchar(argumentos[1])) {
+    as.Date(argumentos[1])
+  } else {
+    Sys.Date()
+  }
+  message("Gerando resumo com data de referência ", ref)
+  resumo <- gerar_resumo(ref)
   utils::write.csv(
     formatar_csv(resumo), file.path(DIR_DADOS, "resumo.csv"),
     row.names = FALSE, quote = FALSE
