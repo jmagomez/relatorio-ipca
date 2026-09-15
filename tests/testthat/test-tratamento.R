@@ -190,7 +190,7 @@ test_that("contribuições somam o índice cheio", {
 })
 
 
-# ── Camada de núcleos derivada do SIDRA ─────────────────────────────────
+# ── Camada de núcleos derivada do SIDRA ─────────────────────
 
 test_that("difusão por grupo aceita a saída de coletar_ipca_grupos", {
   source(file.path(rprojroot_raiz(), "R", "nucleos.R"))
@@ -234,16 +234,14 @@ test_that("consolidar_nucleos preserva uma linha por mês do IPCA", {
   expect_false(any(is.na(resultado$difusao)))
 })
 
-test_that("nenhum núcleo oficial é publicado sem confirmação explícita", {
+test_that("o catálogo de núcleos oficiais declara os campos que a coleta usa", {
   source(file.path(rprojroot_raiz(), "R", "nucleos.R"))
-  # Guarda-chuva contra publicar série com rótulo não verificado: enquanto
-  # NUCLEOS_SGS$confirmado for FALSE, a coleta devolve vazio em vez de arriscar.
-  expect_true(all(c("chave", "codigo", "descricao", "confirmado") %in% names(NUCLEOS_SGS)))
-  expect_type(NUCLEOS_SGS$confirmado, "logical")
+  # A verificação de identidade em si está em test-nucleos-oficiais.R.
+  expect_true(all(c("chave", "codigo", "descricao") %in% names(NUCLEOS_SGS)))
 })
 
 
-# ── Coleta: funções puras, sem tocar a rede ─────────────────────────────
+# ── Coleta: funções puras, sem tocar a rede ──────────────────
 
 test_that("raiz_projeto encontra a raiz pelo _quarto.yml", {
   source(file.path(rprojroot_raiz(), "R", "coleta_sgs.R"))
