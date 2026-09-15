@@ -505,3 +505,72 @@ grafico_difusao <- function(df, meses = 36) {
     ) +
     .tema_ipca()
 }
+
+
+#' Núcleos oficiais do Banco Central contra o índice cheio
+#'
+#' Cada núcleo remove uma parte diferente da cauda: exclusão tira itens
+#' predefinidos, médias aparadas descartam as caudas da distribuição do mês,
+#' dupla ponderação penaliza itens voláteis. Quando **todos** apontam na mesma
+#' direção, a leitura é da tendência e não de um artefato de método — é essa
+#' convergência, mais do que qualquer núcleo isolado, que sustenta a conclusão.
+#'
+#' O rótulo de cada série traz o código SGS, para o leitor auditar a origem.
+#'
+#' @param df_oficiais Saída de `coletar_nucleos_oficiais()`.
+#' @param df_ipca Tibble com `data` e `ipca_mm`.
+#' @param meses Quantos meses exibir. Padrão: 36.
+#' @return Objeto ggplot, ou NULL quando não há núcleo aprovado.
+grafico_nucleos_oficiais <- function(df_oficiais, df_ipca, meses = 36) {
+  if (is.null(df_oficiais) || nrow(df_oficiais) == 0L) {
+    return(NULL)
+  }
+
+  corte <- max(df_ipca$data, na.rm = TRUE) - meses * 31
+
+  cheio <- df_ipca |>
+    dplyr::filter(data >= corte) |>
+    dplyr::transmute(data, rotulo = "IPCA cheio", valor = ipca_mm)
+
+  nucleos <- df_oficiais |>
+    dplyr::filter(data >= corte) |>
+    dplyr::select(data, rotulo, valor)
+
+  df_plot <- dplyr::bind_rows(cheio, nucleos) |>
+    dplyr::filter(!is.na(valor)) |>
+    dplyr::mutate(
+      rotulo = factor(rotulo, levels = c("IPCA cheio", sort(unique(nucleos$rotulo)))),
+      dica = paste0(rotulo_mes(data), " — ", rotulo, ": ", fmt_br(valor), "%")
+    )
+
+  n_nucleos <- dplyr::n_distinct(nucleos$rotulo)
+  # O índice cheio fica na cor da marca e mais espesso; os núcleos recebem uma
+  # rampa fria distinta, para a comparação ser cheio-contra-conjunto e não uma
+  # disputa entre cinco cores de mesmo peso.
+  paleta <- c(
+    "IPCA cheio" = .cor_primaria,
+    stats::setNames(
+      colorRampPalette(c("#d97706", "#7c2d12"))(max(n_nucleos, 1)),
+      levels(df_plot$rotulo)[-1]
+    )
+  )
+
+  ggplot(df_plot, aes(x = data, y = valor, color = rotulo, group = rotulo)) +
+    geom_hline(yintercept = 0, color = .cor_cinza, linewidth = 0.35) +
+    geom_line(aes(linewidth = rotulo == "IPCA cheio")) +
+    camada_interativa(aes(tooltip = dica, data_id = as.character(data))) +
+    scale_linewidth_manual(values = c("TRUE" = 1.2, "FALSE" = 0.7), guide = "none") +
+    scale_color_manual(values = paleta) +
+    scale_x_date(labels = rotulo_mes, date_breaks = "4 months") +
+    scale_y_continuous(labels = scales::number_format(accuracy = 0.01, suffix = "%")) +
+    guides(color = guide_legend(nrow = 2)) +
+    labs(
+      title = "Núcleos oficiais do Banco Central e o IPCA cheio",
+      subtitle = paste0(
+        "Variação mensal. ", n_nucleos, " núcleo(s) aprovado(s) na verificação ",
+        "de identidade; o código SGS de cada série está no rótulo."
+      ),
+      x = NULL, y = "%"
+    ) +
+    .tema_ipca()
+}
