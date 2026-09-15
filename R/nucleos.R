@@ -86,23 +86,45 @@ consolidar_nucleos <- function(df_ipca, df_grupos, corte = 20) {
 
 #' Catálogo dos núcleos oficiais do Banco Central.
 #'
-#' Os códigos abaixo são o melhor conhecimento disponível, **mas o código não
-#' confia neles**. Toda série coletada passa por `validar_serie_nucleo()` antes
-#' de entrar no relatório: se o código apontar para outra coisa — um índice de
-#' nível, uma série anual, outro indicador —, ela é descartada com aviso, e o
-#' relatório segue com as medidas derivadas do SIDRA.
+#' O conjunto é o do Estudo Especial 102/2021 do BCB, que substituiu o conjunto
+#' anterior: saíram EX1, EX2 e médias aparadas *sem* suavização; entrou o
+#' percentil 55. São estes cinco que o BCB usa em análise de conjuntura.
 #'
-#' O rótulo publicado sempre carrega o código SGS entre parênteses, para que o
-#' leitor possa auditar a origem de cada linha.
+#' Os códigos e as descrições foram conferidos **um a um** contra o próprio SGS
+#' (Localizar séries → Por código), em 15/09/2026. A conferência não foi
+#' decorativa: a primeira versão deste catálogo trazia 28751 como percentil 55,
+#' e 28751 é o núcleo **Ex-alimentação e energia (EX-FE)**. O percentil 55 é
+#' 28750. O relatório teria publicado um gráfico rotulado "Percentil 55" com os
+#' dados do EX-FE.
+#'
+#' Esse defeito **passaria pela `validar_serie_nucleo()`**: o EX-FE é um núcleo
+#' legítimo do IPCA e exibe todas as cinco propriedades estruturais exigidas.
+#' A verificação comportamental protege contra série grosseiramente trocada —
+#' nível em vez de variação, frequência errada, unidade errada —, não contra
+#' troca entre dois núcleos do mesmo índice. Só a conferência do nome no SGS
+#' resolve isso, e é por isso que o rótulo publicado carrega o código.
+#'
+#' Ao alterar qualquer linha desta tabela, confira o nome no SGS e atualize
+#' `test-nucleos-oficiais.R`, que fixa o catálogo.
 NUCLEOS_SGS <- data.frame(
   chave = c("ms", "ex0", "ex3", "dp", "p55"),
-  codigo = c(4466L, 11427L, 27839L, 16122L, 28751L),
+  codigo = c(4466L, 11427L, 27839L, 16122L, 28750L),
+  # Descrições encurtadas a partir do nome completo do SGS, que começa sempre
+  # com "Índice Nacional de Preços ao Consumidor Amplo (IPCA) - Núcleo ...".
   descricao = c(
     "Médias aparadas com suavização",
     "Exclusão EX0",
     "Exclusão EX3",
     "Dupla ponderação",
     "Percentil 55"
+  ),
+  #: Nome completo como o SGS o publica — usado pelo teste que fixa o catálogo.
+  nome_sgs = c(
+    "Índice Nacional de Preços ao Consumidor Amplo (IPCA) - Núcleo médias aparadas com suavização",
+    "Índice Nacional de Preços ao Consumidor Amplo (IPCA) - Núcleo por exclusão - EX0",
+    "Índice Nacional de Preços ao Consumidor Amplo (IPCA) - Núcleo por exclusão - EX3",
+    "Índice Nacional de Preços ao Consumidor Amplo (IPCA) - Núcleo de dupla ponderação",
+    "Índice Nacional de Preços ao Consumidor Amplo (IPCA) - Núcleo Percentil 55"
   ),
   stringsAsFactors = FALSE
 )
@@ -130,6 +152,10 @@ rotulo_nucleo <- function(descricao, codigo) {
 #'    mais volátil que o cheio não é núcleo.
 #' 5. **Correlação positiva com o índice cheio.** Mede o mesmo fenômeno; se
 #'    não anda junto, é outro indicador.
+#'
+#' **O que esta função não faz:** distinguir dois núcleos do mesmo índice. O
+#' EX-FE, o EX2 e o percentil 55 passam todos nas cinco checagens. Contra troca
+#' entre núcleos, a proteção é o par (código, nome) fixado no teste.
 #'
 #' @param df_serie Tibble com `data` (Date) e `valor` (num).
 #' @param df_ipca Tibble com `data` e `ipca_mm`, o índice cheio de referência.
