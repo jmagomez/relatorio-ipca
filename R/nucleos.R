@@ -7,10 +7,14 @@
 #    Totalmente reproduzíveis e verificáveis; entram no relatório por padrão.
 #
 # 2. **Núcleos oficiais do Banco Central** (SGS). Prontos e mais precisos, mas
-#    dependem de o código de cada série estar correto. O catálogo abaixo está
-#    **desligado por padrão**: publicar uma série macroeconômica com o rótulo
-#    errado é pior do que não publicá-la. Rode `validar_catalogo_nucleos()`,
-#    confira nome e ordem de grandeza de cada série, e então ligue.
+#    dependem de o código de cada série estar correto — e não há endpoint
+#    público que devolva o NOME de uma série do SGS em JSON para conferir.
+#    A saída aqui não é confiar no código nem desligar a camada: é **verificar
+#    a identidade pelo comportamento**. Toda série coletada tem de exibir as
+#    propriedades estruturais de um núcleo do IPCA (mensal, ordem de grandeza
+#    de variação de preço, menos volátil que o índice cheio e correlacionada
+#    com ele) antes de ser publicada. Série que não passa é descartada com
+#    aviso, e o rótulo publicado sempre carrega o código SGS à vista.
 
 library(dplyr)
 
@@ -77,122 +81,221 @@ consolidar_nucleos <- function(df_ipca, df_grupos, corte = 20) {
 
 
 # ══════════════════════════════════════════════════════════════════════════════
-# Camada 2 — núcleos oficiais do SGS (requer confirmação antes de ligar)
+# Camada 2 — núcleos oficiais do SGS, com verificação de identidade
 # ══════════════════════════════════════════════════════════════════════════════
 
-#' Catálogo dos núcleos oficiais.
+#' Catálogo dos núcleos oficiais do Banco Central.
 #'
-#' `confirmado` indica se o código foi verificado contra o SGS **neste
-#' repositório**. Enquanto for FALSE, `coletar_nucleos_oficiais()` ignora a
-#' linha. Para confirmar: rode `validar_catalogo_nucleos()`, confira na consulta
-#' pública do SGS (https://www3.bcb.gov.br/sgspub/) que o código corresponde ao
-#' núcleo descrito, e marque TRUE.
+#' Os códigos abaixo são o melhor conhecimento disponível, **mas o código não
+#' confia neles**. Toda série coletada passa por `validar_serie_nucleo()` antes
+#' de entrar no relatório: se o código apontar para outra coisa — um índice de
+#' nível, uma série anual, outro indicador —, ela é descartada com aviso, e o
+#' relatório segue com as medidas derivadas do SIDRA.
+#'
+#' O rótulo publicado sempre carrega o código SGS entre parênteses, para que o
+#' leitor possa auditar a origem de cada linha.
 NUCLEOS_SGS <- data.frame(
   chave = c("ms", "ex0", "ex3", "dp", "p55"),
   codigo = c(4466L, 11427L, 27839L, 16122L, 28751L),
   descricao = c(
-    "IPCA núcleo médias aparadas com suavização (IPCA-MS)",
-    "IPCA núcleo por exclusão EX0",
-    "IPCA núcleo por exclusão EX3",
-    "IPCA núcleo de dupla ponderação",
-    "IPCA núcleo percentil 55 (P55)"
+    "Médias aparadas com suavização",
+    "Exclusão EX0",
+    "Exclusão EX3",
+    "Dupla ponderação",
+    "Percentil 55"
   ),
-  confirmado = c(FALSE, FALSE, FALSE, FALSE, FALSE),
   stringsAsFactors = FALSE
 )
 
-
-#' Consulta cada núcleo do catálogo e reporta o que voltou
-#'
-#' Não publica nada: imprime número de observações, período coberto e os
-#' últimos valores, para conferência humana do código de cada série.
-#'
-#' @param desde Data inicial da amostra de verificação.
-#' @return Data frame com o diagnóstico por série.
-validar_catalogo_nucleos <- function(desde = Sys.Date() - 400) {
-  linhas <- lapply(seq_len(nrow(NUCLEOS_SGS)), function(i) {
-    serie <- NUCLEOS_SGS[i, ]
-    dados <- tryCatch(
-      rbcb::get_series(serie$codigo, start_date = as.Date(desde)),
-      error = function(e) NULL
-    )
-
-    if (is.null(dados) || !is.data.frame(dados) || nrow(dados) == 0L) {
-      return(data.frame(
-        chave = serie$chave, codigo = serie$codigo, status = "sem dados",
-        n = 0L, ultimo = NA_real_, plausivel = NA, stringsAsFactors = FALSE
-      ))
-    }
-
-    valores <- as.numeric(dados[[2]])
-    ultimo <- dplyr::last(valores[!is.na(valores)])
-    # Um núcleo do IPCA é variação percentual MENSAL: fora de [-3, 5] quase
-    # certamente é outra série (nível de índice, acumulado, outra unidade).
-    plausivel <- !is.na(ultimo) && ultimo > -3 && ultimo < 5
-
-    data.frame(
-      chave = serie$chave, codigo = serie$codigo, status = "ok",
-      n = nrow(dados), ultimo = ultimo, plausivel = plausivel,
-      stringsAsFactors = FALSE
-    )
-  })
-
-  resumo <- do.call(rbind, linhas)
-  message(
-    "Confira cada linha contra https://www3.bcb.gov.br/sgspub/ antes de marcar ",
-    "`confirmado = TRUE` em NUCLEOS_SGS. `plausivel = FALSE` indica série que ",
-    "não é variação percentual mensal."
-  )
-  resumo
+#' Rótulo de exibição, sempre com o código SGS à vista
+rotulo_nucleo <- function(descricao, codigo) {
+  paste0(descricao, " (SGS ", codigo, ")")
 }
 
 
-#' Coleta os núcleos oficiais marcados como confirmados
+#' Verifica se uma série tem as propriedades estruturais de um núcleo do IPCA
 #'
-#' Enquanto nenhum estiver confirmado devolve um tibble vazio, e o relatório
-#' segue com as medidas derivadas do SIDRA. Falha por série, nunca global.
+#' Não existe endpoint público que devolva o nome de uma série do SGS em JSON,
+#' então a identidade é verificada pelo comportamento, não pelo rótulo. Um
+#' núcleo de inflação ao consumidor satisfaz, por construção, cinco
+#' propriedades — e uma série trocada falha em pelo menos uma delas:
 #'
-#' @param desde Data inicial.
-#' @return Tibble com `data`, `chave`, `descricao`, `valor`.
-coletar_nucleos_oficiais <- function(desde = as.Date("2015-01-01")) {
-  confirmados <- NUCLEOS_SGS[NUCLEOS_SGS$confirmado, , drop = FALSE]
+#' 1. **Frequência mensal.** Série diária ou anual é outra coisa.
+#' 2. **Ordem de grandeza de variação mensal.** Fora de ±5% ao mês não é
+#'    variação percentual de preço ao consumidor; é nível de índice, acumulado
+#'    em 12 meses ou outra unidade.
+#' 3. **Sobreposição suficiente** com o IPCA cheio para comparar.
+#' 4. **Volatilidade menor que a do índice cheio.** É a propriedade que
+#'    *define* um núcleo: ele existe para remover a cauda volátil. Um núcleo
+#'    mais volátil que o cheio não é núcleo.
+#' 5. **Correlação positiva com o índice cheio.** Mede o mesmo fenômeno; se
+#'    não anda junto, é outro indicador.
+#'
+#' @param df_serie Tibble com `data` (Date) e `valor` (num).
+#' @param df_ipca Tibble com `data` e `ipca_mm`, o índice cheio de referência.
+#' @param min_meses Sobreposição mínima exigida. Padrão: 24.
+#' @return Lista com `ok` (logical) e `motivos` (character): as checagens que
+#'   falharam, vazias quando a série passa.
+validar_serie_nucleo <- function(df_serie, df_ipca, min_meses = 24L) {
+  motivos <- character()
 
-  if (nrow(confirmados) == 0L) {
-    message(
-      "Nenhum núcleo oficial confirmado em NUCLEOS_SGS — o relatório usa ",
-      "apenas as medidas derivadas do SIDRA. Rode validar_catalogo_nucleos()."
-    )
-    return(data.frame(
-      data = as.Date(character()), chave = character(),
-      descricao = character(), valor = numeric(), stringsAsFactors = FALSE
-    ))
+  if (is.null(df_serie) || !is.data.frame(df_serie) || nrow(df_serie) < min_meses) {
+    return(list(ok = FALSE, motivos = "série vazia ou curta demais"))
   }
 
-  partes <- lapply(seq_len(nrow(confirmados)), function(i) {
-    serie <- confirmados[i, ]
-    dados <- tryCatch(
+  df_serie <- df_serie[!is.na(df_serie$valor), ]
+  df_serie <- df_serie[order(df_serie$data), ]
+
+  # 1. Frequência mensal: mediana do intervalo entre observações entre 26 e 32 dias.
+  intervalos <- as.numeric(diff(df_serie$data))
+  if (length(intervalos) == 0L || stats::median(intervalos) < 26 ||
+    stats::median(intervalos) > 32) {
+    motivos <- c(motivos, "não é série mensal")
+  }
+
+  # 2. Ordem de grandeza compatível com variação percentual mensal de preços.
+  if (max(abs(df_serie$valor), na.rm = TRUE) > 5) {
+    motivos <- c(motivos, "valores fora da faixa de variação mensal (±5%)")
+  }
+
+  # 3 a 5 exigem sobreposição com o índice cheio.
+  juncao <- merge(
+    df_serie[, c("data", "valor")],
+    df_ipca[, c("data", "ipca_mm")],
+    by = "data"
+  )
+  juncao <- juncao[stats::complete.cases(juncao), ]
+
+  if (nrow(juncao) < min_meses) {
+    motivos <- c(motivos, "sobreposição insuficiente com o IPCA cheio")
+    return(list(ok = length(motivos) == 0L, motivos = motivos))
+  }
+
+  desvio_nucleo <- stats::sd(juncao$valor)
+  desvio_cheio <- stats::sd(juncao$ipca_mm)
+  if (!is.finite(desvio_nucleo) || !is.finite(desvio_cheio) ||
+    desvio_nucleo >= desvio_cheio) {
+    motivos <- c(motivos, "volatilidade não menor que a do índice cheio")
+  }
+
+  correlacao <- suppressWarnings(stats::cor(juncao$valor, juncao$ipca_mm))
+  if (!is.finite(correlacao) || correlacao < 0.3) {
+    motivos <- c(motivos, "correlação fraca com o índice cheio")
+  }
+
+  list(ok = length(motivos) == 0L, motivos = motivos)
+}
+
+
+#' Coleta os núcleos oficiais, descartando os que não passam na verificação
+#'
+#' Falha por série, nunca global: um núcleo reprovado ou indisponível não
+#' impede os demais, e nenhum impede o relatório. O retorno traz uma coluna
+#' `rotulo` já pronta para exibição, com o código SGS embutido.
+#'
+#' @param df_ipca Tibble com `data` e `ipca_mm`, usado na verificação.
+#' @param desde Data inicial da coleta.
+#' @param verificar Quando FALSE, pula a verificação estrutural. Use apenas em
+#'   diagnóstico — o relatório sempre verifica.
+#' @return Tibble com `data`, `chave`, `codigo`, `rotulo` e `valor`.
+coletar_nucleos_oficiais <- function(df_ipca, desde = as.Date("2015-01-01"),
+                                     verificar = TRUE) {
+  vazio <- data.frame(
+    data = as.Date(character()), chave = character(), codigo = integer(),
+    rotulo = character(), valor = numeric(), stringsAsFactors = FALSE
+  )
+
+  if (!requireNamespace("rbcb", quietly = TRUE)) {
+    warning("Pacote 'rbcb' ausente: núcleos oficiais não coletados.")
+    return(vazio)
+  }
+
+  partes <- lapply(seq_len(nrow(NUCLEOS_SGS)), function(i) {
+    serie <- NUCLEOS_SGS[i, ]
+
+    bruto <- tryCatch(
       rbcb::get_series(serie$codigo, start_date = as.Date(desde)),
       error = function(e) NULL
     )
-    if (is.null(dados) || !is.data.frame(dados) || nrow(dados) == 0L) {
+    if (is.null(bruto) || !is.data.frame(bruto) || nrow(bruto) == 0L) {
       warning("Núcleo ", serie$chave, " (SGS ", serie$codigo, ") indisponível.")
       return(NULL)
     }
+
+    df <- data.frame(
+      data = as.Date(bruto[[1]]),
+      valor = as.numeric(bruto[[2]]),
+      stringsAsFactors = FALSE
+    )
+
+    if (verificar) {
+      exame <- validar_serie_nucleo(df, df_ipca)
+      if (!exame$ok) {
+        warning(
+          "Núcleo ", serie$chave, " (SGS ", serie$codigo,
+          ") descartado — não tem as propriedades de um núcleo do IPCA: ",
+          paste(exame$motivos, collapse = "; "),
+          ". Confira o código em https://www3.bcb.gov.br/sgspub/"
+        )
+        return(NULL)
+      }
+    }
+
     data.frame(
-      data = as.Date(dados[[1]]),
+      data = df$data,
       chave = serie$chave,
-      descricao = serie$descricao,
-      valor = as.numeric(dados[[2]]),
+      codigo = serie$codigo,
+      rotulo = rotulo_nucleo(serie$descricao, serie$codigo),
+      valor = df$valor,
       stringsAsFactors = FALSE
     )
   })
 
   partes <- Filter(Negate(is.null), partes)
   if (length(partes) == 0L) {
-    return(data.frame(
-      data = as.Date(character()), chave = character(),
-      descricao = character(), valor = numeric(), stringsAsFactors = FALSE
-    ))
+    message(
+      "Nenhum núcleo oficial passou na verificação — o relatório segue com as ",
+      "medidas derivadas do SIDRA."
+    )
+    return(vazio)
   }
   do.call(rbind, partes) |> dplyr::arrange(data, chave)
+}
+
+
+#' Diagnóstico do catálogo: o que cada código devolve e se passa na verificação
+#'
+#' Não publica nada. Serve para conferência humana antes de confiar no gráfico.
+#'
+#' @param df_ipca Índice cheio de referência.
+#' @param desde Data inicial da amostra.
+#' @return Data frame com um veredito por série.
+validar_catalogo_nucleos <- function(df_ipca, desde = as.Date("2015-01-01")) {
+  linhas <- lapply(seq_len(nrow(NUCLEOS_SGS)), function(i) {
+    serie <- NUCLEOS_SGS[i, ]
+    bruto <- tryCatch(
+      rbcb::get_series(serie$codigo, start_date = as.Date(desde)),
+      error = function(e) NULL
+    )
+
+    if (is.null(bruto) || !is.data.frame(bruto) || nrow(bruto) == 0L) {
+      return(data.frame(
+        chave = serie$chave, codigo = serie$codigo, n = 0L,
+        ultimo = NA_real_, aprovado = FALSE, motivos = "sem dados",
+        stringsAsFactors = FALSE
+      ))
+    }
+
+    df <- data.frame(data = as.Date(bruto[[1]]), valor = as.numeric(bruto[[2]]))
+    exame <- validar_serie_nucleo(df, df_ipca)
+
+    data.frame(
+      chave = serie$chave, codigo = serie$codigo, n = nrow(df),
+      ultimo = dplyr::last(df$valor[!is.na(df$valor)]),
+      aprovado = exame$ok,
+      motivos = if (length(exame$motivos)) paste(exame$motivos, collapse = "; ") else "",
+      stringsAsFactors = FALSE
+    )
+  })
+  do.call(rbind, linhas)
 }
