@@ -12,6 +12,14 @@ on:
 permissions:
   contents: write
 
+# Locale UTF-8 explícito. Em locale C (padrão de vários runners), o R lê os
+# fontes como latin1 e publica "Ritmo da infla....o" no lugar de "Ritmo da
+# inflação", além de rotular os eixos com meses em inglês. Verificado: o mesmo
+# gráfico sai correto com LANG=C.UTF-8 e corrompido sem.
+env:
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+
 jobs:
   gerar-boletim:
     runs-on: ubuntu-latest
@@ -47,9 +55,16 @@ jobs:
       # binários do RSPM, e falha imediatamente se algum não instalar.
       - name: Instala pacotes R
         run: |
-          Rscript -e "pkgs <- c('rbcb','sidrar','dplyr','tidyr','lubridate','slider','ggplot2','scales','knitr','rmarkdown','kableExtra'); install.packages(pkgs); faltando <- setdiff(pkgs, rownames(installed.packages())); if (length(faltando) > 0) stop('Pacotes NAO instalados: ', paste(faltando, collapse=', '))"
+          Rscript -e "pkgs <- c('rbcb','sidrar','dplyr','tidyr','lubridate','slider','ggplot2','scales','knitr','rmarkdown','kableExtra','ggiraph','testthat'); install.packages(pkgs); faltando <- setdiff(pkgs, rownames(installed.packages())); if (length(faltando) > 0) stop('Pacotes NAO instalados: ', paste(faltando, collapse=', '))"
 
       - uses: quarto-dev/quarto-actions/setup@v2
+
+      # As funções puras de tratamento são a base de todo número publicado.
+      # Rodar os testes antes de gerar o boletim impede que uma regressão de
+      # cálculo chegue ao e-mail.
+      - name: Testes das funções de tratamento
+        working-directory: tests
+        run: Rscript testthat.R
 
       - name: Instala Claude Code
         run: npm install -g @anthropic-ai/claude-code
@@ -88,11 +103,33 @@ jobs:
       # Os dois passos abaixo só rodam quando um boletim NOVO foi publicado.
       # Sem essa condição, uma execução em que o revisor não aprovou (push
       # ignorado) enviaria por e-mail o boletim.html ANTIGO como se fosse novo.
+      # `sed` substituiria a PRIMEIRA ocorrência de "</body>" em cada linha, e
+      # só casaria a grafia exata em minúsculas. Um HTML com </BODY> ou com a
+      # string dentro de um script sairia com o rodapé no lugar errado — ou sem
+      # rodapé nenhum, silenciosamente. Aqui a âncora é a ÚLTIMA ocorrência,
+      # sem diferenciar maiúsculas, e a ausência dela é erro.
       - name: Insere link do Connect Cloud no corpo do e-mail
         if: success() && steps.push.outputs.publicado == 'true'
         run: |
-          sed 's|</body>|<hr><p><a href="https://connect.posit.cloud/jmagomez/content/019f5da4-43ea-2bed-6bbd-90e3f7aaca72">📈 Abrir a versão interativa no Connect Cloud</a></p></body>|' \
-            boletim.html > corpo-email.html
+          python3 - <<'PY'
+          import re, sys
+          from pathlib import Path
+
+          RODAPE = (
+              '<hr><p><a href="https://connect.posit.cloud/jmagomez/content/'
+              '019f5da4-43ea-2bed-6bbd-90e3f7aaca72">'
+              '📈 Abrir a versão interativa no Connect Cloud</a></p>'
+          )
+          html = Path("boletim.html").read_text(encoding="utf-8")
+          casos = list(re.finditer(r"</body\s*>", html, flags=re.IGNORECASE))
+          if not casos:
+              sys.exit("boletim.html não tem </body> — render provavelmente falhou.")
+          fim = casos[-1].start()
+          Path("corpo-email.html").write_text(
+              html[:fim] + RODAPE + html[fim:], encoding="utf-8"
+          )
+          print("corpo-email.html gerado")
+          PY
 
       - name: Envia boletim por e-mail
         if: success() && steps.push.outputs.publicado == 'true'

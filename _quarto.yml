@@ -13,16 +13,35 @@ format:
     # Esta linha é a garantia da unidade R$/US$: o boletim.qmd é reescrito do
     # zero pelo agente redator toda semana, mas o _quarto.yml não. NÃO REMOVA.
     from: markdown-tex_math_dollars
-    theme: cosmo
+    theme:
+      light: cosmo
+      dark: darkly
     toc: true
     toc-title: "Sumário"
     toc-depth: 3
+    toc-location: left
     code-fold: true
     code-summary: "Ver código"
     embed-resources: true
     fig-align: center
+    fig-width: 9
+    fig-height: 4.2
+    fig-dpi: 150
+    df-print: kable
+    lang: pt
 
 execute:
-  freeze: auto
+  # freeze: false — mudança deliberada.
+  #
+  # Com `freeze: auto`, o Quarto só reexecuta um chunk quando o **código** muda.
+  # Como a coleta deste relatório consulta as APIs do BCB e do SIDRA em tempo de
+  # execução, o código fica idêntico de um mês para o outro e o chunk nunca
+  # reexecuta: o relatório continuava publicando os dados congelados da última
+  # vez em que alguém editou o R, enquanto o README afirmava que "basta
+  # renderizar — as funções de coleta consultam as APIs em tempo real".
+  #
+  # As duas coisas não podiam ser verdadeiras ao mesmo tempo. Quem manda é o
+  # README: um relatório de conjuntura que não atualiza os dados não serve.
+  freeze: false
   warning: false
   message: false

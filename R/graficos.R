@@ -3,13 +3,31 @@
 library(ggplot2)
 library(dplyr)
 library(scales)
+library(lubridate)
 
-# ── Constantes de estilo ───────────────────────────────────────────────────────
+# ── Constantes de estilo ───────────────────────────────────────────
 
 .cor_primaria   <- "#282f6b"
 .cor_secundaria <- "#d97706"
 .cor_acento     <- "#059669"
 .cor_cinza      <- "#6b7280"
+
+.meses_abr <- c(
+  "jan", "fev", "mar", "abr", "mai", "jun",
+  "jul", "ago", "set", "out", "nov", "dez"
+)
+
+#' Rótulo "mmm/aa" em português, sem depender do locale do sistema
+#'
+#' `date_labels = "%b"` devolve "Oct"/"Feb" quando o runner do CI roda em
+#' locale C ou en_US — e o gráfico de um relatório em português sai com meses
+#' em inglês. Esta função elimina a dependência.
+rotulo_mes <- function(datas) {
+  paste0(
+    .meses_abr[lubridate::month(datas)], "/",
+    substr(format(datas, "%Y"), 3, 4)
+  )
+}
 
 .tema_ipca <- function() {
   theme_minimal(base_size = 11) +
@@ -23,7 +41,7 @@ library(scales)
     )
 }
 
-# ── Funções de gráfico ─────────────────────────────────────────────────────────
+# ── Funções de gráfico ─────────────────────────────────────────────
 
 #' Gráfico de barras do IPCA mensal (últimos 24 meses)
 #'
@@ -59,7 +77,7 @@ grafico_ipca_mensal <- function(df) {
       values = c("TRUE" = .cor_primaria, "FALSE" = .cor_secundaria),
       guide  = "none"
     ) +
-    scale_x_date(date_labels = "%b\n%y", date_breaks = "2 months") +
+    scale_x_date(labels = rotulo_mes, date_breaks = "2 months") +
     scale_y_continuous(
       labels = scales::number_format(accuracy = 0.01)
     ) +
@@ -269,4 +287,290 @@ salvar_graficos <- function(graficos, path = "output/",
     )
   }
   invisible(graficos)
+}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Interatividade opcional
+#
+# O relatório anterior embutia PNG estático: sem tooltip, sem valor exato, sem
+# zoom. Aqui os gráficos ganham camada interativa quando `ggiraph` está
+# instalado, e degradam para a figura estática quando não está — o render nunca
+# depende do pacote extra.
+# ══════════════════════════════════════════════════════════════════════════════
+
+tem_ggiraph <- function() requireNamespace("ggiraph", quietly = TRUE)
+
+#' Adiciona pontos de captura invisíveis com tooltip
+#'
+#' Alvo de hover maior que a marca, para o cursor não precisar acertar a linha.
+#'
+#' @param mapeamento `aes()` com ao menos `tooltip`; `data_id` é opcional.
+#' @return Camada ggplot, ou NULL quando ggiraph não está disponível.
+camada_interativa <- function(mapeamento, tamanho = 3) {
+  if (!tem_ggiraph()) {
+    return(NULL)
+  }
+  ggiraph::geom_point_interactive(
+    mapping = mapeamento, size = tamanho, alpha = 0.01, show.legend = FALSE
+  )
+}
+
+#' Renderiza como widget interativo, ou devolve o ggplot intacto
+#'
+#' @param p Objeto ggplot.
+#' @param altura,largura Dimensões do SVG, em polegadas.
+#' @return `girafe` quando ggiraph existe; o próprio `p` caso contrário.
+renderizar <- function(p, altura = 4.2, largura = 9) {
+  if (!tem_ggiraph()) {
+    return(p)
+  }
+  ggiraph::girafe(
+    ggobj = p, width_svg = largura, height_svg = altura,
+    options = list(
+      ggiraph::opts_hover(css = "stroke-width:2.5;"),
+      ggiraph::opts_hover_inv(css = "opacity:0.35;"),
+      ggiraph::opts_tooltip(
+        css = paste(
+          "background:#ffffff;border:1px solid #d9d9e3;border-radius:6px;",
+          "padding:6px 9px;font-family:sans-serif;font-size:12px;",
+          "color:#1a1a1a;box-shadow:0 4px 14px rgba(0,0,0,.12);"
+        ),
+        opacity = 1
+      ),
+      ggiraph::opts_toolbar(saveaspng = TRUE, position = "topright")
+    )
+  )
+}
+
+#' Formata número no padrão brasileiro para uso em tooltip
+fmt_br <- function(x, casas = 2) {
+  formatC(x, format = "f", digits = casas, decimal.mark = ",", big.mark = ".")
+}
+
+
+# ══════════════════════════════════════════════════════════════════════════════
+# Gráficos novos
+# ══════════════════════════════════════════════════════════════════════════════
+
+#' Ritmo da inflação: acumulado em 12 meses contra trimestre anualizado
+#'
+#' O acumulado em doze meses é a medida de referência, mas carrega inércia:
+#' continua subindo meses depois de o ritmo corrente já ter virado. O trimestre
+#' anualizado mostra a inflação que está sendo gerada agora. Quando as duas
+#' linhas se cruzam, o acumulado tende a seguir o trimestre nos meses seguintes.
+#'
+#' Sem ajuste sazonal — o subtítulo diz isso, e o leitor deve comparar com o
+#' mesmo trimestre de anos anteriores antes de concluir por inflexão.
+#'
+#' @param df Tibble com `data`, `acum_12m` e `anualizado_3m`.
+#' @param meta Centro da meta contínua, para a linha de referência.
+#' @param banda Tolerância em p.p.
+#' @param anos Quantos anos exibir. Padrão: 6.
+#' @return Objeto ggplot.
+grafico_ritmo <- function(df, meta = 3, banda = 1.5, anos = 6) {
+  corte <- max(df$data, na.rm = TRUE) - anos * 365
+  df_plot <- df |>
+    dplyr::filter(data >= corte, !is.na(acum_12m) | !is.na(anualizado_3m)) |>
+    dplyr::select(data, acum_12m, anualizado_3m) |>
+    tidyr::pivot_longer(-data, names_to = "serie", values_to = "valor") |>
+    dplyr::filter(!is.na(valor)) |>
+    dplyr::mutate(
+      serie = factor(
+        serie,
+        levels = c("acum_12m", "anualizado_3m"),
+        labels = c("Acumulado 12 meses", "Trimestre anualizado")
+      ),
+      dica = paste0(rotulo_mes(data), " — ", serie, ": ", fmt_br(valor), "%")
+    )
+
+  ggplot(df_plot, aes(x = data, y = valor, color = serie, group = serie)) +
+    annotate(
+      "rect",
+      xmin = min(df_plot$data), xmax = max(df_plot$data),
+      ymin = meta - banda, ymax = meta + banda,
+      fill = .cor_acento, alpha = 0.10
+    ) +
+    geom_hline(yintercept = meta, color = .cor_acento, linewidth = 0.6, linetype = "dashed") +
+    geom_line(linewidth = 1) +
+    camada_interativa(aes(tooltip = dica, data_id = as.character(data))) +
+    scale_color_manual(values = c(
+      "Acumulado 12 meses" = .cor_primaria,
+      "Trimestre anualizado" = .cor_secundaria
+    )) +
+    scale_x_date(date_labels = "%Y", date_breaks = "1 year") +
+    scale_y_continuous(labels = scales::number_format(accuracy = 0.1, suffix = "%")) +
+    labs(
+      title = "Ritmo da inflação",
+      subtitle = paste0(
+        "Acumulado em 12 meses e trimestre anualizado (sem ajuste sazonal). ",
+        "Faixa: meta contínua de ", fmt_br(meta, 2), "% ± ", fmt_br(banda, 1), " p.p."
+      ),
+      x = NULL, y = "%"
+    ) +
+    .tema_ipca()
+}
+
+
+#' Índice cheio contra núcleo por médias aparadas
+#'
+#' O índice cheio responde a choque concentrado — energia, combustível,
+#' alimento in natura. O núcleo apara as caudas e mostra a tendência que
+#' sobrevive ao choque. Distância grande e persistente entre as duas linhas
+#' indica que a leitura corrente é de oferta, não de demanda.
+#'
+#' @param df Tibble com `data`, `ipca_mm` e `nucleo_aparado`.
+#' @param meses Quantos meses exibir. Padrão: 36.
+#' @return Objeto ggplot.
+grafico_nucleo <- function(df, meses = 36) {
+  df_plot <- df |>
+    dplyr::filter(!is.na(nucleo_aparado)) |>
+    dplyr::arrange(data) |>
+    dplyr::slice_tail(n = meses) |>
+    dplyr::select(data, ipca_mm, nucleo_aparado) |>
+    tidyr::pivot_longer(-data, names_to = "serie", values_to = "valor") |>
+    dplyr::filter(!is.na(valor)) |>
+    dplyr::mutate(
+      serie = factor(
+        serie,
+        levels = c("ipca_mm", "nucleo_aparado"),
+        labels = c("IPCA cheio", "Núcleo — média aparada entre grupos")
+      ),
+      dica = paste0(rotulo_mes(data), " — ", serie, ": ", fmt_br(valor), "%")
+    )
+
+  ggplot(df_plot, aes(x = data, y = valor, color = serie, group = serie)) +
+    geom_hline(yintercept = 0, color = .cor_cinza, linewidth = 0.35) +
+    geom_line(linewidth = 1) +
+    camada_interativa(aes(tooltip = dica, data_id = as.character(data))) +
+    scale_color_manual(values = c(
+      "IPCA cheio" = .cor_primaria,
+      "Núcleo — média aparada entre grupos" = .cor_secundaria
+    )) +
+    scale_x_date(labels = rotulo_mes, date_breaks = "4 months") +
+    scale_y_continuous(labels = scales::number_format(accuracy = 0.01, suffix = "%")) +
+    labs(
+      title = "IPCA cheio e núcleo",
+      subtitle = paste0(
+        "Variação mensal. O núcleo apara 20% do peso em cada cauda da ",
+        "distribuição dos nove grupos — medida derivada, não o IPCA-MS do BCB."
+      ),
+      x = NULL, y = "%"
+    ) +
+    .tema_ipca()
+}
+
+
+#' Difusão entre os grupos, mês a mês
+#'
+#' Responde ao que o índice cheio não responde: a inflação do mês veio de poucos
+#' grupos ou de muitos? A linha tracejada é a média histórica da própria série —
+#' difusão acima dela indica pressão mais espalhada que o usual.
+#'
+#' @param df Tibble com `data` e `difusao`.
+#' @param meses Quantos meses exibir. Padrão: 36.
+#' @return Objeto ggplot.
+grafico_difusao <- function(df, meses = 36) {
+  df_plot <- df |>
+    dplyr::filter(!is.na(difusao)) |>
+    dplyr::arrange(data) |>
+    dplyr::slice_tail(n = meses) |>
+    dplyr::mutate(
+      dica = paste0(rotulo_mes(data), " — difusão: ", fmt_br(difusao, 1), "%")
+    )
+
+  media <- mean(df_plot$difusao, na.rm = TRUE)
+
+  ggplot(df_plot, aes(x = data, y = difusao)) +
+    geom_col(aes(fill = difusao >= media), width = 25) +
+    camada_interativa(aes(tooltip = dica, data_id = as.character(data))) +
+    geom_hline(yintercept = media, color = .cor_cinza, linewidth = 0.6, linetype = "dashed") +
+    annotate(
+      "text",
+      x = min(df_plot$data), y = 97, hjust = 0, vjust = 1,
+      label = paste0("média do período: ", fmt_br(media, 1), "%"),
+      size = 2.9, color = .cor_cinza
+    ) +
+    scale_fill_manual(
+      values = c("TRUE" = .cor_primaria, "FALSE" = .cor_cinza), guide = "none"
+    ) +
+    scale_x_date(labels = rotulo_mes, date_breaks = "4 months") +
+    scale_y_continuous(
+      limits = c(0, 100), labels = scales::number_format(accuracy = 1, suffix = "%")
+    ) +
+    labs(
+      title = "Difusão da inflação",
+      subtitle = "Proporção dos nove grupos de despesa com variação positiva no mês",
+      x = NULL, y = "% dos grupos"
+    ) +
+    .tema_ipca()
+}
+
+
+#' Núcleos oficiais do Banco Central contra o índice cheio
+#'
+#' Cada núcleo remove uma parte diferente da cauda: exclusão tira itens
+#' predefinidos, médias aparadas descartam as caudas da distribuição do mês,
+#' dupla ponderação penaliza itens voláteis. Quando **todos** apontam na mesma
+#' direção, a leitura é da tendência e não de um artefato de método — é essa
+#' convergência, mais do que qualquer núcleo isolado, que sustenta a conclusão.
+#'
+#' O rótulo de cada série traz o código SGS, para o leitor auditar a origem.
+#'
+#' @param df_oficiais Saída de `coletar_nucleos_oficiais()`.
+#' @param df_ipca Tibble com `data` e `ipca_mm`.
+#' @param meses Quantos meses exibir. Padrão: 36.
+#' @return Objeto ggplot, ou NULL quando não há núcleo aprovado.
+grafico_nucleos_oficiais <- function(df_oficiais, df_ipca, meses = 36) {
+  if (is.null(df_oficiais) || nrow(df_oficiais) == 0L) {
+    return(NULL)
+  }
+
+  corte <- max(df_ipca$data, na.rm = TRUE) - meses * 31
+
+  cheio <- df_ipca |>
+    dplyr::filter(data >= corte) |>
+    dplyr::transmute(data, rotulo = "IPCA cheio", valor = ipca_mm)
+
+  nucleos <- df_oficiais |>
+    dplyr::filter(data >= corte) |>
+    dplyr::select(data, rotulo, valor)
+
+  df_plot <- dplyr::bind_rows(cheio, nucleos) |>
+    dplyr::filter(!is.na(valor)) |>
+    dplyr::mutate(
+      rotulo = factor(rotulo, levels = c("IPCA cheio", sort(unique(nucleos$rotulo)))),
+      dica = paste0(rotulo_mes(data), " — ", rotulo, ": ", fmt_br(valor), "%")
+    )
+
+  n_nucleos <- dplyr::n_distinct(nucleos$rotulo)
+  # O índice cheio fica na cor da marca e mais espesso; os núcleos recebem uma
+  # rampa fria distinta, para a comparação ser cheio-contra-conjunto e não uma
+  # disputa entre cinco cores de mesmo peso.
+  paleta <- c(
+    "IPCA cheio" = .cor_primaria,
+    stats::setNames(
+      colorRampPalette(c("#d97706", "#7c2d12"))(max(n_nucleos, 1)),
+      levels(df_plot$rotulo)[-1]
+    )
+  )
+
+  ggplot(df_plot, aes(x = data, y = valor, color = rotulo, group = rotulo)) +
+    geom_hline(yintercept = 0, color = .cor_cinza, linewidth = 0.35) +
+    geom_line(aes(linewidth = rotulo == "IPCA cheio")) +
+    camada_interativa(aes(tooltip = dica, data_id = as.character(data))) +
+    scale_linewidth_manual(values = c("TRUE" = 1.2, "FALSE" = 0.7), guide = "none") +
+    scale_color_manual(values = paleta) +
+    scale_x_date(labels = rotulo_mes, date_breaks = "4 months") +
+    scale_y_continuous(labels = scales::number_format(accuracy = 0.01, suffix = "%")) +
+    guides(color = guide_legend(nrow = 2)) +
+    labs(
+      title = "Núcleos oficiais do Banco Central e o IPCA cheio",
+      subtitle = paste0(
+        "Variação mensal. ", n_nucleos, " núcleo(s) aprovado(s) na verificação ",
+        "de identidade; o código SGS de cada série está no rótulo."
+      ),
+      x = NULL, y = "%"
+    ) +
+    .tema_ipca()
 }
