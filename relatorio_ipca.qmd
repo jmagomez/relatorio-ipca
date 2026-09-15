@@ -1,7 +1,8 @@
 ---
 title: "Relatório IPCA"
-subtitle: "Inflação ao Consumidor — Análise Conjuntural"
+subtitle: "Inflação ao consumidor — análise conjuntural"
 date: today
+date-format: "D [de] MMMM [de] YYYY"
 lang: pt
 ---
 
@@ -10,150 +11,515 @@ lang: pt
 #| message: false
 #| warning: false
 
+library(dplyr)
+library(tidyr)
+library(lubridate)
+library(ggplot2)
+library(knitr)
+
 source("R/coleta.R")
 source("R/tratamento.R")
 source("R/graficos.R")
+source("R/nucleos.R")
 
-# ── Coleta ────────────────────────────────────────────────────────────────────
+# ── Parâmetros do regime de metas ────────────────────────────────────
+#
+# Desde janeiro de 2025 vigora a META CONTÍNUA: a meta é avaliada mês a mês
+# sobre o IPCA acumulado em doze meses, e o descumprimento é caracterizado
+# quando o índice fica fora do intervalo de tolerância por seis meses
+# consecutivos. Não é mais uma meta de ano-calendário.
+META_CENTRO <- 3.0
+META_BANDA <- 1.5
+MESES_PARA_DESCUMPRIMENTO <- 6
+
+# ── Coleta ─────────────────────────────────────────────────────────
 df_ipca_raw <- coletar_ipca_mensal()
 df_meta_raw <- coletar_meta_inflacao()
-df_grupos   <- coletar_ipca_grupos()
+df_grupos <- coletar_ipca_grupos()
 
-# ── Tratamento ────────────────────────────────────────────────────────────────
+# ── Tratamento ──────────────────────────────────────────────────
 df_ipca <- df_ipca_raw |>
   calcular_acumulado_12m() |>
-  calcular_acumulado_ano()
+  calcular_acumulado_ano() |>
+  calcular_anualizado(n = 3) |>
+  calcular_media_movel(n = 3)
 
 df_meta_mensal <- preparar_meta_mensal(df_ipca, df_meta_raw)
-df_sazonal     <- preparar_sazonal(df_ipca)
-lst_contrib    <- preparar_contribuicoes(df_grupos)
+df_sazonal <- preparar_sazonal(df_ipca)
+lst_contrib <- preparar_contribuicoes(df_grupos)
+df_nucleos <- consolidar_nucleos(df_ipca, df_grupos)
 
-# ── Gráficos → output/ ────────────────────────────────────────────────────────
-p_mensal        <- grafico_ipca_mensal(df_ipca)
-p_12m           <- grafico_ipca_12m(df_ipca, df_meta_mensal)
-p_sazonal       <- grafico_sazonal(df_sazonal)
-p_contribuicoes <- grafico_contribuicoes(lst_contrib$mes_atual)
+# Núcleos oficiais do BCB. A coleta verifica a identidade de cada série antes
+# de publicá-la (mensal, ordem de grandeza de variação de preço, menos volátil
+# que o cheio e correlacionada com ele); série reprovada é descartada com aviso
+# e o relatório segue com a medida derivada do SIDRA.
+df_oficiais <- tryCatch(
+  coletar_nucleos_oficiais(df_ipca),
+  error = function(e) {
+    warning("Coleta dos núcleos oficiais falhou: ", conditionMessage(e))
+    NULL
+  }
+)
+nucleos_aprovados <- if (is.null(df_oficiais)) character() else unique(df_oficiais$rotulo)
+df_meta_avaliada <- avaliar_meta_continua(df_ipca, META_CENTRO, META_BANDA)
 
-salvar_graficos(list(
-  ipca_mensal   = p_mensal,
-  ipca_12m      = p_12m,
-  sazonal       = p_sazonal,
-  contribuicoes = p_contribuicoes
-))
-
-# ── Variáveis para inline code ────────────────────────────────────────────────
+# ── Variáveis para o texto ────────────────────────────────────────
 meses_pt <- c(
-  "janeiro","fevereiro","março","abril","maio","junho",
-  "julho","agosto","setembro","outubro","novembro","dezembro"
+  "janeiro", "fevereiro", "março", "abril", "maio", "junho",
+  "julho", "agosto", "setembro", "outubro", "novembro", "dezembro"
 )
 
-data_ult      <- max(df_ipca_raw$data, na.rm = TRUE)
-data_ref      <- paste(meses_pt[lubridate::month(data_ult)], "de",
-                        lubridate::year(data_ult))
+fmt <- function(x, d = 2) {
+  if (length(x) != 1 || is.na(x)) {
+    return("indisponível")
+  }
+  formatC(x, format = "f", digits = d, decimal.mark = ",", big.mark = ".")
+}
 
-ipca_ultimo   <- tail(df_ipca_raw$ipca_mm, 1)
-acum_12m_ult  <- tail(na.omit(df_ipca$acum_12m), 1)
-acum_ano_ult  <- tail(na.omit(df_ipca$acum_ano),  1)
-meta_ano      <- tail(na.omit(df_meta_mensal$meta_inflacao), 1)
-desvio_meta   <- round(acum_12m_ult - meta_ano, 2)
+fmt_sinal <- function(x, d = 2) {
+  if (length(x) != 1 || is.na(x)) {
+    return("indisponível")
+  }
+  paste0(if (x > 0) "+" else "", fmt(x, d))
+}
 
+ultimo_ou_na <- function(x) {
+  x <- x[!is.na(x)]
+  if (length(x) == 0L) NA_real_ else dplyr::last(x)
+}
+
+data_ult <- max(df_ipca_raw$data, na.rm = TRUE)
+data_ref <- paste(meses_pt[lubridate::month(data_ult)], "de", lubridate::year(data_ult))
+
+ipca_ultimo <- ultimo_ou_na(df_ipca_raw$ipca_mm)
+ipca_penult <- dplyr::nth(df_ipca_raw$ipca_mm, -2)
+acum_12m_ult <- ultimo_ou_na(df_ipca$acum_12m)
+acum_ano_ult <- ultimo_ou_na(df_ipca$acum_ano)
+anual_3m_ult <- ultimo_ou_na(df_ipca$anualizado_3m)
+nucleo_ult <- ultimo_ou_na(df_nucleos$nucleo_aparado)
+difusao_ult <- ultimo_ou_na(df_nucleos$difusao)
+difusao_media <- mean(df_nucleos$difusao, na.rm = TRUE)
+
+desvio_meta <- acum_12m_ult - META_CENTRO
+mov_mensal <- if (!is.na(ipca_penult) && ipca_ultimo >= ipca_penult) {
+  "aceleração"
+} else {
+  "desaceleração"
+}
+
+# Ritmo corrente contra a inércia dos doze meses: é este contraste que sinaliza
+# inflexão antes de o acumulado virar.
+ritmo <- dplyr::case_when(
+  is.na(anual_3m_ult) | is.na(acum_12m_ult) ~ "sem leitura de ritmo disponível",
+  anual_3m_ult < acum_12m_ult - 0.5 ~ "abaixo do acumulado em doze meses, o que tende a puxá-lo para baixo nos próximos meses",
+  anual_3m_ult > acum_12m_ult + 0.5 ~ "acima do acumulado em doze meses, o que tende a puxá-lo para cima nos próximos meses",
+  TRUE ~ "em linha com o acumulado em doze meses"
+)
+
+# Leitura do núcleo contra o índice cheio.
+#
+# O sentido importa e não é simétrico: núcleo ABAIXO do cheio significa que o
+# resultado do mês foi empurrado para cima por poucos grupos (choque, tende a
+# se dissipar). Núcleo ACIMA do cheio significa o oposto — a pressão de fundo é
+# maior do que o número cheio sugere, e um alívio pontual a está mascarando.
+# O limiar de 0,15 p.p. separa diferença material de ruído de arredondamento.
+LIMIAR_NUCLEO <- 0.15
+distancia_nucleo <- nucleo_ult - ipca_ultimo
+
+leitura_nucleo <- dplyr::case_when(
+  is.na(distancia_nucleo) ~ "núcleo indisponível neste mês",
+  distancia_nucleo < -LIMIAR_NUCLEO ~ "abaixo do índice cheio — alta concentrada em poucos grupos",
+  distancia_nucleo > LIMIAR_NUCLEO ~ "acima do índice cheio — alívio pontual mascara a pressão de fundo",
+  TRUE ~ "em linha com o índice cheio — pressão distribuída entre os grupos"
+)
+
+# Convergência entre os núcleos oficiais: quando todos apontam na mesma
+# direção, a leitura é de tendência e não de artefato do método de um deles.
+if (length(nucleos_aprovados) > 0L) {
+  ultimo_mes_oficial <- max(df_oficiais$data, na.rm = TRUE)
+  oficiais_do_mes <- df_oficiais[df_oficiais$data == ultimo_mes_oficial, ]
+  mediana_oficiais <- stats::median(oficiais_do_mes$valor, na.rm = TRUE)
+  n_acima_do_cheio <- sum(oficiais_do_mes$valor > ipca_ultimo, na.rm = TRUE)
+} else {
+  ultimo_mes_oficial <- NA
+  oficiais_do_mes <- NULL
+  mediana_oficiais <- NA_real_
+  n_acima_do_cheio <- NA_integer_
+}
+
+ultima_avaliacao <- dplyr::slice_tail(df_meta_avaliada, n = 1)
+meses_fora <- ultima_avaliacao$meses_consecutivos_fora
 situacao_meta <- dplyr::case_when(
-  acum_12m_ult > meta_ano + 1.5  ~ "acima do limite superior da banda",
-  acum_12m_ult < meta_ano - 1.5  ~ "abaixo do limite inferior da banda",
-  acum_12m_ult > meta_ano        ~ "acima do centro, dentro da banda",
-  TRUE                            ~ "abaixo do centro, dentro da banda"
+  abs(desvio_meta) > META_BANDA & desvio_meta > 0 ~ "acima do limite superior da banda",
+  abs(desvio_meta) > META_BANDA ~ "abaixo do limite inferior da banda",
+  desvio_meta > 0 ~ "acima do centro, dentro da banda",
+  TRUE ~ "abaixo do centro, dentro da banda"
 )
 
-df_ult_mes    <- lst_contrib$mes_atual
-grupo_lider   <- df_ult_mes$grupo[which.max(df_ult_mes$contribuicao)]
-contrib_lider <- round(max(df_ult_mes$contribuicao, na.rm = TRUE), 2)
-n_pos         <- sum(df_ult_mes$contribuicao > 0, na.rm = TRUE)
-n_neg         <- sum(df_ult_mes$contribuicao < 0, na.rm = TRUE)
-
-ipca_penult   <- dplyr::nth(df_ipca_raw$ipca_mm, -2)
-mov_mensal    <- if (ipca_ultimo >= ipca_penult) "aceleração" else "desaceleração"
-
-fmt <- function(x, d = 2) format(round(x, d), nsmall = d)
+df_ult_mes <- lst_contrib$mes_atual
+grupo_lider <- df_ult_mes$grupo[which.max(df_ult_mes$contribuicao)]
+contrib_lider <- max(df_ult_mes$contribuicao, na.rm = TRUE)
+grupo_alivio <- df_ult_mes$grupo[which.min(df_ult_mes$contribuicao)]
+contrib_alivio <- min(df_ult_mes$contribuicao, na.rm = TRUE)
+n_pos <- sum(df_ult_mes$contribuicao > 0, na.rm = TRUE)
+n_neg <- sum(df_ult_mes$contribuicao < 0, na.rm = TRUE)
 ```
+
+::: {.callout-note appearance="minimal"}
+Dados de **`r data_ref`**, coletados das APIs do Banco Central (séries SGS 433 e
+13521, via `rbcb`) e do SIDRA/IBGE (tabela 7060, via `sidrar`) no momento da
+renderização. Nenhum valor é estimado ou interpolado.
+:::
+
+## Quadro-resumo
+
+```{r quadro}
+#| echo: false
+
+quadro <- data.frame(
+  Indicador = c(
+    "IPCA — variação no mês",
+    "IPCA — acumulado no ano",
+    "IPCA — acumulado em 12 meses",
+    "IPCA — trimestre anualizado",
+    "Núcleo — média aparada entre grupos",
+    "Difusão — grupos com alta",
+    "Desvio do centro da meta"
+  ),
+  Valor = c(
+    paste0(fmt(ipca_ultimo), "%"),
+    paste0(fmt(acum_ano_ult), "%"),
+    paste0(fmt(acum_12m_ult), "%"),
+    paste0(fmt(anual_3m_ult), "%"),
+    paste0(fmt(nucleo_ult), "%"),
+    paste0(fmt(difusao_ult, 1), "% dos 9 grupos"),
+    paste0(fmt_sinal(desvio_meta), " p.p.")
+  ),
+  Leitura = c(
+    mov_mensal,
+    paste("até", data_ref),
+    situacao_meta,
+    ritmo,
+    leitura_nucleo,
+    if (!is.na(difusao_ult) && difusao_ult > difusao_media) {
+      "acima da média do período"
+    } else {
+      "abaixo da média do período"
+    },
+    paste0(
+      "meta contínua de ", fmt(META_CENTRO), "% ± ", fmt(META_BANDA, 1), " p.p."
+    )
+  ),
+  check.names = FALSE
+)
+
+kable(quadro, align = c("l", "r", "l"))
+```
+
+`r if (meses_fora >= MESES_PARA_DESCUMPRIMENTO) paste0("::: {.callout-warning}\n O IPCA acumulado em doze meses está fora do intervalo de tolerância há **", meses_fora, " meses consecutivos**. Sob a meta contínua, seis meses consecutivos caracterizam descumprimento e obrigam o presidente do Banco Central a enviar carta aberta ao Ministro da Fazenda.\n:::") else if (meses_fora > 0) paste0("::: {.callout-note}\n O acumulado em doze meses está fora do intervalo de tolerância há ", meses_fora, " mês(es) consecutivo(s). O descumprimento formal da meta contínua se caracteriza em ", MESES_PARA_DESCUMPRIMENTO, " meses.\n:::") else ""`
+
+---
 
 ## Introdução
 
-O **Índice Nacional de Preços ao Consumidor Amplo (IPCA)** é o indicador oficial de inflação do Brasil, calculado mensalmente pelo IBGE. Sua cobertura abrange famílias com renda entre 1 e 40 salários mínimos residentes nas principais regiões metropolitanas do país, e a composição do índice reflete a estrutura de consumo apurada pela Pesquisa de Orçamentos Familiares (POF). Por ser a referência do sistema de metas de inflação, o IPCA baliza as decisões de política monetária do Banco Central do Brasil (BCB).
+O **Índice Nacional de Preços ao Consumidor Amplo (IPCA)** é o indicador oficial
+de inflação do Brasil, calculado mensalmente pelo IBGE. Sua cobertura abrange
+famílias com renda entre 1 e 40 salários mínimos residentes nas principais
+regiões metropolitanas do país, e a composição do índice reflete a estrutura de
+consumo apurada pela Pesquisa de Orçamentos Familiares (POF). Por ser a
+referência do sistema de metas, o IPCA baliza as decisões de política monetária
+do Banco Central.
 
-O índice é decomposto em nove grupos de despesa — de Alimentação e Bebidas a Comunicação — cada qual com peso específico na cesta de consumo. Essa estrutura permite identificar não apenas o nível da inflação, mas também seus determinantes, distinguindo choques setoriais de pressões difusas. Os dados deste relatório foram coletados diretamente da API do BCB (série 433 e série 13521 via **rbcb**) e do SIDRA/IBGE (tabela 7060 via **sidrar**).
+Desde **janeiro de 2025** o regime opera sob **meta contínua**: em vez de
+avaliar o cumprimento apenas no fechamento do ano-calendário, o Conselho
+Monetário Nacional fixou meta de `r fmt(META_CENTRO)`% com intervalo de
+tolerância de ± `r fmt(META_BANDA, 1)` p.p., verificada **mês a mês** sobre o
+acumulado em doze meses. O descumprimento se caracteriza quando o índice
+permanece fora do intervalo por **seis meses consecutivos** — momento em que o
+presidente do Banco Central deve encaminhar carta aberta ao Ministro da Fazenda
+explicando as causas, as providências e o prazo de convergência.
 
-Os dados mais recentes disponíveis referem-se a **`r data_ref`**. A análise está organizada em quatro dimensões: variação mensal recente, inflação acumulada em doze meses em relação à meta, padrão sazonal histórico e decomposição por grupo de despesa.
+Esta edição está organizada em cinco leituras complementares: o nível corrente,
+o **ritmo** de curto prazo, a **qualidade** da inflação (núcleo e difusão), o
+padrão sazonal e a decomposição por grupo de despesa.
 
 ---
 
-## Panorama Mensal
+## Panorama mensal
 
-Em `r data_ref`, o IPCA registrou variação de **`r fmt(ipca_ultimo)`%**, caracterizando `r mov_mensal` em relação ao mês anterior (`r fmt(ipca_penult)`%). O acumulado no ano corrente soma **`r fmt(acum_ano_ult)`%**, refletindo o ritmo de ajuste de preços até o período de referência. O gráfico abaixo apresenta a evolução da variação mensal nos últimos 24 meses.
+Em `r data_ref`, o IPCA registrou variação de **`r fmt(ipca_ultimo)`%**,
+caracterizando `r mov_mensal` em relação ao mês anterior
+(`r fmt(ipca_penult)`%). O acumulado no ano corrente soma
+**`r fmt(acum_ano_ult)`%** e o acumulado em doze meses,
+**`r fmt(acum_12m_ult)`%**.
 
-A janela de 24 meses permite capturar pelo menos dois ciclos sazonais completos e identificar tendências de médio prazo sem o ruído de séries longas. Barras em azul indicam meses de inflação positiva; barras em âmbar sinalizam deflação — situação menos frequente no histórico brasileiro, mas relevante para identificar episódios de alívio em grupos específicos.
+A janela de 24 meses abaixo cobre dois ciclos sazonais completos — o suficiente
+para distinguir movimento recorrente de movimento atípico sem o ruído de séries
+longas. Barras em azul indicam meses de inflação positiva; barras em âmbar,
+deflação.
 
 ```{r fig-mensal}
 #| echo: false
-#| out-width: "100%"
-knitr::include_graphics("output/ipca_mensal.png")
+#| fig-cap: "IPCA — variação mensal nos últimos 24 meses."
+renderizar(grafico_ipca_mensal(df_ipca))
 ```
 
-A leitura visual das barras evidencia a intensidade da pressão inflacionária mês a mês. Oscilações abruptas — barras muito mais altas ou mais baixas do que seus vizinhos — costumam refletir choques de oferta pontuais (energia, combustíveis, alimentos in natura) ou efeitos de base estatística, em particular quando o mês correspondente do ano anterior apresentou variação atípica.
+Oscilações abruptas — barras muito mais altas ou mais baixas que as vizinhas —
+costumam refletir choques de oferta pontuais (energia, combustíveis, alimentos
+in natura) ou efeitos de base estatística, sobretudo quando o mês correspondente
+do ano anterior apresentou variação atípica. A seção de contribuições identifica
+qual grupo respondeu por cada movimento.
 
 ---
 
-## IPCA Acumulado em 12 Meses
+## Ritmo: o que está sendo gerado agora
 
-O IPCA acumulado em doze meses encerrou `r data_ref` em **`r fmt(acum_12m_ult)`%**, situando-se `r situacao_meta`. A meta estabelecida pelo Conselho Monetário Nacional (CMN) para o ano vigente é de **`r fmt(meta_ano)`%**, com tolerância de ±1,5 ponto percentual — portanto, a banda aceitável vai de `r fmt(meta_ano - 1.5)`% a `r fmt(meta_ano + 1.5)`%. O desvio em relação ao centro da meta é de **`r fmt(abs(desvio_meta))` p.p.**
+O acumulado em doze meses é a medida de referência do regime de metas, mas
+carrega inércia por construção: continua refletindo meses que já saíram do
+noticiário. O **trimestre anualizado** — a variação dos últimos três meses
+elevada à quarta potência — mostra a inflação que está sendo gerada agora.
 
-O horizonte de doze meses é preferível à variação mensal para avaliar a convergência à meta, pois atenua distorções sazonais e choques transitórios. A série acumulada também é o parâmetro que o BCB monitora formalmente: quando ultrapassa o limite superior por dois trimestres consecutivos, o presidente do Banco Central deve enviar carta aberta ao Ministério da Fazenda. O gráfico a seguir exibe a trajetória histórica do acumulado e a banda da meta ao longo do tempo.
+Em `r data_ref`, o trimestre anualizado está em **`r fmt(anual_3m_ult)`%**,
+contra `r fmt(acum_12m_ult)`% do acumulado em doze meses: `r ritmo`.
+
+```{r fig-ritmo}
+#| echo: false
+#| fig-cap: "Acumulado em 12 meses e trimestre anualizado, com a banda da meta contínua."
+renderizar(grafico_ritmo(df_ipca, meta = META_CENTRO, banda = META_BANDA))
+```
+
+::: {.callout-important appearance="simple"}
+**O trimestre anualizado não tem ajuste sazonal.** A série do IPCA publicada
+pelo IBGE é bruta, e este relatório não aplica dessazonalização — um trimestre
+que concentra reajustes escolares ou de energia elétrica aparece elevado por
+razão de calendário, não de tendência. Antes de ler uma inflexão, compare com o
+mesmo trimestre dos anos anteriores na seção de padrão sazonal.
+:::
+
+Quando as duas linhas se cruzam, o acumulado em doze meses tende a seguir o
+trimestre nos meses seguintes — a leitura de curto prazo antecede a de médio
+prazo, e é por isso que o Copom acompanha as duas.
+
+---
+
+## Qualidade da inflação: núcleo e difusão
+
+Duas leituras com o mesmo número cheio podem ter significados opostos para
+política monetária. Alta concentrada em um item de oferta tende a se dissipar
+sozinha; alta espalhada por muitos itens costuma exigir juros.
+
+### Núcleo
+
+O núcleo abaixo apara 20% do peso em cada cauda da distribuição de variações dos
+nove grupos e devolve a média ponderada do miolo. Um choque concentrado —
+combustível, energia, alimento in natura — sai da conta.
+
+```{r fig-nucleo}
+#| echo: false
+#| fig-cap: "IPCA cheio e núcleo por médias aparadas entre grupos."
+renderizar(grafico_nucleo(df_nucleos))
+```
+
+Em `r data_ref`, o núcleo está em **`r fmt(nucleo_ult)`%** contra
+`r fmt(ipca_ultimo)`% do índice cheio.
+A leitura é: **`r leitura_nucleo`**.
+`r if (!is.na(distancia_nucleo) && distancia_nucleo < -LIMIAR_NUCLEO) "Um conjunto restrito de grupos puxou o índice cheio para cima; quando o choque se esgota, o cheio tende a convergir para o núcleo." else if (!is.na(distancia_nucleo) && distancia_nucleo > LIMIAR_NUCLEO) "Um alívio concentrado — tipicamente energia, combustível ou alimento in natura — segurou o índice cheio abaixo da pressão de fundo. Esgotado o alívio, o cheio tende a subir na direção do núcleo." else "Núcleo e índice cheio próximos indicam que o resultado do mês reflete a tendência, e não um evento isolado."`
+
+::: {.callout-note appearance="simple"}
+**Esta medida não é o IPCA-MS do Banco Central.** O núcleo oficial apara a
+distribuição dos 377 subitens e suaviza itens de reajuste infrequente; este
+apara nove grupos e não suaviza nada. É uma verificação independente e
+reproduzível a partir dos microdados do SIDRA, não um substituto — os núcleos
+oficiais aparecem logo abaixo, e a comparação entre os dois é informativa por
+si: convergência reforça a leitura, divergência indica que a granularidade
+importa neste mês.
+:::
+
+### Núcleos oficiais do Banco Central
+
+```{r fig-nucleos-oficiais}
+#| echo: false
+#| fig-cap: "Núcleos oficiais do BCB e o IPCA cheio, variação mensal."
+
+if (length(nucleos_aprovados) > 0L) {
+  renderizar(grafico_nucleos_oficiais(df_oficiais, df_ipca))
+} else {
+  knitr::asis_output(paste(
+    "::: {.callout-warning}",
+    "Nenhum núcleo oficial do SGS entrou nesta edição: as séries não estavam",
+    "disponíveis ou não passaram na verificação de identidade. A análise de",
+    "núcleo acima, derivada dos microdados do SIDRA, permanece válida.",
+    ":::",
+    sep = "\n"
+  ))
+}
+```
+
+`r if (length(nucleos_aprovados) > 0L) paste0("Entraram nesta edição **", length(nucleos_aprovados), if (length(nucleos_aprovados) == 1L) " núcleo**" else " núcleos**", " — ", paste(nucleos_aprovados, collapse = ", "), ". A mediana dos núcleos oficiais no mês é de **", fmt(mediana_oficiais), "%**, contra ", fmt(ipca_ultimo), "% do índice cheio, e ", n_acima_do_cheio, if (n_acima_do_cheio == 1L) " deles está acima do cheio. " else " deles estão acima do cheio. ", "Convergência entre métodos diferentes de aparar a cauda (exclusão, médias aparadas, dupla ponderação) é o que distingue leitura de tendência de artefato de um método isolado: quando os núcleos discordam entre si, nenhum deles deve ser lido como a tendência.") else ""`
+
+::: {.callout-note appearance="simple"}
+**Como estas séries são verificadas.** Não existe endpoint público que devolva
+o *nome* de uma série do SGS em JSON, então o código não confia no número da
+série: cada uma precisa exibir as propriedades estruturais de um núcleo do IPCA
+— frequência mensal, ordem de grandeza de variação mensal de preços,
+volatilidade menor que a do índice cheio e correlação positiva com ele — antes
+de ser publicada. Uma série que não passa é descartada com aviso no log do
+render. O código SGS aparece no rótulo de cada linha para auditoria direta em
+[www3.bcb.gov.br/sgspub](https://www3.bcb.gov.br/sgspub/).
+:::
+
+### Difusão
+
+A difusão responde ao que o índice cheio não responde: a inflação do mês veio de
+poucos grupos ou de muitos?
+
+```{r fig-difusao}
+#| echo: false
+#| fig-cap: "Proporção dos nove grupos de despesa com variação positiva no mês."
+renderizar(grafico_difusao(df_nucleos))
+```
+
+Em `r data_ref`, **`r fmt(difusao_ult, 1)`%** dos grupos registraram alta, contra
+uma média de `r fmt(difusao_media, 1)`% no período exibido. Difusão alta
+convivendo com índice cheio baixo indica pressão espalhada sendo compensada por
+um choque negativo pontual — combinação que costuma anteceder retomada da
+inflação quando o choque se esgota.
+
+---
+
+## Meta contínua
+
+O IPCA acumulado em doze meses encerrou `r data_ref` em
+**`r fmt(acum_12m_ult)`%**, `r situacao_meta`. O desvio em relação ao centro é de
+**`r fmt_sinal(desvio_meta)` p.p.**, e o intervalo de tolerância vai de
+`r fmt(META_CENTRO - META_BANDA)`% a `r fmt(META_CENTRO + META_BANDA)`%.
 
 ```{r fig-12m}
 #| echo: false
-#| out-width: "100%"
-knitr::include_graphics("output/ipca_12m.png")
+#| fig-cap: "IPCA acumulado em 12 meses e a banda da meta vigente em cada período."
+renderizar(grafico_ipca_12m(df_ipca, df_meta_mensal))
 ```
 
-A área sombreada em verde representa a banda de tolerância da meta vigente em cada período — variável ao longo do tempo, pois as metas foram revisadas pelo CMN em diferentes anos. A linha tracejada indica o centro da meta. Períodos em que a linha azul transita acima da banda superior correspondem a ciclos de aperto monetário; quando a linha cai abaixo da banda inferior, o Banco Central pode considerar afrouxamento das condições financeiras.
+A área sombreada representa a banda de tolerância **vigente em cada período** —
+variável ao longo do tempo, porque o CMN revisou tanto o centro quanto a
+amplitude em diferentes anos, e porque o próprio regime mudou de meta anual para
+meta contínua em 2025. A linha tracejada indica o centro.
+
+```{r tabela-meta}
+#| echo: false
+
+recentes <- df_meta_avaliada |>
+  dplyr::slice_tail(n = 12) |>
+  dplyr::transmute(
+    `Mês` = paste0(meses_pt[lubridate::month(data)], "/", lubridate::year(data)),
+    `Acum. 12m (%)` = vapply(acum_12m, fmt, character(1)),
+    `Desvio (p.p.)` = vapply(desvio, fmt_sinal, character(1)),
+    `Fora da banda` = ifelse(fora_da_banda, "sim", "não"),
+    `Meses consecutivos` = meses_consecutivos_fora
+  )
+
+kable(recentes, align = c("l", "r", "r", "c", "r"))
+```
 
 ---
 
-## Padrão Sazonal
+## Padrão sazonal
 
-A análise sazonal sobrepõe as variações mensais de múltiplos anos para revelar padrões recorrentes ao longo dos doze meses do calendário. No Brasil, a inflação tende a ser mais intensa no primeiro trimestre — período marcado pela renovação de contratos de aluguel, reajuste de mensalidades escolares e pressões sobre a energia elétrica decorrentes do período úmido — e a arrefecer entre junho e agosto, meses de menor demanda por serviços ligados ao clima.
+A análise sazonal sobrepõe as variações mensais de múltiplos anos para revelar
+padrões recorrentes. No Brasil, a inflação tende a ser mais intensa no primeiro
+trimestre — renovação de contratos de aluguel, reajuste de mensalidades
+escolares e pressão sobre energia elétrica — e a arrefecer entre junho e agosto.
 
-O conhecimento do padrão sazonal é fundamental para interpretar leituras mensais: uma alta em março pode ser esperada e não sinalizar aceleração estrutural, enquanto um número elevado em agosto — fora do padrão — merece atenção analítica. O gráfico a seguir sobrepõe os anos desde 2015, com o ano corrente destacado em azul escuro e traço mais espesso.
+Conhecer esse padrão é o que permite ler corretamente o trimestre anualizado da
+seção anterior: uma alta em março pode ser esperada e não sinalizar aceleração
+estrutural, enquanto um número elevado em agosto merece atenção.
 
 ```{r fig-sazonal}
 #| echo: false
-#| out-width: "100%"
-knitr::include_graphics("output/sazonal.png")
+#| fig-cap: "IPCA mensal por mês do calendário, com o ano corrente em destaque."
+renderizar(grafico_sazonal(df_sazonal))
 ```
 
-O envelope formado pelas linhas históricas define o intervalo de comportamento esperado para cada mês. Quando a linha do ano corrente se afasta desse envelope — tanto para cima quanto para baixo —, isso indica a presença de choques não-sazonais ou mudanças estruturais no processo inflacionário que merecem investigação adicional, como alterações de política fiscal, câmbio ou preços administrados.
+O envelope formado pelas linhas históricas define o intervalo de comportamento
+esperado para cada mês. Quando a linha do ano corrente se afasta desse envelope,
+há choque não-sazonal ou mudança estrutural — alteração de política fiscal,
+câmbio ou preços administrados — que merece investigação adicional.
 
 ---
 
-## Contribuições por Grupo
+## Contribuições por grupo
 
-A variação mensal do IPCA pode ser decomposta pela contribuição de cada um dos nove grupos que compõem o índice. A contribuição é calculada como o produto da variação mensal de cada grupo pelo seu peso na cesta de consumo, dividido por 100 — ou seja, quantos pontos percentuais aquele grupo adicionou (ou subtraiu) à inflação cheia do mês. Pela construção do índice, a soma das nove contribuições reproduz o IPCA mensal.
+A variação mensal do IPCA se decompõe pela contribuição de cada um dos nove
+grupos: variação do grupo multiplicada pelo seu peso na cesta, dividida por 100.
+Por construção, a soma das nove contribuições reproduz o índice cheio do mês.
 
-Em `r data_ref`, o grupo **`r grupo_lider`** liderou as pressões inflacionárias, com contribuição de **`r fmt(contrib_lider)` p.p.** De um total de nove grupos, `r n_pos` registraram contribuição positiva e `r n_neg` contribuição negativa para o índice. A composição entre grupos pressores e grupos atenuadores oferece informação qualitativa relevante sobre a natureza da inflação corrente.
+Em `r data_ref`, o grupo **`r grupo_lider`** liderou as pressões, com
+contribuição de **`r fmt_sinal(contrib_lider)` p.p.**, enquanto
+**`r grupo_alivio`** foi o maior atenuante, com `r fmt_sinal(contrib_alivio)`
+p.p. De nove grupos, `r n_pos` contribuíram positivamente e `r n_neg`
+negativamente.
 
 ```{r fig-contrib}
 #| echo: false
-#| out-width: "100%"
-knitr::include_graphics("output/contribuicoes.png")
+#| fig-cap: "Contribuição de cada grupo de despesa para o IPCA do mês."
+renderizar(grafico_contribuicoes(lst_contrib$mes_atual))
 ```
 
-A decomposição por grupo permite diferenciar inflações de oferta — concentradas em Alimentação, Habitação (energia) e Transportes (combustíveis) — de inflações de demanda, que tendem a se disseminar por grupos de serviços como Saúde, Educação e Despesas Pessoais. Essa distinção é relevante para a política monetária, visto que choques de oferta costumam ser transitórios e menos sensíveis à taxa de juros do que pressões originadas pela demanda doméstica.
+A decomposição diferencia inflação de oferta — concentrada em Alimentação,
+Habitação (energia) e Transportes (combustíveis) — de inflação de demanda, que
+se dissemina por grupos de serviços como Saúde, Educação e Despesas Pessoais.
+A distinção importa porque choques de oferta são tipicamente transitórios e
+pouco sensíveis à taxa de juros, enquanto pressões de demanda respondem à
+política monetária.
+
+```{r tabela-contrib}
+#| echo: false
+
+tabela_contrib <- lst_contrib$mes_atual |>
+  dplyr::arrange(dplyr::desc(contribuicao)) |>
+  dplyr::transmute(
+    Grupo = grupo,
+    `Variação (%)` = vapply(variacao, fmt, character(1)),
+    `Peso (%)` = vapply(peso, fmt, character(1)),
+    `Contribuição (p.p.)` = vapply(contribuicao, fmt_sinal, character(1))
+  )
+
+kable(tabela_contrib, align = c("l", "r", "r", "r"))
+```
 
 ---
 
-## Considerações Finais
+## Considerações finais
 
-O conjunto de indicadores analisados aponta para um IPCA de **`r fmt(ipca_ultimo)`%** em `r data_ref` e acumulado de **`r fmt(acum_12m_ult)`%** em doze meses, situação `r situacao_meta` (`r fmt(meta_ano)`%). O acumulado no ano corrente é de **`r fmt(acum_ano_ult)`%**. O principal vetor de pressão no mês de referência foi o grupo `r grupo_lider`, com contribuição de `r fmt(contrib_lider)` p.p.
+Em `r data_ref` o IPCA variou **`r fmt(ipca_ultimo)`%** no mês e acumula
+**`r fmt(acum_12m_ult)`%** em doze meses, `r situacao_meta`
+(`r fmt_sinal(desvio_meta)` p.p. do centro). O trimestre anualizado está em
+`r fmt(anual_3m_ult)`%, `r ritmo`. O núcleo por médias aparadas está em
+`r fmt(nucleo_ult)`% e a difusão, em `r fmt(difusao_ult, 1)`% dos grupos. O
+principal vetor de pressão foi `r grupo_lider`, com
+`r fmt_sinal(contrib_lider)` p.p.
 
-A análise sazonal e a decomposição por grupos fornecem camadas interpretativas complementares à leitura da variação mensal isolada. A comparação com o padrão histórico permite distinguir movimentos cíclicos esperados de sinais de alteração estrutural na dinâmica inflacionária.
+As cinco leituras são complementares e nenhuma basta sozinha: o nível diz onde
+estamos, o ritmo diz para onde vamos, núcleo e difusão dizem se o movimento é
+estrutural ou pontual, e a decomposição diz quem o produziu.
 
-Todos os dados utilizados são públicos e reproduzíveis. Os scripts de coleta, tratamento e visualização estão disponíveis no diretório `R/` do projeto. Para atualizar o relatório com os dados mais recentes, basta renderizar este documento novamente — as funções de coleta consultam as APIs em tempo real, e o mecanismo `freeze: auto` do Quarto garante que apenas os trechos alterados sejam reprocessados.
+### Metodologia e limites
+
+- **Fontes.** IPCA mensal e meta de inflação: séries SGS 433 e 13521 do Banco
+  Central, via `rbcb`. Variação e peso por grupo: tabela 7060 do SIDRA/IBGE,
+  variáveis 63 e 66, via `sidrar`. Consultadas no momento da renderização.
+- **Sem ajuste sazonal.** Nenhuma série deste relatório é dessazonalizada. As
+  medidas de ritmo devem ser lidas contra o padrão sazonal da própria série.
+- **Duas camadas de núcleo, com precisões diferentes.** A medida derivada
+  (média aparada e difusão) usa nove grupos, não os 377 subitens do Banco
+  Central: é reproduzível a partir do SIDRA e robusta a choque concentrado,
+  porém mais grossa. Os núcleos oficiais do SGS são mais precisos, e por isso
+  passam por verificação de identidade antes de entrar — o código SGS de cada
+  série aparece no rótulo para auditoria.
+- **Convergência é o critério.** Um núcleo isolado pode refletir o método de
+  aparo, não a inflação. A conclusão só se apoia em núcleo quando as medidas
+  independentes apontam na mesma direção.
+- **Reprodutibilidade.** Os scripts estão em `R/`; as funções puras de
+  tratamento têm testes em `tests/testthat/`. O projeto renderiza com
+  `quarto render` e o cache está desligado (`freeze: false`) justamente para
+  que cada renderização reflita os dados mais recentes.
