@@ -25,13 +25,25 @@ semanal de quatro indicadores, enviado por e-mail.
 | IBC-Br com ajuste sazonal | SGS 24364 | boletim semanal |
 | IPCA por grupo (variação e peso) | SIDRA 7060, variáveis 63 e 66 | relatório mensal |
 
-Núcleos oficiais do BCB: catálogo em `R/nucleos.R` (SGS 4466, 11427, 27839,
-16122, 28751). **Ligados, mas verificados em tempo de execução** — não há
-endpoint público que devolva o nome de uma série do SGS, então
-`validar_serie_nucleo()` confere as propriedades estruturais (mensal, ±5% ao
-mês, ≥24 meses de sobreposição, volatilidade menor que a do cheio, correlação
-positiva) antes de publicar. Série reprovada é descartada com aviso. Nunca
-remova essa verificação nem publique um núcleo sem o código SGS no rótulo.
+Núcleos oficiais do BCB: catálogo em `R/nucleos.R`, o conjunto do **Estudo
+Especial 102/2021** — médias aparadas com suavização (**4466**), exclusão EX0
+(**11427**), exclusão EX3 (**27839**), dupla ponderação (**16122**) e percentil
+55 (**28750**).
+
+**Cuidado com 28751**: é o núcleo Ex-alimentação e energia (EX-FE), não o
+percentil 55. A primeira versão deste catálogo trazia esse código como P55, e o
+relatório teria publicado um gráfico rotulado "Percentil 55" com dados do
+EX-FE. O par (código, nome) está fixado em `test-nucleos-oficiais.R`; confira no
+SGS (Localizar séries → Por código) antes de alterar qualquer linha.
+
+Além disso, `validar_serie_nucleo()` confere em tempo de execução as
+propriedades estruturais (mensal, ±5% ao mês, ≥24 meses de sobreposição,
+volatilidade menor que a do cheio, correlação positiva) antes de publicar; série
+reprovada é descartada com aviso. Essa verificação protege contra série
+**grosseiramente** trocada — nível em vez de variação, frequência errada — e
+**não** contra troca entre dois núcleos do mesmo índice: o EX-FE passaria nas
+cinco checagens. As duas camadas são necessárias. Nunca remova nenhuma delas,
+nem publique um núcleo sem o código SGS no rótulo.
 
 ---
 
@@ -114,6 +126,12 @@ Os workflows definem `LANG=C.UTF-8` e `LC_ALL=C.UTF-8`. Em locale C, o R lê os
 fontes como latin1 e publica "inflação" como "infla....o", além de rotular os
 eixos com meses em inglês. Os gráficos usam `rotulo_mes()` em vez de
 `date_labels = "%b"` para não depender de locale nem no caso de o env sumir.
+
+Em locale C, `source()` e o carregador do testthat interpretam o encoding dos
+arquivos de forma **diferente**: o mesmo texto acentuado chega como bytes UTF-8
+crus de um lado e como caractere de outro. Por isso o teste que fixa os nomes
+das séries compara apenas o esqueleto ASCII — e por isso não se deve usar
+escapes `\uXXXX` em teste que compare com literal vindo de `R/`.
 
 ---
 
