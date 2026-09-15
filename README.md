@@ -89,13 +89,33 @@ quarto render boletim.qmd
 
 ### Núcleos oficiais do BCB
 
-O relatório publica os cinco núcleos oficiais (médias aparadas com suavização,
-exclusão EX0 e EX3, dupla ponderação e percentil 55) — **mas não confia no
-número da série**.
+O relatório publica os cinco núcleos do conjunto que o BCB usa em análise de
+conjuntura, definido no [Estudo Especial 102/2021](https://www.bcb.gov.br/conteudo/relatorioinflacao/EstudosEspeciais/EE102_Atualizacao_conjunto_nucleos_inflacao_comumente_considerados_pelo_BCB_para_analise_de_conjuntura_economica.pdf)
+— que aposentou EX1, EX2 e as médias aparadas *sem* suavização, e acrescentou o
+percentil 55:
+
+| Núcleo | SGS | Nome no SGS |
+|---|---|---|
+| Médias aparadas com suavização | **4466** | *…Núcleo médias aparadas com suavização* |
+| Exclusão EX0 | **11427** | *…Núcleo por exclusão - EX0* |
+| Exclusão EX3 | **27839** | *…Núcleo por exclusão - EX3* |
+| Dupla ponderação | **16122** | *…Núcleo de dupla ponderação* |
+| Percentil 55 | **28750** | *…Núcleo Percentil 55* |
+
+> ⚠️ **28751 não é o percentil 55** — é o núcleo Ex-alimentação e energia
+> (EX-FE), que não faz parte deste conjunto. A primeira versão do catálogo
+> trazia 28751 como P55; o relatório teria publicado um gráfico rotulado
+> "Percentil 55" com os dados do EX-FE. Os pares (código, nome) foram conferidos
+> um a um no [SGS](https://www3.bcb.gov.br/sgspub/) e estão fixados em
+> `tests/testthat/test-nucleos-oficiais.R`.
+
+Esse defeito **passaria despercebido pela verificação comportamental** descrita
+abaixo: o EX-FE é um núcleo legítimo do IPCA e exibe todas as propriedades
+exigidas. As duas camadas cobrem coisas diferentes e ambas são necessárias.
 
 Não existe endpoint público que devolva o *nome* de uma série do SGS em JSON,
-então a identidade é verificada pelo comportamento. Antes de publicar, cada
-série precisa exibir as propriedades estruturais de um núcleo do IPCA:
+então a identidade também é verificada pelo comportamento. Antes de publicar,
+cada série precisa exibir as propriedades estruturais de um núcleo do IPCA:
 
 | Verificação | Por quê |
 |---|---|
@@ -107,7 +127,13 @@ série precisa exibir as propriedades estruturais de um núcleo do IPCA:
 
 Série reprovada é descartada com aviso no log do render, e o relatório segue com
 as medidas derivadas do SIDRA. O rótulo publicado sempre carrega o código SGS,
-para auditoria direta em [www3.bcb.gov.br/sgspub](https://www3.bcb.gov.br/sgspub/).
+para auditoria direta em [www3.bcb.gov.br/sgspub](https://www3.bcb.gov.br/sgspub/)
+— foi exatamente essa auditoria que revelou a troca do 28751.
+
+O que a verificação comportamental **não** faz: distinguir dois núcleos do mesmo
+índice. Ela pega série grosseiramente trocada (nível em vez de variação,
+frequência errada, unidade errada); não pega EX-FE no lugar de P55. Para isso
+existe o teste que fixa o par (código, nome).
 
 Diagnóstico manual do catálogo:
 
@@ -169,14 +195,16 @@ render funciona igual.
 cd tests && Rscript testthat.R
 ```
 
-76 testes das funções puras de `R/tratamento.R`, `R/nucleos.R` e
+98 testes das funções puras de `R/tratamento.R`, `R/nucleos.R` e
 `R/coleta_sgs.R`: acumulados, trimestre anualizado, média móvel, difusão, média
 aparada ponderada, variação por média de período, contagem de meses fora da
-banda da meta e a verificação de identidade dos núcleos oficiais — esta última
-exercitando tanto um núcleo legítimo quanto os quatro modos de série trocada
-(índice de nível, série diária, série mais volátil que o cheio e indicador não
-correlacionado). Cada teste corresponde a uma definição verificável ou a um
-defeito corrigido, incluindo os dois que documentam o erro do IBC-Br.
+banda da meta, a verificação de identidade dos núcleos oficiais — exercitando
+tanto um núcleo legítimo quanto os quatro modos de série trocada (índice de
+nível, série diária, série mais volátil que o cheio e indicador não
+correlacionado) — e o bloco que **fixa o par (código, nome)** de cada núcleo do
+SGS. Cada teste corresponde a uma definição verificável ou a um defeito
+corrigido, incluindo os dois que documentam o erro do IBC-Br e o que impede o
+28751 de voltar ao catálogo.
 
 O CI roda os testes **antes** do render: uma regressão de cálculo falha em
 segundos, enquanto o render completo consulta as APIs e leva minutos.
@@ -189,6 +217,12 @@ Os workflows definem `LANG=C.UTF-8` e `LC_ALL=C.UTF-8`. Em locale C o R lê os
 fontes como latin1 e publica "inflação" como "infla....o"; os eixos também
 saem com meses em inglês. Os gráficos usam `rotulo_mes()` em vez de
 `date_labels = "%b"` para não depender do locale nem quando a variável falta.
+
+Em locale C, `source()` e o carregador do testthat interpretam o encoding dos
+arquivos de forma **diferente**: o mesmo texto acentuado chega como bytes UTF-8
+crus de um lado e como caractere de outro. Por isso o teste que fixa os nomes
+das séries compara apenas o esqueleto ASCII, e escapes `\uXXXX` não devem ser
+usados em teste que compare com literal vindo de `R/`.
 
 ## Licença
 
