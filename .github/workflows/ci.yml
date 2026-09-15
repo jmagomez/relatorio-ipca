@@ -17,6 +17,10 @@ on:
 permissions:
   contents: read
 
+env:
+  LANG: C.UTF-8
+  LC_ALL: C.UTF-8
+
 jobs:
   render:
     runs-on: ubuntu-latest
@@ -30,9 +34,24 @@ jobs:
 
       - name: Instala pacotes R
         run: |
-          Rscript -e "pkgs <- c('rbcb','sidrar','dplyr','tidyr','lubridate','slider','ggplot2','scales','knitr','rmarkdown','kableExtra'); install.packages(pkgs); faltando <- setdiff(pkgs, rownames(installed.packages())); if (length(faltando) > 0) stop('Pacotes NAO instalados: ', paste(faltando, collapse=', '))"
+          Rscript -e "pkgs <- c('rbcb','sidrar','dplyr','tidyr','lubridate','slider','ggplot2','scales','knitr','rmarkdown','kableExtra','ggiraph','testthat'); install.packages(pkgs); faltando <- setdiff(pkgs, rownames(installed.packages())); if (length(faltando) > 0) stop('Pacotes NAO instalados: ', paste(faltando, collapse=', '))"
 
       - uses: quarto-dev/quarto-actions/setup@v2
 
+      # Testes primeiro: falha de cálculo aparece em segundos, enquanto o
+      # render completo consulta as APIs do BCB e do SIDRA e leva minutos.
+      - name: Testes das funções de tratamento
+        working-directory: tests
+        run: Rscript testthat.R
+
       - name: Render
         run: quarto render
+
+      # O render consulta as APIs em tempo real: se uma fonte estiver fora do
+      # ar, o HTML sai com "indisponível" em vez de falhar. Este passo torna
+      # isso visível no log do CI em vez de deixar passar calado.
+      - name: Verifica se o relatório saiu com indicadores ausentes
+        run: |
+          if grep -q "indisponível" relatorio_ipca.html; then
+            echo "::warning::O relatório renderizou com ao menos um indicador indisponível."
+          fi
