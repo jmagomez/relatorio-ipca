@@ -169,7 +169,7 @@ render funciona igual.
 cd tests && Rscript testthat.R
 ```
 
-75 testes das funções puras de `R/tratamento.R`, `R/nucleos.R` e
+76 testes das funções puras de `R/tratamento.R`, `R/nucleos.R` e
 `R/coleta_sgs.R`: acumulados, trimestre anualizado, média móvel, difusão, média
 aparada ponderada, variação por média de período, contagem de meses fora da
 banda da meta e a verificação de identidade dos núcleos oficiais — esta última
