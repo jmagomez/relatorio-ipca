@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-09-14"
+subtitle: "Data de referência: 2026-09-21"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-09-14"
+data_ref_boletim <- "2026-09-21"
 
 # ATENÇÃO — cifrão em texto markdown:
 # o _quarto.yml deste projeto desliga a extensão markdown-tex_math_dollars
@@ -40,11 +40,23 @@ fmt <- function(x, digits = 2, prefix = "", suffix = "") {
 }
 
 # Formata datas de referência no padrão mm/aaaa, sem depender de locale.
+# Uso: séries mensais (IPCA, IBC-Br), cujo dia é sempre "01" e não é
+# informativo.
 fmt_data <- function(x) {
   if (is.null(x) || length(x) != 1 || is.na(x)) {
     return("indicador indisponível nesta semana")
   }
   format(as.Date(x), "%m/%Y")
+}
+
+# Formata datas de referência no padrão dd/mm/aaaa, sem depender de locale.
+# Uso: séries diárias (câmbio, Selic), em que o dia da última observação é
+# informativo e não pode ser truncado.
+fmt_data_dia <- function(x) {
+  if (is.null(x) || length(x) != 1 || is.na(x)) {
+    return("indicador indisponível nesta semana")
+  }
+  format(as.Date(x), "%d/%m/%Y")
 }
 
 dados <- read.csv("output/dados/resumo.csv", stringsAsFactors = FALSE)
@@ -86,8 +98,8 @@ library(knitr)
 quadro <- data.frame(
   Indicador = c(
     paste0("IPCA (", fmt_data(ipca$data_ref), ")"),
-    paste0("Câmbio R\\$/US\\$ (", fmt_data(cambio$data_ref), ")"),
-    "Selic meta (% a.a.; variações em p.p.)",
+    paste0("Câmbio R\\$/US\\$ (", fmt_data_dia(cambio$data_ref), ")"),
+    paste0("Selic meta (", fmt_data_dia(selic$data_ref), "; % a.a.; variações em p.p.)"),
     paste0("IBC-Br (", fmt_data(ibc$data_ref), ")")
   ),
   `Último valor` = c(
@@ -137,7 +149,7 @@ com deflação pontual em um mês isolado da série.
 
 A taxa de câmbio R\$/US\$ (SGS&nbsp;1), cotação de fechamento, está em
 `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de
-`r fmt_data(cambio$data_ref)`, último fechamento disponível para a série. No
+`r fmt_data_dia(cambio$data_ref)`, último fechamento disponível para a série. No
 mês, o Real apreciou-se frente ao dólar, com a cotação recuando
 `r fmt(abs(cambio$var_mes), suffix = "%")`. No acumulado do ano e no
 acumulado em doze meses, o movimento tem o mesmo sentido — recuo de
@@ -151,11 +163,11 @@ em todos os prazos observados nesta semana.
 
 A meta da taxa Selic (SGS&nbsp;432), definida pelo Comitê de Política
 Monetária (Copom), está em `r fmt(selic$valor_atual, suffix = "% a.a.")`
-na referência de `r fmt_data(selic$data_ref)`. O nível da taxa é expresso em
+na referência de `r fmt_data_dia(selic$data_ref)`. O nível da taxa é expresso em
 percentual ao ano (% a.a.); já as variações abaixo são reportadas em pontos
 percentuais (p.p.), nunca em pontos-base. No mês, a variação foi de
-`r fmt(selic$var_mes, suffix = " p.p.")`, o que corresponde a estabilidade da
-meta na comparação mensal. No acumulado do ano, a variação é de
+`r fmt(selic$var_mes, suffix = " p.p.")`, o que corresponde a recuo da meta
+na comparação mensal. No acumulado do ano, a variação é de
 `r fmt(selic$var_ano, suffix = " p.p.")`, e no acumulado em doze meses a
 variação também é de `r fmt(selic$var_12m, suffix = " p.p.")`; em ambos os
 horizontes mais longos, o resultado corresponde a recuo da meta em relação ao
@@ -180,12 +192,13 @@ recuo na margem em relação ao mês imediatamente anterior.
 No horizonte de doze meses, a série original (fonte: Banco Central,
 SGS&nbsp;24363) apresenta variação de `r fmt(ibc$var_12m, suffix = "%")`,
 resultado positivo no interanual. No acumulado do ano, a mesma série
-original (SGS&nbsp;24363) mostra variação de
-`r fmt(ibc$var_ano, suffix = "%")`. Assim, a série dessazonalizada recua na
-margem mensal enquanto a série original permanece em patamar superior ao do
-mesmo período do ano anterior — os dois resultados são reportados
-separadamente, sem síntese entre a leitura de curtíssimo prazo (SA) e a
-leitura interanual (original).
+original (SGS&nbsp;24363), calculada por média de período (média dos meses
+do ano corrente contra a média dos mesmos meses do ano anterior), mostra
+variação de `r fmt(ibc$var_ano, suffix = "%")`. Assim, a série
+dessazonalizada recua na margem mensal enquanto a série original permanece
+em patamar superior ao do mesmo período do ano anterior — os dois resultados
+são reportados separadamente, sem síntese entre a leitura de curtíssimo
+prazo (SA) e a leitura interanual (original).
 
 ---
 
