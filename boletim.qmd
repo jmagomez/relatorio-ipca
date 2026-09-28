@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-09-21"
+subtitle: "Data de referência: 2026-09-28"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-09-21"
+data_ref_boletim <- "2026-09-28"
 
 # ATENÇÃO — cifrão em texto markdown:
 # o _quarto.yml deste projeto desliga a extensão markdown-tex_math_dollars
@@ -149,15 +149,15 @@ com deflação pontual em um mês isolado da série.
 
 A taxa de câmbio R\$/US\$ (SGS&nbsp;1), cotação de fechamento, está em
 `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de
-`r fmt_data_dia(cambio$data_ref)`, último fechamento disponível para a série. No
-mês, o Real apreciou-se frente ao dólar, com a cotação recuando
-`r fmt(abs(cambio$var_mes), suffix = "%")`. No acumulado do ano e no
-acumulado em doze meses, o movimento tem o mesmo sentido — recuo de
-`r fmt(abs(cambio$var_ano), suffix = "%")` e
-`r fmt(abs(cambio$var_12m), suffix = "%")`, respectivamente —, o que
-corresponde a valorização do Real nos três horizontes considerados: mensal,
-anual e de doze meses. Em síntese, o dólar ficou mais barato frente ao Real
-em todos os prazos observados nesta semana.
+`r fmt_data_dia(cambio$data_ref)`, último fechamento disponível para a série.
+No mês, a cotação subiu `r fmt(abs(cambio$var_mes), suffix = "%")`, o que
+corresponde a depreciação do Real frente ao dólar na margem. Já no acumulado
+do ano e no acumulado em doze meses o sentido se inverte: recuo de
+`r fmt(abs(cambio$var_ano), suffix = "%")` e de
+`r fmt(abs(cambio$var_12m), suffix = "%")`, respectivamente, o que
+corresponde a valorização do Real nesses dois horizontes mais longos. Em
+síntese, o dólar ficou mais caro frente ao Real no mês, mas continua mais
+barato do que estava no início do ano e há doze meses.
 
 ### Taxa Selic
 
@@ -171,7 +171,8 @@ na comparação mensal. No acumulado do ano, a variação é de
 `r fmt(selic$var_ano, suffix = " p.p.")`, e no acumulado em doze meses a
 variação também é de `r fmt(selic$var_12m, suffix = " p.p.")`; em ambos os
 horizontes mais longos, o resultado corresponde a recuo da meta em relação ao
-patamar observado um ano antes.
+patamar observado um ano antes. Os três horizontes apontam, portanto, na
+mesma direção: ciclo de corte de juros em curso.
 
 ---
 
