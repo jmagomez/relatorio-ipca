@@ -37,3 +37,7 @@ Thumbs.db
 #                          esse commit que o workflow usa como sinal de "houve
 #                          boletim novo" para disparar o e-mail. Ignorá-lo faria
 #                          o publicador não gerar commit e o envio nunca ocorrer.
+
+# Corpo do e-mail montado por R/corpo_email.R. Gerado a cada execução do
+# workflow (e localmente, ao rodar o script), nunca editado à mão.
+corpo-email.html

@@ -103,33 +103,25 @@ jobs:
       # Os dois passos abaixo só rodam quando um boletim NOVO foi publicado.
       # Sem essa condição, uma execução em que o revisor não aprovou (push
       # ignorado) enviaria por e-mail o boletim.html ANTIGO como se fosse novo.
-      # `sed` substituiria a PRIMEIRA ocorrência de "</body>" em cada linha, e
-      # só casaria a grafia exata em minúsculas. Um HTML com </BODY> ou com a
-      # string dentro de um script sairia com o rodapé no lugar errado — ou sem
-      # rodapé nenhum, silenciosamente. Aqui a âncora é a ÚLTIMA ocorrência,
-      # sem diferenciar maiúsculas, e a ausência dela é erro.
-      - name: Insere link do Connect Cloud no corpo do e-mail
+      #
+      # O corpo do e-mail NÃO é mais o boletim.html com um rodapé costurado.
+      # Aquele arquivo tem 1.859 KB, dos quais 5,9 KB são conteúdo — o resto é
+      # tema Bootstrap, JS e fontes em base64 — e o Gmail trunca o corpo acima
+      # de ~102 KB, então o boletim chegava cortado. R/corpo_email.R monta um
+      # corpo de ~4,6 KB feito para cliente de e-mail, já com o link do Connect
+      # Cloud, e falha se algum dia passar do limite.
+      #
+      # data_ref vai por env e ENTRE ASPAS de propósito. Em execução agendada
+      # `inputs.data_ref` é vazio; interpolado direto no comando, o shell some
+      # com o argumento e "corpo-email.html" vira o primeiro parâmetro — o
+      # script então publica "Data de referência: corpo-email.html" no e-mail,
+      # sem erro nenhum. Verificado. Passar por env também impede que o
+      # conteúdo do input seja interpretado como comando.
+      - name: Monta o corpo leve do e-mail
         if: success() && steps.push.outputs.publicado == 'true'
-        run: |
-          python3 - <<'PY'
-          import re, sys
-          from pathlib import Path
-
-          RODAPE = (
-              '<hr><p><a href="https://connect.posit.cloud/jmagomez/content/'
-              '019f5da4-43ea-2bed-6bbd-90e3f7aaca72">'
-              '📈 Abrir a versão interativa no Connect Cloud</a></p>'
-          )
-          html = Path("boletim.html").read_text(encoding="utf-8")
-          casos = list(re.finditer(r"</body\s*>", html, flags=re.IGNORECASE))
-          if not casos:
-              sys.exit("boletim.html não tem </body> — render provavelmente falhou.")
-          fim = casos[-1].start()
-          Path("corpo-email.html").write_text(
-              html[:fim] + RODAPE + html[fim:], encoding="utf-8"
-          )
-          print("corpo-email.html gerado")
-          PY
+        env:
+          DATA_REF: ${{ inputs.data_ref }}
+        run: Rscript R/corpo_email.R "$DATA_REF" corpo-email.html
 
       - name: Envia boletim por e-mail
         if: success() && steps.push.outputs.publicado == 'true'
