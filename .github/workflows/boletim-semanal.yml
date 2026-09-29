@@ -25,7 +25,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           # token com escrita necessário para o git push funcionar
           token: ${{ secrets.GITHUB_TOKEN }}
@@ -92,7 +92,7 @@ jobs:
             echo "publicado=false" >> "$GITHUB_OUTPUT"
           fi
 
-      - uses: actions/upload-artifact@v4
+      - uses: actions/upload-artifact@v7
         if: always()   # salva logs mesmo se o job falhar
         with:
           name: logs-${{ github.run_id }}
@@ -125,7 +125,7 @@ jobs:
 
       - name: Envia boletim por e-mail
         if: success() && steps.push.outputs.publicado == 'true'
-        uses: dawidd6/action-send-mail@v6
+        uses: dawidd6/action-send-mail@v22
         with:
           server_address: smtp.gmail.com
           server_port: 465
@@ -140,7 +140,7 @@ jobs:
 
       - name: Envia report por e-mail
         if: always()   # envia tanto em sucesso quanto em falha
-        uses: dawidd6/action-send-mail@v6
+        uses: dawidd6/action-send-mail@v22
         with:
           server_address: smtp.gmail.com
           server_port: 465
