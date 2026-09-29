@@ -66,5 +66,9 @@ carta aberta do presidente do BC ao Ministro da Fazenda).
 Use sit$maior_sequencia_fora e sit$meses_fora_sob_regime para o
 contexto — ambos já contam apenas a partir de jan/2025. NÃO use
 df_meta$meses_consecutivos_fora para falar do regime: esse
-contador corre sobre a série inteira e inclui meses de 2024, sob
-a meta de ano-calendário anterior, que tinha outro centro.
+contador corre sobre a série inteira, que começa em dez/1980, e
+aplicado a ela a banda de hoje acha uma corrida de 208 meses
+terminada em mar/1998. Nenhum desses meses era avaliado contra
+3,00% ± 1,5 — a meta da época era de ano-calendário e tinha outro
+centro. Escrever esse número no boletim seria julgar o passado
+pela régua do presente.

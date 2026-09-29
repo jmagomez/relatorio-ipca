@@ -153,10 +153,14 @@ a posição dentro da banda, a folga até o teto e a contagem de meses
 consecutivos fora — são seis que caracterizam descumprimento.
 
 **A contagem do regime reinicia em jan/2025.** `avaliar_meta_continua()` roda
-o contador sobre a série inteira, e ali a corrida mais longa tem 13 meses —
-mas começou em out/2024, sob a meta de ano-calendário anterior, cujo centro
-era outro (3,25% em 2023, 3,50% em 2022). Sob o regime contínuo a maior
-corrida tem **10** meses. Use `sit$maior_sequencia_fora`, nunca
+o contador sobre a série inteira, que começa em dez/1980: aplicar a banda de
+3,00% ± 1,5 a ela produz uma corrida de **208 meses** encerrada em mar/1998.
+Mesmo dentro da janela de seis anos do gráfico o contador ainda acha 28 meses
+(dez/2020 a mar/2023) e 13 meses (out/2024 a out/2025) — meses avaliados, na
+época, contra metas de ano-calendário de outro centro (3,75% em 2021, 3,50%
+em 2022, 3,25% em 2023). Sob o regime contínuo a maior corrida tem **10**
+meses (jan a out/2025), e 12 dos 20 meses ficaram fora. Use
+`sit$maior_sequencia_fora` e `sit$meses_fora_sob_regime`, nunca
 `df_meta$meses_consecutivos_fora`, para falar do regime.
 
 Pela mesma razão, `grafico_meta_continua()` desenha a faixa **e os pontos de
