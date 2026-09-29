@@ -9,31 +9,35 @@ relatorio_ipca.html
 /output/*.png
 /output/figure/
 
-# Figuras intermediárias do knitr
-figure/
-
-# Sessão R
+# Ambiente do R
 .Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
 *.Rproj
 
-# Logs de execução geram ruído de diff a cada rodada; mantidos apenas os que
-# a rotina precisa reler entre agentes.
-/logs/erros.md
+# Python
+__pycache__/
+*.py[cod]
+.venv/
+venv/
 
-# Sistema operacional / editores
+# Sistema
 .DS_Store
 Thumbs.db
-.idea/
-.vscode/
 
-# Versionados de propósito:
-#   output/dados/*.csv   — séries coletadas, entrada do boletim semanal
-#   logs/revisao.md      — parecer do revisor, lido pelo publicador
+# O que NÃO entra aqui, e por quê:
+#
+#   output/dados/*.csv   — série histórica coletada das APIs. Versionada de
+#                          propósito: é o único registro do que cada edição
+#                          publicou, e o que permite reproduzir um boletim
+#                          antigo sem depender de a API ainda responder.
 #   logs/execucao.jsonl  — trilha de execução dos agentes
 #   boletim.html         — NÃO desversione. O agente publicador o commita, e é
 #                          esse commit que o workflow usa como sinal de "houve
 #                          boletim novo" para disparar o e-mail. Ignorá-lo faria
 #                          o publicador não gerar commit e o envio nunca ocorrer.
+
+# Corpo do e-mail montado por R/corpo_email.R. Gerado a cada execução do
+# workflow (e localmente, ao rodar o script), nunca editado à mão.
+corpo-email.html
