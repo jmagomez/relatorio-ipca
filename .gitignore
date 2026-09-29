@@ -32,7 +32,6 @@ Thumbs.db
 # Versionados de propósito:
 #   output/dados/*.csv   — séries coletadas, entrada do boletim semanal
 #   logs/revisao.md      — parecer do revisor, lido pelo publicador
-#   logs/execucao.jsonl  — trilha de execução dos agentes
 #   boletim.html         — NÃO desversione. O agente publicador o commita, e é
 #                          esse commit que o workflow usa como sinal de "houve
 #                          boletim novo" para disparar o e-mail. Ignorá-lo faria

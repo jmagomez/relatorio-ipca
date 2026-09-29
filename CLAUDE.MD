@@ -107,6 +107,10 @@ Essa linha é a única proteção que sobrevive à regeneração semanal do
 `boletim.qmd` pelo redator — **não remova, e não redeclare `from:`** no YAML do
 `boletim.qmd`.
 
+A proteção vale para o corpo do texto, **não para dentro de uma opção de
+chunk**: num `#| fig-cap` o cifrão sem escape volta a ser delimitador de
+fórmula. Ali escreva `R\$/US\$`.
+
 ---
 
 ## Cache do Quarto
@@ -167,6 +171,15 @@ Pela mesma razão, `grafico_meta_continua()` desenha a faixa **e os pontos de
 "fora da banda"** apenas a partir de jan/2025. Sombrear 3,00% ± 1,5 sobre 2022
 afirmaria que aquele IPCA era avaliado contra uma meta que ainda não existia.
 
+**A frase é uma só: `frase_meta(sit)`.** Havia duas redações do mesmo
+parágrafo — uma montada por `corpo_email.R`, outra escrita à mão pelo redator
+dentro do `.qmd` — e elas divergiram: com os mesmos dados o e-mail dizia "no
+2º mês seguido dentro" enquanto o boletim publicava "Há 0 mês(es)
+consecutivo(s) fora da banda", porque `sit$meses_consecutivos_fora` vale 0
+justamente quando o índice está dentro. `frase_meta()` recebe o par de marcas
+de ênfase (Markdown para o `.qmd`, `<strong>` para o e-mail) e devolve o mesmo
+texto. Não parafraseie: imprima.
+
 ### Selic em degraus
 
 `geom_step()`, nunca `geom_line()`. A meta só muda por decisão do Copom e fica
@@ -177,14 +190,17 @@ sugere taxas intermediárias que nunca vigoraram.
 
 O workflow enviava como corpo o `boletim.html` inteiro: **1.859 KB, dos quais
 5,9 KB são conteúdo** — o resto é tema Bootstrap, JS e fontes em base64. O
-mesmo arquivo ia anexado, somando ~3,7 MB por envio, e o Gmail trunca corpo
-acima de ~102 KB.
+mesmo arquivo ia anexado, e o Gmail trunca corpo acima de ~102 KB.
 
 `R/corpo_email.R` monta um corpo próprio de ~4,6 KB: tabela com estilo inline,
 **sem `<svg>`, sem `<script>`, sem CSS externo, sem base64**. Gmail e Outlook
 removem SVG inline — gráfico posto no corpo do e-mail simplesmente não
 apareceria. Os gráficos ficam no `boletim.html` anexado e na versão do Connect
 Cloud, que abrem em navegador.
+
+Medido no envio real: o e-mail completo caiu de **4,38 MB para 3,03 MB**. O
+corpo caiu de ~1,82 MB (truncado pelo Gmail) para 4,6 KB; o anexo subiu 22%,
+porque agora carrega os quatro gráficos.
 
 O HTML é escrito direto, sem passar pelo Pandoc, o que elimina de vez o risco
 de `R$/US$` virar fórmula matemática.
@@ -204,7 +220,8 @@ R/
                   verificação de identidade em tempo de execução
   gerar_resumo.R  monta output/dados/resumo.csv (4 indicadores)
   graficos.R      ggplot2 + camada interativa opcional (ggiraph)
-  graficos_boletim.R  gráficos do boletim semanal e leitura da meta contínua
+  graficos_boletim.R  gráficos do boletim semanal, situacao_meta() e
+                  frase_meta() — a frase da meta, usada pelo .qmd e pelo e-mail
   corpo_email.R   corpo leve do e-mail (~4,6 KB), executável por Rscript
 tests/testthat/   testes das funções puras — rodam no CI antes do render
 relatorio_ipca.qmd  relatório mensal
@@ -223,3 +240,9 @@ boletim.qmd         boletim semanal (regenerado pelo redator)
 - `boletim.html` é versionado de propósito. O agente publicador o commita, e é
   esse commit que sinaliza "há boletim novo" para o workflow disparar o e-mail.
   Desversioná-lo faria o envio parar em silêncio.
+- **Não há Python neste repositório.** Havia um hook `PostToolUse` em
+  `.claude/settings.json` que chamava `python -c` para anotar cada agente em
+  `logs/execucao.jsonl`. O arquivo parou de receber entradas em jul/2026, ficou
+  com 36 linhas malformadas (alguém gravou um JSON multilinha num `.jsonl`) e
+  nenhum código jamais o leu. Foi removido com o log. Se um dia a trilha de
+  execução voltar a fazer falta, ela deve ser escrita em R, como o resto.
