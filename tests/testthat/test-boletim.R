@@ -20,7 +20,7 @@ serie_meta_sintetica <- function() {
 }
 
 
-# ── O anacronismo: aplicar a regra de 2025 ao passado ────────────────────────
+# ── O anacronismo: aplicar a regra de 2025 ao passado ──────────────────────
 #
 # A meta contínua vigora desde jan/2025. Antes disso a meta era de
 # ano-calendário e o centro era OUTRO: 3,25% em 2023, 3,50% em 2022. Contar
@@ -63,7 +63,7 @@ test_that("a contagem sob o regime não conta meses que o regime não governava"
 })
 
 
-# ── A leitura que faltava ──────────────────────────────────────────────
+# ── A leitura que faltava ─────────────────────────────────────────
 #
 # O boletim publicava o acumulado em doze meses como número solto, sem dizer
 # onde ele cai dentro da banda que define o regime.
@@ -83,6 +83,44 @@ test_that("situacao_meta informa a folga até o teto e o estado corrente", {
   expect_equal(s$limite_descumprimento, 6L)
 })
 
+test_that("frase_meta nunca publica uma contagem zerada", {
+  # O boletim de 2026-09-28 saiu com "Há 0 mês(es) consecutivo(s) fora da
+  # banda" — o agente redator montava a frase à mão a partir de
+  # sit$meses_consecutivos_fora, que vale 0 justamente quando o índice está
+  # DENTRO. A redação pior aparecia quando a notícia era boa.
+  dentro <- avaliar_meta_continua(
+    data.frame(data = seq(as.Date("2025-01-01"), by = "month", length.out = 20),
+               acum_12m = c(rep(5.2, 18), 4.0, 4.2)),
+    META_CENTRO, META_BANDA
+  )
+  f <- frase_meta(situacao_meta(dentro))
+
+  # \\b evita casar o "0 m" de "20 meses", que é legítimo.
+  expect_false(grepl("\\b0 m", f))
+  expect_false(grepl("\\b0º", f))
+  expect_false(grepl("mês\\(es\\)|consecutivo\\(s\\)", f))
+  expect_true(grepl("dentro", f))
+})
+
+test_that("frase_meta usa a ênfase pedida e serve aos dois destinos", {
+  df <- avaliar_meta_continua(
+    data.frame(data = seq(as.Date("2025-01-01"), by = "month", length.out = 6),
+               acum_12m = c(4.0, 4.1, 4.2, 4.3, 4.4, 4.22)),
+    META_CENTRO, META_BANDA
+  )
+  s <- situacao_meta(df)
+
+  md <- frase_meta(s)
+  html <- frase_meta(s, c("<strong>", "</strong>"))
+
+  # O .qmd recebe Markdown; o corpo do e-mail recebe HTML. Mesma frase.
+  expect_true(grepl("**", md, fixed = TRUE))
+  expect_false(grepl("<strong>", md, fixed = TRUE))
+  expect_true(grepl("<strong>", html, fixed = TRUE))
+
+  expect_null(frase_meta(NULL))
+})
+
 test_that("série fora da banda reporta a corrida corrente", {
   df <- avaliar_meta_continua(
     data.frame(data = seq(as.Date("2025-01-01"), by = "month", length.out = 4),
@@ -95,7 +133,7 @@ test_that("série fora da banda reporta a corrida corrente", {
 })
 
 
-# ── Selic em degraus, não em reta ───────────────────────────────────────
+# ── Selic em degraus, não em reta ───────────────────────────────────
 #
 # A meta Selic só muda por decisão do Copom e fica constante entre reuniões.
 # Ligar as observações por reta inclinada desenha um ajuste gradual que não
@@ -113,7 +151,7 @@ test_that("o gráfico da Selic usa geom_step", {
 })
 
 
-# ── Falha por série, nunca global ───────────────────────────────────────
+# ── Falha por série, nunca global ───────────────────────────────────
 #
 # Regra do projeto: uma fonte fora do ar vira "indicador indisponível nesta
 # semana" e não derruba o boletim.
@@ -140,7 +178,7 @@ test_that("ler_serie_boletim devolve NULL para arquivo inexistente ou malformado
 })
 
 
-# ── O corpo do e-mail ────────────────────────────────────────────────
+# ── O corpo do e-mail ───────────────────────────────────────────
 #
 # O workflow enviava como corpo o boletim.html inteiro: 1.859 KB para 5,9 KB
 # de conteúdo. O Gmail trunca acima de ~102 KB.
