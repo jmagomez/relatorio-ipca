@@ -135,18 +135,77 @@ escapes `\uXXXX` em teste que compare com literal vindo de `R/`.
 
 ---
 
+## Boletim semanal: gráficos e corpo do e-mail
+
+O boletim publicava quatro números numa tabela e **nenhum gráfico**, enquanto
+`output/dados/` guardava 560 meses de IPCA (desde 1980), 283 de IBC-Br (desde
+2003) e dois anos de Selic e câmbio diários. A série era coletada, versionada
+e nunca desenhada.
+
+As funções moram em `R/graficos_boletim.R`, **não no `boletim.qmd`**. O `.qmd`
+é reescrito do zero toda segunda pelo agente redator: gráfico escrito lá
+dentro dura uma semana. É a mesma razão do aviso sobre o `_quarto.yml`.
+
+### Meta contínua no boletim
+
+O acumulado em doze meses não sai como número solto. `situacao_meta()` devolve
+a posição dentro da banda, a folga até o teto e a contagem de meses
+consecutivos fora — são seis que caracterizam descumprimento.
+
+**A contagem do regime reinicia em jan/2025.** `avaliar_meta_continua()` roda
+o contador sobre a série inteira, que começa em dez/1980: aplicar a banda de
+3,00% ± 1,5 a ela produz uma corrida de **208 meses** encerrada em mar/1998.
+Mesmo dentro da janela de seis anos do gráfico o contador ainda acha 28 meses
+(dez/2020 a mar/2023) e 13 meses (out/2024 a out/2025) — meses avaliados, na
+época, contra metas de ano-calendário de outro centro (3,75% em 2021, 3,50%
+em 2022, 3,25% em 2023). Sob o regime contínuo a maior corrida tem **10**
+meses (jan a out/2025), e 12 dos 20 meses ficaram fora. Use
+`sit$maior_sequencia_fora` e `sit$meses_fora_sob_regime`, nunca
+`df_meta$meses_consecutivos_fora`, para falar do regime.
+
+Pela mesma razão, `grafico_meta_continua()` desenha a faixa **e os pontos de
+"fora da banda"** apenas a partir de jan/2025. Sombrear 3,00% ± 1,5 sobre 2022
+afirmaria que aquele IPCA era avaliado contra uma meta que ainda não existia.
+
+### Selic em degraus
+
+`geom_step()`, nunca `geom_line()`. A meta só muda por decisão do Copom e fica
+constante entre reuniões; reta inclinada desenha ajuste gradual inexistente e
+sugere taxas intermediárias que nunca vigoraram.
+
+### Corpo do e-mail
+
+O workflow enviava como corpo o `boletim.html` inteiro: **1.859 KB, dos quais
+5,9 KB são conteúdo** — o resto é tema Bootstrap, JS e fontes em base64. O
+mesmo arquivo ia anexado, somando ~3,7 MB por envio, e o Gmail trunca corpo
+acima de ~102 KB.
+
+`R/corpo_email.R` monta um corpo próprio de ~4,6 KB: tabela com estilo inline,
+**sem `<svg>`, sem `<script>`, sem CSS externo, sem base64**. Gmail e Outlook
+removem SVG inline — gráfico posto no corpo do e-mail simplesmente não
+apareceria. Os gráficos ficam no `boletim.html` anexado e na versão do Connect
+Cloud, que abrem em navegador.
+
+O HTML é escrito direto, sem passar pelo Pandoc, o que elimina de vez o risco
+de `R$/US$` virar fórmula matemática.
+
+---
+
 ## Estrutura
 
 ```
 R/
   coleta.R        coleta do relatório mensal (rbcb + sidrar)
-  coleta_sgs.R    coleta do boletim semanal (catálogo de séries SGS)
+  coleta_sgs.R    coleta do boletim semanal (catálogo de séries SGS);
+                  casa de raiz_projeto()
   tratamento.R    funções puras: acumulados, anualizado, difusão,
                   média aparada, variação por média de período, meta contínua
   nucleos.R       núcleo e difusão do SIDRA; núcleos oficiais do SGS com
                   verificação de identidade em tempo de execução
   gerar_resumo.R  monta output/dados/resumo.csv (4 indicadores)
   graficos.R      ggplot2 + camada interativa opcional (ggiraph)
+  graficos_boletim.R  gráficos do boletim semanal e leitura da meta contínua
+  corpo_email.R   corpo leve do e-mail (~4,6 KB), executável por Rscript
 tests/testthat/   testes das funções puras — rodam no CI antes do render
 relatorio_ipca.qmd  relatório mensal
 boletim.qmd         boletim semanal (regenerado pelo redator)
