@@ -55,7 +55,7 @@ suppressMessages({
 })
 
 
-# ── Regime de metas ────────────────────────────────────────────────────
+# ── Regime de metas ─────────────────────────────────────────────
 #
 # A meta CONTÍNUA vigora desde janeiro de 2025: centro de 3,00% com tolerância
 # de ±1,5 p.p., avaliada mês a mês sobre o IPCA acumulado em doze meses, e o
@@ -111,13 +111,15 @@ situacao_meta <- function(df_meta) {
 
   # A contagem que vale é a do REGIME, reiniciada em jan/2025.
   #
-  # `avaliar_meta_continua()` roda o contador sobre a série inteira, e na
-  # série inteira a corrida mais longa tem 13 meses — mas ela começou em
-  # out/2024, quando a meta ainda era de ano-calendário, com outro centro.
-  # Contar esses três meses como descumprimento do regime contínuo é aplicar
-  # a regra de 2025 a um período que ela não governava. Sob o regime, a maior
-  # corrida tem 10 meses (jan/2025 a out/2025) — ainda bem acima dos seis que
-  # caracterizam descumprimento, mas é este o número correto.
+  # `avaliar_meta_continua()` roda o contador sobre a série inteira, que
+  # começa em dez/1980: aplicada a ela, a banda de hoje acha uma corrida de
+  # 208 meses terminada em mar/1998. A corrida recente, de 13 meses, começou
+  # em out/2024, quando a meta ainda era de ano-calendário e o centro era
+  # outro. Nenhum desses meses era avaliado contra 3,00% ± 1,5; contá-los
+  # como descumprimento do regime contínuo é aplicar a regra de 2025 a um
+  # período que ela não governava. Sob o regime, a maior corrida tem 10 meses
+  # (jan/2025 a out/2025) — ainda bem acima dos seis que caracterizam
+  # descumprimento, mas é este o número correto.
   sob_regime <- df_meta[df_meta$data >= INICIO_META_CONTINUA, , drop = FALSE]
   maior_fora_regime <- 0L
   if (nrow(sob_regime) > 0) {
@@ -144,6 +146,69 @@ situacao_meta <- function(df_meta) {
     maior_sequencia_fora = maior_fora_regime,
     meses_fora_sob_regime = sum(sob_regime$fora_da_banda, na.rm = TRUE),
     total_meses_sob_regime = nrow(sob_regime)
+  )
+}
+
+
+#' A situação da meta escrita por extenso, uma vez só
+#'
+#' Havia duas redações do mesmo parágrafo: uma em `corpo_email.R`, montada por
+#' este código, e outra escrita à mão pelo agente redator dentro do
+#' `boletim.qmd`. Com os mesmos dados, o e-mail dizia "no 2º mês seguido
+#' dentro" enquanto o boletim publicava "Há 0 mês(es) consecutivo(s) fora da
+#' banda" — redação que só aparece justamente quando a notícia é boa.
+#'
+#' Reunir as duas aqui resolve o caso zero de uma vez e impede que voltem a
+#' divergir: o `.qmd` é reescrito toda semana, este arquivo não.
+#'
+#' @param s Saída de `situacao_meta()`.
+#' @param enfase Par (abre, fecha) para destacar os números. O padrão é
+#'   Markdown, que serve ao `.qmd`; `corpo_email.R` passa `<strong>`.
+#' @return Parágrafo único, ou `NULL` quando não há situação a relatar.
+frase_meta <- function(s, enfase = c("**", "**")) {
+  if (is.null(s)) {
+    return(NULL)
+  }
+  abre <- enfase[1]
+  fecha <- enfase[2]
+  destaque <- function(x) paste0(abre, x, fecha)
+
+  banda <- paste0("banda de ", fmt_br(s$piso, 2), "% a ", fmt_br(s$teto, 2), "%")
+
+  if (s$fora) {
+    posicao <- if (s$acum_12m > s$teto) "acima do teto" else "abaixo do piso"
+    corpo <- paste0(
+      "está ", destaque(posicao), " da ", banda, ", pelo ",
+      s$meses_consecutivos_fora, "º mês consecutivo. ",
+      "São ", s$limite_descumprimento,
+      " meses seguidos fora que caracterizam descumprimento e obrigam o ",
+      "presidente do BC a enviar carta aberta ao Ministro da Fazenda."
+    )
+  } else {
+    # O trecho da sequência some quando ela é zero. Dizer "no 0º mês seguido
+    # dentro" é pior do que não dizer nada.
+    corpo <- paste0(
+      "está ", destaque("dentro"), " da ", banda,
+      ", a ", fmt_br(s$folga_ate_o_teto, 2), " p.p. do teto",
+      if (s$meses_consecutivos_dentro > 0) {
+        paste0(" e no ", s$meses_consecutivos_dentro, "º mês seguido dentro")
+      } else {
+        ""
+      },
+      "."
+    )
+  }
+
+  contexto <- paste0(
+    " Desde a entrada do regime contínuo, em jan/2025, foram ",
+    s$meses_fora_sob_regime, " dos ", s$total_meses_sob_regime,
+    " meses fora da banda, com sequência máxima de ",
+    s$maior_sequencia_fora, " meses consecutivos."
+  )
+
+  paste0(
+    "IPCA acumulado em 12 meses: ", destaque(paste0(fmt_br(s$acum_12m, 2), "%")),
+    " (", format(as.Date(s$data), "%m/%Y"), "). O índice ", corpo, contexto
   )
 }
 
