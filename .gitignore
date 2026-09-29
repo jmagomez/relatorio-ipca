@@ -9,29 +9,29 @@ relatorio_ipca.html
 /output/*.png
 /output/figure/
 
-# Ambiente do R
+# Figuras intermediárias do knitr
+figure/
+
+# Sessão R
 .Rproj.user/
 .Rhistory
 .RData
 .Ruserdata
 *.Rproj
 
-# Python
-__pycache__/
-*.py[cod]
-.venv/
-venv/
+# Logs de execução geram ruído de diff a cada rodada; mantidos apenas os que
+# a rotina precisa reler entre agentes.
+/logs/erros.md
 
-# Sistema
+# Sistema operacional / editores
 .DS_Store
 Thumbs.db
+.idea/
+.vscode/
 
-# O que NÃO entra aqui, e por quê:
-#
-#   output/dados/*.csv   — série histórica coletada das APIs. Versionada de
-#                          propósito: é o único registro do que cada edição
-#                          publicou, e o que permite reproduzir um boletim
-#                          antigo sem depender de a API ainda responder.
+# Versionados de propósito:
+#   output/dados/*.csv   — séries coletadas, entrada do boletim semanal
+#   logs/revisao.md      — parecer do revisor, lido pelo publicador
 #   logs/execucao.jsonl  — trilha de execução dos agentes
 #   boletim.html         — NÃO desversione. O agente publicador o commita, e é
 #                          esse commit que o workflow usa como sinal de "houve
