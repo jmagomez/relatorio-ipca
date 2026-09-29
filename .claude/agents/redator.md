@@ -25,3 +25,46 @@ como "R/US".
 
 Atividade: cita IBC-Br SA (var_mes) E original (var_12m),
 identificando a fonte de cada número.
+
+GRÁFICOS — obrigatórios, e NUNCA escritos à mão aqui.
+
+O boletim passou meses publicando quatro números numa tabela
+enquanto output/dados/ guardava 560 meses de IPCA, 283 de
+IBC-Br e dois anos de Selic e câmbio diários. A série inteira
+era coletada, versionada e nunca desenhada.
+
+Inclua no setup, depois do fmt():
+
+    source("R/graficos_boletim.R")
+    serie_ipca <- ler_serie_boletim("output/dados/ipca.csv")
+    df_meta <- avaliar_meta_continua(
+      calcular_acumulado_12m(dplyr::rename(serie_ipca, ipca_mm = valor)),
+      META_CENTRO, META_BANDA
+    )
+    sit <- situacao_meta(df_meta)
+
+E um chunk por seção, cada um com `#| fig-cap`:
+
+    Inflação        grafico_meta_continua(df_meta)
+    Câmbio e juros  grafico_selic(ler_serie_boletim("output/dados/selic.csv"))
+                    grafico_cambio(ler_serie_boletim("output/dados/cambio.csv"))
+    Atividade       grafico_ibcbr(ler_serie_boletim("output/dados/ibcbr_sa.csv"))
+
+As funções devolvem NULL quando a série falta — envolva cada
+chamada em `if (!is.null(g)) print(g)` para manter a regra de
+falha por série. Não reimplemente nenhum gráfico no .qmd: este
+arquivo é reescrito do zero toda semana e o que estiver aqui
+dentro se perde. É a mesma razão do aviso sobre o _quarto.yml.
+
+META CONTÍNUA: na seção Inflação, o acumulado em 12 meses NÃO
+pode sair como número solto. Diga onde ele cai na banda usando
+`sit`: sit$acum_12m, sit$piso, sit$teto, sit$folga_ate_o_teto,
+sit$fora, sit$meses_consecutivos_fora e sit$limite_descumprimento
+(6 meses seguidos fora caracterizam descumprimento e obrigam
+carta aberta do presidente do BC ao Ministro da Fazenda).
+
+Use sit$maior_sequencia_fora e sit$meses_fora_sob_regime para o
+contexto — ambos já contam apenas a partir de jan/2025. NÃO use
+df_meta$meses_consecutivos_fora para falar do regime: esse
+contador corre sobre a série inteira e inclui meses de 2024, sob
+a meta de ano-calendário anterior, que tinha outro centro.
