@@ -84,7 +84,7 @@ URL_CONNECT <- paste0(
 LIMITE_GMAIL_BYTES <- 102400L
 
 
-# ── Formatação ─────────────────────────────────────────────────────────
+# ── Formatação ─────────────────────────────────────────────────
 
 #' Escapa o que não pode ir cru para dentro do HTML
 esc_html <- function(x) {
@@ -122,7 +122,7 @@ fmt_data_br <- function(x, dia = FALSE) {
 }
 
 
-# ── Leitura do resumo ──────────────────────────────────────────────────
+# ── Leitura do resumo ────────────────────────────────────────────
 
 ler_resumo <- function(caminho) {
   if (!file.exists(caminho)) {
@@ -149,55 +149,15 @@ extrai_indicador <- function(df, nome) {
 }
 
 
-# ── A leitura da meta ─────────────────────────────────────────────────
+# ── A leitura da meta ───────────────────────────────────────────
 
-#' Frase de abertura: onde o IPCA está em relação à banda
-#'
-#' É a informação que o boletim não dava. O acumulado em doze meses saía como
-#' número solto — "a variação alcança 4,22%" — sem dizer que o teto da banda é
-#' 4,50%, nem quantos meses consecutivos fora caracterizam descumprimento.
-frase_meta <- function(s) {
-  if (is.null(s)) {
-    return(NULL)
-  }
-  banda <- paste0(
-    "banda de ", fmt_br(s$piso, 2), "% a ", fmt_br(s$teto, 2), "%"
-  )
-  if (s$fora) {
-    posicao <- if (s$acum_12m > s$teto) "acima do teto" else "abaixo do piso"
-    corpo <- paste0(
-      "está <strong>", posicao, "</strong> da ", banda, ", pelo ",
-      s$meses_consecutivos_fora, "º mês consecutivo. ",
-      "São ", s$limite_descumprimento,
-      " meses seguidos fora que caracterizam descumprimento e obrigam o ",
-      "presidente do BC a enviar carta aberta ao Ministro da Fazenda."
-    )
-  } else {
-    corpo <- paste0(
-      "está <strong>dentro</strong> da ", banda,
-      ", a ", fmt_br(s$folga_ate_o_teto, 2), " p.p. do teto",
-      if (s$meses_consecutivos_dentro > 0) {
-        paste0(" e no ", s$meses_consecutivos_dentro, "º mês seguido dentro")
-      } else {
-        ""
-      },
-      "."
-    )
-  }
-  contexto <- paste0(
-    " Desde a entrada do regime contínuo, em jan/2025, foram ",
-    s$meses_fora_sob_regime, " dos ", s$total_meses_sob_regime,
-    " meses fora da banda, com sequência máxima de ",
-    s$maior_sequencia_fora, " meses consecutivos."
-  )
-  paste0(
-    "IPCA acumulado em 12 meses: <strong>", fmt_br(s$acum_12m, 2),
-    "%</strong> (", fmt_data_br(s$data), "). O índice ", corpo, contexto
-  )
-}
+# `frase_meta()` mora em `graficos_boletim.R`, carregado acima. Havia uma
+# cópia aqui e outra redação, escrita à mão, dentro do `boletim.qmd`: com os
+# mesmos dados o e-mail dizia "no 2º mês seguido dentro" e o boletim dizia
+# "Há 0 mês(es) consecutivo(s) fora da banda". Uma definição só.
 
 
-# ── Montagem do HTML ──────────────────────────────────────────────────
+# ── Montagem do HTML ────────────────────────────────────────────
 
 .css_celula <- "padding:8px 10px;border-bottom:1px solid #e5e7eb;"
 .css_num <- paste0(.css_celula, "text-align:right;font-variant-numeric:tabular-nums;")
@@ -237,7 +197,7 @@ montar_corpo <- function(data_ref = as.character(Sys.Date()),
     situacao <- situacao_meta(df_meta)
   }
 
-  abertura <- frase_meta(situacao)
+  abertura <- frase_meta(situacao, c("<strong>", "</strong>"))
 
   linhas <- paste0(
     linha_tabela(
@@ -309,7 +269,7 @@ montar_corpo <- function(data_ref = as.character(Sys.Date()),
 }
 
 
-# ── Execução por linha de comando ────────────────────────────────────────
+# ── Execução por linha de comando ──────────────────────────────────
 
 # Só executa quando o arquivo É o script invocado, nunca quando é apenas
 # carregado por `source()`.
