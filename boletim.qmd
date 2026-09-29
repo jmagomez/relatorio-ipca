@@ -143,7 +143,7 @@ if (!is.null(g)) print(g) else cat("Gráfico indisponível nesta semana.")
 A taxa de câmbio R\$/US\$ (SGS&nbsp;1), cotação de fechamento, está em `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de `r fmt_data_dia(cambio$data_ref)`. No mês, a cotação subiu `r fmt(abs(cambio$var_mes), suffix = "%")`, o que corresponde a depreciação do Real na margem. No acumulado do ano e em doze meses o sentido se inverte: recuo de `r fmt(abs(cambio$var_ano), suffix = "%")` e de `r fmt(abs(cambio$var_12m), suffix = "%")`, respectivamente, o que corresponde a valorização do Real nesses horizontes mais longos.
 
 ```{r grafico-cambio}
-#| fig-cap: "Câmbio R$/US$, cotação diária de fechamento (venda), últimos dois anos. Fonte: Banco Central, SGS 1."
+#| fig-cap: "Câmbio R\\$/US\\$, cotação diária de fechamento (venda), últimos dois anos. Fonte: Banco Central, SGS 1."
 g <- grafico_cambio(ler_serie_boletim("output/dados/cambio.csv"))
 if (!is.null(g)) print(g) else cat("Gráfico indisponível nesta semana.")
 ```
