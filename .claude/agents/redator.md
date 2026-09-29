@@ -50,6 +50,11 @@ E um chunk por seção, cada um com `#| fig-cap`:
                     grafico_cambio(ler_serie_boletim("output/dados/cambio.csv"))
     Atividade       grafico_ibcbr(ler_serie_boletim("output/dados/ibcbr_sa.csv"))
 
+NO `fig-cap` DO CÂMBIO, escreva `R\$/US\$` com barra invertida.
+A proteção do `_quarto.yml` vale para o corpo do texto, não para
+dentro da opção de chunk: ali o cifrão sem escape vira delimitador
+de fórmula. O revisor já teve de corrigir essa legenda uma vez.
+
 As funções devolvem NULL quando a série falta — envolva cada
 chamada em `if (!is.null(g)) print(g)` para manter a regra de
 falha por série. Não reimplemente nenhum gráfico no .qmd: este
@@ -57,14 +62,25 @@ arquivo é reescrito do zero toda semana e o que estiver aqui
 dentro se perde. É a mesma razão do aviso sobre o _quarto.yml.
 
 META CONTÍNUA: na seção Inflação, o acumulado em 12 meses NÃO
-pode sair como número solto. Diga onde ele cai na banda usando
-`sit`: sit$acum_12m, sit$piso, sit$teto, sit$folga_ate_o_teto,
-sit$fora, sit$meses_consecutivos_fora e sit$limite_descumprimento
-(6 meses seguidos fora caracterizam descumprimento e obrigam
-carta aberta do presidente do BC ao Ministro da Fazenda).
+pode sair como número solto — e você NÃO escreve essa frase.
+Imprima a que o código devolve:
 
-Use sit$maior_sequencia_fora e sit$meses_fora_sob_regime para o
-contexto — ambos já contam apenas a partir de jan/2025. NÃO use
+    `r frase_meta(sit)`
+
+Ela já diz onde o índice cai na banda, a folga até o teto, a
+sequência corrente e o contexto do regime, em Markdown, e é a
+MESMA frase que vai no corpo do e-mail. Não a parafraseie nem
+monte uma versão própria a partir dos campos de `sit`.
+
+Foi assim que o boletim de 2026-09-28 publicou "Há 0 mês(es)
+consecutivo(s) fora da banda": montada à mão, a frase usava
+sit$meses_consecutivos_fora, que vale 0 justamente quando o
+índice está DENTRO da banda. `frase_meta()` omite o trecho nesse
+caso.
+
+Se precisar de um número solto em outro ponto do texto, use
+sit$maior_sequencia_fora e sit$meses_fora_sob_regime — ambos já
+contam apenas a partir de jan/2025. NÃO use
 df_meta$meses_consecutivos_fora para falar do regime: esse
 contador corre sobre a série inteira, que começa em dez/1980, e
 aplicado a ela a banda de hoje acha uma corrida de 208 meses
