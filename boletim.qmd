@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-09-28"
+subtitle: "Data de referência: 2026-10-12"
 format:
   html:
     theme: cosmo
@@ -15,10 +15,9 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-09-28"
+data_ref_boletim <- "2026-10-12"
 
 # Cifrão: o _quarto.yml desliga tex_math_dollars, então "R$/US$" sai literal.
-# Aqui o cifrão é escrito escapado (\$), válido com ou sem essa proteção.
 # NÃO redeclare `from:` neste YAML e NÃO edite o _quarto.yml.
 
 # Mensagem-padrão quando o valor é NA ou NULL: nunca imprimir "NA" no HTML.
@@ -76,6 +75,86 @@ ipca   <- extrai("IPCA")
 cambio <- extrai("Cambio R$/US$")
 selic  <- extrai("Selic meta")
 ibc    <- extrai("IBC-Br")
+
+# Direção pelo sinal: devolve NA quando x é NA/NULL, para o texto tratar à parte.
+indisp <- function(x) is.null(x) || length(x) != 1 || is.na(x)
+dir_txt <- function(x, pos, neg, zero) {
+  if (indisp(x)) return(NA_character_)
+  if (x > 0) pos else if (x < 0) neg else zero
+}
+# "alta de 3,95%", "queda de 9,33%", "estabilidade (0,00%)" ou indisponível.
+mov_txt <- function(x) {
+  if (indisp(x)) return("indicador indisponível nesta semana")
+  if (x == 0) return(paste0("estabilidade (", fmt(x, suffix = "%"), ")"))
+  paste0(dir_txt(x, "alta", "queda", ""), " de ", fmt(abs(x), suffix = "%"))
+}
+# Sentido comum a três variações (1 alta, -1 queda, 0 estável/misto/NA).
+sentido_comum <- function(a, b, c) {
+  s <- c(a, b, c)
+  if (any(vapply(s, indisp, logical(1)))) return(0)
+  if (all(s > 0)) 1 else if (all(s < 0)) -1 else 0
+}
+
+# Câmbio (R$/US$): subir a cotação é desvalorização do Real; cair é valorização.
+cambio_mes_txt <- if (indisp(cambio$var_mes)) {
+  "No mês, a variação da cotação está indisponível nesta semana."
+} else if (cambio$var_mes == 0) {
+  "No mês, a cotação ficou estável, sem variação do Real na margem."
+} else {
+  paste0(
+    "No mês, a cotação ", dir_txt(cambio$var_mes, "subiu", "recuou", ""), " ",
+    fmt(abs(cambio$var_mes), suffix = "%"), ", o que corresponde ",
+    dir_txt(cambio$var_mes, "à desvalorização", "à valorização", ""),
+    " do Real na margem."
+  )
+}
+cambio_sent <- sentido_comum(cambio$var_mes, cambio$var_ano, cambio$var_12m)
+cambio_hor_txt <- if (cambio_sent != 0) {
+  paste0(
+    "No acumulado do ano e em doze meses o sentido é o mesmo: ",
+    dir_txt(cambio$var_ano, "alta", "queda", ""), " de ",
+    fmt(abs(cambio$var_ano), suffix = "%"), " e de ",
+    fmt(abs(cambio$var_12m), suffix = "%"), ", respectivamente."
+  )
+} else {
+  paste0(
+    "No acumulado do ano, ", mov_txt(cambio$var_ano),
+    "; em doze meses, ", mov_txt(cambio$var_12m), "."
+  )
+}
+
+# Selic: síntese dos três horizontes só quando os três concordam.
+selic_sent <- sentido_comum(selic$var_mes, selic$var_ano, selic$var_12m)
+selic_sintese <- if (selic_sent < 0) {
+  "Os três horizontes apontam recuo da meta."
+} else if (selic_sent > 0) {
+  "Os três horizontes apontam alta da meta."
+} else {
+  "Os horizontes não apontam um mesmo sentido para a meta, ou há indicador indisponível."
+}
+
+# IPCA no ano e IBC-Br mensal.
+ipca_ano_txt <- if (indisp(ipca$var_ano)) {
+  "No acumulado do ano, o indicador está indisponível nesta semana"
+} else {
+  paste0(
+    "No acumulado do ano, ", dir_txt(ipca$var_ano, "a alta", "a queda", "a variação"),
+    " é de ", fmt(abs(ipca$var_ano), suffix = "%")
+  )
+}
+ibc_mes_txt <- if (indisp(ibc$var_mes)) {
+  paste0(
+    "Na comparação mensal, a variação da série com ajuste sazonal (fonte: Banco Central, ",
+    "SGS&nbsp;24364) está indisponível nesta semana."
+  )
+} else {
+  paste0(
+    "Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central, SGS&nbsp;24364) ",
+    "apresenta variação de ", fmt(ibc$var_mes, suffix = "%"), " em ", fmt_data(ibc$data_ref),
+    " frente ao mês anterior, ",
+    dir_txt(ibc$var_mes, "uma alta", "uma queda", "estabilidade"), "."
+  )
+}
 ```
 
 ## Quadro
@@ -120,13 +199,9 @@ kable(quadro, align = c("l", "r", "r", "r"))
 
 ## Inflação
 
-O Índice Nacional de Preços ao Consumidor Amplo (IPCA), apurado pelo IBGE e coletado via SGS&nbsp;433, registrou variação de `r fmt(ipca$var_mes, suffix = "%")` em `r fmt_data(ipca$data_ref)`, o mês mais recente disponível para a série. No acumulado do ano, a alta é de `r fmt(ipca$var_ano, suffix = "%")`; em doze meses, `r fmt(ipca$var_12m, suffix = "%")`.
+O Índice Nacional de Preços ao Consumidor Amplo (IPCA), apurado pelo IBGE e coletado via SGS&nbsp;433, registrou variação de `r fmt(ipca$var_mes, suffix = "%")` em `r fmt_data(ipca$data_ref)`, o mês mais recente disponível para a série. `r ipca_ano_txt`; em doze meses, `r fmt(ipca$var_12m, suffix = "%")`.
 
-**Meta contínua.** Desde janeiro de 2025 a meta é avaliada mês a mês sobre o IPCA acumulado em doze meses, com centro de `r fmt(META_CENTRO, suffix = "%")` e tolerância de ± `r fmt(META_BANDA, digits = 1)` p.p., isto é, banda de `r fmt(sit$piso, suffix = "%")` a `r fmt(sit$teto, suffix = "%")`. Em `r fmt_data(sit$data)`, o acumulado em 12 meses é de `r fmt(sit$acum_12m, suffix = "%")`, `r if (is.null(sit)) "situação frente à banda indisponível nesta semana" else if (isTRUE(sit$fora)) "FORA da banda" else "dentro da banda"`. `r if (!is.null(sit) && !isTRUE(sit$fora)) paste0("Restam ", fmt(sit$folga_ate_o_teto, suffix = " p.p."), " de folga até o teto.")`
-
-`r if (!is.null(sit) && isTRUE(sit$fora)) paste0("O acumulado excede o teto em ", fmt(-sit$folga_ate_o_teto, suffix = " p.p."), " (ou está abaixo do piso). São ", fmt(sit$meses_consecutivos_fora, digits = 0), " meses consecutivos fora da banda; ", fmt(sit$limite_descumprimento, digits = 0), " seguidos caracterizam descumprimento e obrigam o presidente do Banco Central a enviar carta aberta ao Ministro da Fazenda.") else if (!is.null(sit)) paste0("Há ", fmt(sit$meses_consecutivos_fora, digits = 0), " mês(es) consecutivo(s) fora da banda; o limite que caracteriza descumprimento, com carta aberta do presidente do Banco Central ao Ministro da Fazenda, é de ", fmt(sit$limite_descumprimento, digits = 0), " meses seguidos.")`
-
-Contexto sob o regime vigente (contagem a partir de jan/2025): o acumulado esteve fora da banda em `r fmt(sit$meses_fora_sob_regime, digits = 0)` dos `r fmt(sit$total_meses_sob_regime, digits = 0)` meses avaliados, e a maior sequência contínua fora da banda foi de `r fmt(sit$maior_sequencia_fora, digits = 0)` meses.
+`r if (is.null(sit)) "Situação frente à meta contínua indisponível nesta semana." else frase_meta(sit)`
 
 ```{r grafico-meta}
 #| fig-cap: "IPCA acumulado em 12 meses e banda da meta contínua (3,00% ± 1,5 p.p., válida desde jan/2025). Fonte: IBGE, via SGS 433."
@@ -140,7 +215,7 @@ if (!is.null(g)) print(g) else cat("Gráfico indisponível nesta semana.")
 
 ### Taxa de câmbio
 
-A taxa de câmbio R\$/US\$ (SGS&nbsp;1), cotação de fechamento, está em `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de `r fmt_data_dia(cambio$data_ref)`. No mês, a cotação subiu `r fmt(abs(cambio$var_mes), suffix = "%")`, o que corresponde a depreciação do Real na margem. No acumulado do ano e em doze meses o sentido se inverte: recuo de `r fmt(abs(cambio$var_ano), suffix = "%")` e de `r fmt(abs(cambio$var_12m), suffix = "%")`, respectivamente, o que corresponde a valorização do Real nesses horizontes mais longos.
+A taxa de câmbio R$/US$ (SGS&nbsp;1), cotação de fechamento, está em `r fmt(cambio$valor_atual, prefix = "R\\$ ")` na referência de `r fmt_data_dia(cambio$data_ref)`. `r cambio_mes_txt` `r cambio_hor_txt`
 
 ```{r grafico-cambio}
 #| fig-cap: "Câmbio R\\$/US\\$, cotação diária de fechamento (venda), últimos dois anos. Fonte: Banco Central, SGS 1."
@@ -150,7 +225,7 @@ if (!is.null(g)) print(g) else cat("Gráfico indisponível nesta semana.")
 
 ### Taxa Selic
 
-A meta da taxa Selic (SGS&nbsp;432), definida pelo Copom, está em `r fmt(selic$valor_atual, suffix = "% a.a.")` na referência de `r fmt_data_dia(selic$data_ref)`. As variações são reportadas em pontos percentuais (p.p.), nunca em pontos-base: `r fmt(selic$var_mes, suffix = " p.p.")` no mês, `r fmt(selic$var_ano, suffix = " p.p.")` no ano e `r fmt(selic$var_12m, suffix = " p.p.")` em doze meses. Os três horizontes apontam recuo da meta, compatível com ciclo de corte de juros.
+A meta da taxa Selic (SGS&nbsp;432), definida pelo Copom, está em `r fmt(selic$valor_atual, suffix = "% a.a.")` na referência de `r fmt_data_dia(selic$data_ref)`. As variações são reportadas em pontos percentuais (p.p.): `r fmt(selic$var_mes, suffix = " p.p.")` no mês, `r fmt(selic$var_ano, suffix = " p.p.")` no ano e `r fmt(selic$var_12m, suffix = " p.p.")` em doze meses. `r selic_sintese`
 
 ```{r grafico-selic}
 #| fig-cap: "Meta da taxa Selic (% a.a.), em degraus, últimos dois anos. Fonte: Banco Central, SGS 432."
@@ -162,11 +237,11 @@ if (!is.null(g)) print(g) else cat("Gráfico indisponível nesta semana.")
 
 ## Atividade
 
-O Índice de Atividade Econômica do Banco Central (IBC-Br) tem como mês de referência mais recente `r fmt_data(ibc$data_ref)`, defasado em relação à data deste boletim (`r data_ref_boletim`). O nível da série original (fonte: Banco Central, SGS&nbsp;24363) é de `r fmt(ibc$valor_atual, suffix = " (índice)")`.
+O Índice de Atividade Econômica do Banco Central (IBC-Br) tem como mês de referência mais recente `r fmt_data(ibc$data_ref)`, defasado em relação à data deste boletim (`r data_ref_boletim`).
 
-Na comparação mensal, a série com ajuste sazonal (fonte: Banco Central, SGS&nbsp;24364) apresenta variação de `r fmt(ibc$var_mes, suffix = "%")` em `r fmt_data(ibc$data_ref)` frente ao mês anterior.
+`r ibc_mes_txt`
 
-No horizonte de doze meses, a série original (fonte: Banco Central, SGS&nbsp;24363), calculada por média de período, apresenta variação de `r fmt(ibc$var_12m, suffix = "%")`. No acumulado do ano, a mesma série original (SGS&nbsp;24363), também por média de período (média dos meses do ano corrente contra a dos mesmos meses do ano anterior), mostra variação de `r fmt(ibc$var_ano, suffix = "%")`. As leituras dessazonalizada (margem) e original (interanual) são reportadas separadamente, sem síntese entre elas.
+No horizonte de doze meses, a série original (fonte: Banco Central, SGS&nbsp;24363), calculada por média de período, apresenta variação de `r fmt(ibc$var_12m, suffix = "%")`. No acumulado do ano, a mesma série original (SGS&nbsp;24363), também por média de período, mostra variação de `r fmt(ibc$var_ano, suffix = "%")`. As leituras dessazonalizada (margem) e original (interanual) são reportadas separadamente, sem síntese entre elas.
 
 ```{r grafico-ibcbr}
 #| fig-cap: "IBC-Br com ajuste sazonal, nível do índice, últimos 48 meses. Fonte: Banco Central, SGS 24364."
@@ -176,4 +251,4 @@ if (!is.null(g)) print(g) else cat("Gráfico indisponível nesta semana.")
 
 ---
 
-*Boletim elaborado com base nos dados disponíveis em `r data_ref_boletim`. Fontes primárias: Banco Central do Brasil, Sistema Gerenciador de Séries Temporais (SGS), via `rbcb::get_series`. Séries: IPCA mensal (SGS&nbsp;433), câmbio R\$/US\$ (SGS&nbsp;1), Selic meta (SGS&nbsp;432), IBC-Br original (SGS&nbsp;24363) e IBC-Br com ajuste sazonal (SGS&nbsp;24364).*
+*Boletim elaborado com base nos dados disponíveis em `r data_ref_boletim`. Fontes primárias: Banco Central do Brasil, Sistema Gerenciador de Séries Temporais (SGS), via `rbcb::get_series`. Séries: IPCA mensal (SGS&nbsp;433), câmbio R$/US$ (SGS&nbsp;1), Selic meta (SGS&nbsp;432), IBC-Br original (SGS&nbsp;24363) e IBC-Br com ajuste sazonal (SGS&nbsp;24364).*
