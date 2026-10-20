@@ -23,6 +23,10 @@ figure/
 # a rotina precisa reler entre agentes.
 /logs/erros.md
 
+# stdout+stderr do passo "Gera boletim" (ver boletim-semanal.yml) — só serve
+# para o e-mail de status e o artifact da run; nunca é lido entre agentes.
+/logs/agente-ultima-execucao.log
+
 # Sistema operacional / editores
 .DS_Store
 Thumbs.db
