@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-10-12"
+subtitle: "Data de referência: 2026-11-02"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-10-12"
+data_ref_boletim <- "2026-11-02"
 
 # Cifrão: o _quarto.yml desliga tex_math_dollars, então "R$/US$" sai literal.
 # NÃO redeclare `from:` neste YAML e NÃO edite o _quarto.yml.
