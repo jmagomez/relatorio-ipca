@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-11-02"
+subtitle: "Data de referência: 2026-11-09"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-11-02"
+data_ref_boletim <- "2026-11-09"
 
 # Cifrão: o _quarto.yml desliga tex_math_dollars, então "R$/US$" sai literal.
 # NÃO redeclare `from:` neste YAML e NÃO edite o _quarto.yml.
@@ -50,11 +50,15 @@ fmt_data_dia <- function(x) {
 source("R/tratamento.R")
 source("R/graficos_boletim.R")
 serie_ipca <- ler_serie_boletim("output/dados/ipca.csv")
-df_meta <- avaliar_meta_continua(
-  calcular_acumulado_12m(dplyr::rename(serie_ipca, ipca_mm = valor)),
-  META_CENTRO, META_BANDA
-)
-sit <- situacao_meta(df_meta)
+df_meta <- NULL
+sit <- NULL
+if (!is.null(serie_ipca)) {
+  df_meta <- avaliar_meta_continua(
+    calcular_acumulado_12m(dplyr::rename(serie_ipca, ipca_mm = valor)),
+    META_CENTRO, META_BANDA
+  )
+  sit <- situacao_meta(df_meta)
+}
 
 dados <- read.csv("output/dados/resumo.csv", stringsAsFactors = FALSE)
 
@@ -95,6 +99,41 @@ sentido_comum <- function(a, b, c) {
   if (all(s > 0)) 1 else if (all(s < 0)) -1 else 0
 }
 
+# Câmbio (R$/US$): descrição calculada de output/dados/cambio.csv, sem conjectura.
+# Base do mês = última cotação em ou antes da mesma data um mês atrás; saltos =
+# variações diárias de 4% ou mais (em módulo) dentro da janela base -> hoje.
+cambio_saltos_txt <- local({
+  vazio <- ""
+  s <- ler_serie_boletim("output/dados/cambio.csv")
+  if (is.null(s)) return(vazio)
+  s <- s[!is.na(s$valor), , drop = FALSE]
+  if (nrow(s) < 2) return(vazio)
+  fim <- max(s$data)
+  alvo <- seq(fim, by = "-1 month", length.out = 2)[2]
+  base <- s[s$data <= alvo, , drop = FALSE]
+  if (nrow(base) == 0) return(vazio)
+  base <- base[nrow(base), ]
+  s$var_dia <- c(NA_real_, 100 * (s$valor[-1] / s$valor[-nrow(s)] - 1))
+  saltos <- s[s$data > base$data & !is.na(s$var_dia) & abs(s$var_dia) >= 4, , drop = FALSE]
+  intervalo <- paste0(
+    "O intervalo vai de ", fmt(base$valor, prefix = "R\\$ "), " (", fmt_data_dia(base$data),
+    ") a ", fmt(s$valor[nrow(s)], prefix = "R\\$ "), " (", fmt_data_dia(fim), "). "
+  )
+  if (nrow(saltos) == 0) return(intervalo)
+  descr <- vapply(seq_len(nrow(saltos)), function(i) {
+    paste0(
+      if (saltos$var_dia[i] > 0) "uma alta de " else "uma queda de ",
+      fmt(abs(saltos$var_dia[i]), suffix = "%"), " em ", fmt_data_dia(saltos$data[i])
+    )
+  }, character(1))
+  paste0(
+    intervalo, "Ele inclui ", paste(descr, collapse = " e "),
+    ", de modo que a variação mensal concentra ",
+    if (nrow(saltos) > 1) "saltos pontuais" else "um salto pontual",
+    " e deve ser lida com cautela; os acumulados do ano e em doze meses são menos sensíveis a eles. "
+  )
+})
+
 # Câmbio (R$/US$): subir a cotação é desvalorização do Real; cair é valorização.
 cambio_mes_txt <- if (indisp(cambio$var_mes)) {
   "No mês, a variação da cotação está indisponível nesta semana."
@@ -103,9 +142,9 @@ cambio_mes_txt <- if (indisp(cambio$var_mes)) {
 } else {
   paste0(
     "No mês, a cotação ", dir_txt(cambio$var_mes, "subiu", "recuou", ""), " ",
-    fmt(abs(cambio$var_mes), suffix = "%"), ", o que corresponde ",
+    fmt(abs(cambio$var_mes), suffix = "%"), ", sentido que corresponde ",
     dir_txt(cambio$var_mes, "à desvalorização", "à valorização", ""),
-    " do Real na margem."
+    " do Real. ", cambio_saltos_txt
   )
 }
 cambio_sent <- sentido_comum(cambio$var_mes, cambio$var_ano, cambio$var_12m)
