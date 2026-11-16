@@ -1,6 +1,6 @@
 ---
 title: "Boletim Macro Semanal"
-subtitle: "Data de referência: 2026-11-09"
+subtitle: "Data de referência: 2026-11-16"
 format:
   html:
     theme: cosmo
@@ -15,7 +15,7 @@ lang: pt
 knitr::opts_chunk$set(echo = FALSE, warning = FALSE, message = FALSE)
 
 # Data de referência deste boletim
-data_ref_boletim <- "2026-11-09"
+data_ref_boletim <- "2026-11-16"
 
 # Cifrão: o _quarto.yml desliga tex_math_dollars, então "R$/US$" sai literal.
 # NÃO redeclare `from:` neste YAML e NÃO edite o _quarto.yml.
@@ -121,16 +121,18 @@ cambio_saltos_txt <- local({
   )
   if (nrow(saltos) == 0) return(intervalo)
   descr <- vapply(seq_len(nrow(saltos)), function(i) {
+    idx <- which(s$data == saltos$data[i])
     paste0(
       if (saltos$var_dia[i] > 0) "uma alta de " else "uma queda de ",
-      fmt(abs(saltos$var_dia[i]), suffix = "%"), " em ", fmt_data_dia(saltos$data[i])
+      fmt(abs(saltos$var_dia[i]), suffix = "%"), " entre ",
+      fmt_data_dia(s$data[idx - 1]), " (", fmt(s$valor[idx - 1], digits = 4, prefix = "R\\$ "), ") e ",
+      fmt_data_dia(saltos$data[i]), " (", fmt(saltos$valor[i], digits = 4, prefix = "R\\$ "), ")"
     )
   }, character(1))
   paste0(
     intervalo, "Ele inclui ", paste(descr, collapse = " e "),
-    ", de modo que a variação mensal concentra ",
-    if (nrow(saltos) > 1) "saltos pontuais" else "um salto pontual",
-    " e deve ser lida com cautela; os acumulados do ano e em doze meses são menos sensíveis a eles. "
+    ", variação que ocorre dentro da alta mensal de ", fmt(cambio$var_mes, suffix = "%"), ". ",
+    "Os dados da série mostram o movimento, mas não informam sua causa, e este boletim não a atribui. "
   )
 })
 
@@ -168,6 +170,9 @@ selic_sintese <- if (selic_sent < 0) {
   "Os três horizontes apontam recuo da meta."
 } else if (selic_sent > 0) {
   "Os três horizontes apontam alta da meta."
+} else if (!any(vapply(list(selic$var_mes, selic$var_ano, selic$var_12m), indisp, logical(1))) &&
+           selic$var_mes == 0 && selic$var_ano < 0 && selic$var_12m < 0) {
+  "A meta ficou estável no mês, e o recuo aparece nos horizontes de ano e de doze meses."
 } else {
   "Os horizontes não apontam um mesmo sentido para a meta, ou há indicador indisponível."
 }
@@ -214,7 +219,7 @@ quadro <- data.frame(
     fmt(ipca$valor_atual, suffix = "%"),
     fmt(cambio$valor_atual, prefix = "R\\$ "),
     fmt(selic$valor_atual, suffix = "% a.a."),
-    fmt(ibc$valor_atual, suffix = " (índice)")
+    fmt(ibc$valor_atual, suffix = " (índice, original, SGS 24363)")
   ),
   `Var. mês` = c(
     fmt(ipca$var_mes, suffix = "%"),
